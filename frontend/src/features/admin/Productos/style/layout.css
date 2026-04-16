@@ -1,0 +1,124 @@
+/* Layout & Header para ProductosPage */
+.productos-container {
+  display: flex;
+  flex-direction: column;
+  padding: 0 12px 12px 12px;
+  flex: 1;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 🚫 Quitar línea azul de Windows/Navegador */
+*:focus {
+  outline: none !important;
+}
+
+.productos-header {
+  margin-bottom: 4px;
+}
+
+.productos-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.productos-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.productos-title {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.productos-subtitle {
+  color: #9CA3AF;
+  font-size: 15px;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.productos-btn-back {
+  background: transparent;
+  border: 1px solid #F5C81B;
+  color: #F5C81B;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.productos-btn-register {
+  padding: 0 16px;
+  background-color: transparent;
+  border: 1px solid #F5C81B;
+  color: #F5C81B;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 36px;
+}
+
+.productos-btn-register:hover {
+  background-color: #F5C81B20;
+}
+
+.productos-btn-submit {
+  padding: 6px 12px;
+  background-color: transparent;
+  border: 1px solid #F5C81B;
+  color: #F5C81B;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.productos-btn-submit:hover {
+  background-color: #F5C81B20;
+}
+
+.productos-search-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.productos-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  overflow: hidden;
+  background-color: #0b1220;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.productos-table-wrapper {
+  flex: 1;
+  overflow: auto;
+}
+
+.productos-entity-table {
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+/* Remove row borders in list mode */
+.productos-entity-table .entity-row {
+  border-bottom: none !important;
+}

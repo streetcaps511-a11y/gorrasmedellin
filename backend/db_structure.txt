@@ -1,0 +1,168 @@
+TABLE:Clientes
+[
+  {
+    "column_name": "Estado",
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "Documento",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "TipoDocumento",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "IdCliente",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "Departamento",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "Ciudad",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "Direccion",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "Nombre",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "Telefono",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "Email",
+    "data_type": "character varying"
+  }
+]
+
+TABLE:Proveedores
+[
+  {
+    "column_name": "Estado",
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "IdProveedor",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "TipoDocumento",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "NumeroDocumento",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "Telefono",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "Direccion",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "Email",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "Departamento",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "Ciudad",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "TipoProveedor",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "Nombre",
+    "data_type": "character varying"
+  }
+]
+
+TABLE:Estado
+[
+  {
+    "column_name": "IdEstado",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "Estado",
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "Nombre",
+    "data_type": "character varying"
+  }
+]
+
+TABLE:Compras
+[
+  {
+    "column_name": "Total",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "IdProveedor",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "Fecha",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "IdCompra",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "TotalFactura",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "MetodoPago",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "Estado",
+    "data_type": "character varying"
+  }
+]
+
+TABLE:Usuarios
+[
+  {
+    "column_name": "IdUsuario",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "IdRol",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "Nombre",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "Correo",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "Clave",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "Estado",
+    "data_type": "character varying"
+  }
+]
+

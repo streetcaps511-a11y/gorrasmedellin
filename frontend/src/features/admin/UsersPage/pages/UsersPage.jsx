@@ -1,0 +1,245 @@
+import '../style/index.css';
+import React, { useMemo } from 'react';
+
+// ===== COMPONENTES COMPARTIDOS =====
+import { Alert, EntityTable, SearchInput, UniversalModal, ConfirmDeleteModal, AnularOperacionModal, CustomPagination, StatusPill } from '../../../shared/services';
+
+// ===== COMPONENTES LOCALES =====
+import StatusFilter from '../components/StatusFilter';
+import UserFormFields from '../components/UserFormFields';
+
+// ===== HOOKS =====
+import { useUsersLogic } from '../hooks/useUsersLogic';
+
+const UsersPage = () => {
+  const {
+    users,
+    searchTerm, setSearchTerm,
+    filterStatus, setFilterStatus,
+    currentPage, setCurrentPage,
+    loading,
+    alert, setAlert,
+    formData,
+    errors,
+    isModalOpen,
+    editingUser,
+    isConfirmOpen,
+    userToDelete,
+    isDetailsOpen,
+    selectedUser,
+    filteredUsers,
+    paginatedUsers,
+    totalPages,
+    openModal,
+    closeModal,
+    handleInputChange,
+    handleSave,
+    handleToggleStatus,
+    confirmToggleStatus,
+    closeAnularModal,
+    openDeleteModal,
+    closeDeleteModal,
+    handleDelete,
+    viewUserDetails,
+    closeDetails,
+    anularModal,
+    isAdministrador,
+    availableStatuses,
+    availableRoles
+  } = useUsersLogic();
+
+  // Definir columnas dentro del componente para acceder a las funciones del hook
+  const columns = useMemo(() => [
+    {
+      header: 'Nombre',
+      field: 'nombreCompleto',
+      width: '200px',
+      render: (item) => (
+        <span className="user-name-text">
+          {item.nombre} {item.apellido}
+        </span>
+      )
+    },
+    {
+      header: 'Email',
+      field: 'email',
+      width: '220px',
+      render: (item) => (
+        <span className="user-email-text">{item.email}</span>
+      )
+    },
+    {
+      header: 'Rol',
+      field: 'rol',
+      width: '130px',
+      render: (item) => (
+        <span className={`user-role-text ${item.rol === 'Administrador' ? 'admin' : ''}`}>
+          {item.rol}
+        </span>
+      )
+    },
+    {
+      header: 'Estado',
+      field: 'isActive',
+      width: '100px',
+      render: (item) => <StatusPill status={item.isActive} />
+    },
+  ], [isAdministrador, handleToggleStatus]);
+
+  const isFormView = isModalOpen || isDetailsOpen;
+
+  return (
+    <div className="users-page-wrapper">
+      {alert.show && (
+        <Alert 
+          message={alert.message} 
+          type={alert.type} 
+          onClose={() => setAlert(prev => ({ ...prev, show: false }))} 
+        />
+      )}
+
+      <>
+        <ConfirmDeleteModal
+          isOpen={isConfirmOpen}
+          onClose={closeDeleteModal}
+          onConfirm={handleDelete}
+          entityName="usuario"
+          entityData={userToDelete}
+        />
+
+        <AnularOperacionModal
+          isOpen={anularModal.isOpen}
+          onClose={closeAnularModal}
+          onConfirm={confirmToggleStatus}
+          title={anularModal.user?.isActive ? 'Confirmar Desactivación' : 'Confirmar Activación'}
+          operationType="usuario"
+          operationData={anularModal.user}
+          confirmButtonText={anularModal.user?.isActive ? 'Desactivar' : 'Activar'}
+          cancelButtonText="Cancelar"
+        />
+      </>
+
+      <div className="users-container">
+        {/* HEADER */}
+        <div className="users-header">
+          <div className="users-header-top">
+            <div>
+              <h1 className="users-title">Usuarios</h1>
+              <p className="users-subtitle">Gestión de usuarios del sistema</p>
+            </div>
+            <button
+              onClick={() => openModal()}
+              className="users-btn-add"
+            >
+              Registrar Usuario
+            </button>
+          </div>
+
+          <div className="users-controls">
+            <div style={{ flex: 1 }}>
+              <SearchInput
+                value={searchTerm}
+                onChange={setSearchTerm}
+                placeholder="Buscar por nombre, email o documento..."
+                onClear={() => setSearchTerm('')}
+                fullWidth={true}
+              />
+            </div>
+            <StatusFilter 
+              filterStatus={filterStatus} 
+              onFilterSelect={setFilterStatus} 
+              statuses={availableStatuses}
+            />
+          </div>
+        </div>
+
+        {/* TABLA */}
+        <div className="users-table-container">
+          <div className="users-table-wrapper yellow-scrollbar">
+            <EntityTable
+              entities={paginatedUsers}
+              columns={columns}
+              onView={viewUserDetails}
+              onEdit={openModal}
+              onDelete={openDeleteModal}
+              onAnular={handleToggleStatus}
+              onReactivar={handleToggleStatus}
+              showAnularButton={true}
+              moduleType="usuarios"
+              idField="id"
+              estadoField="isActive"
+              isAdministradorCheck={isAdministrador}
+            />
+          </div>
+
+          <CustomPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            totalItems={filteredUsers.length}
+            showingStart={filteredUsers.length > 0 ? ((currentPage - 1) * 7) + 1 : 0}
+            endIndex={Math.min(currentPage * 7, filteredUsers.length)}
+            itemsName="usuarios"
+          />
+        </div>
+      </div>
+
+      {/* MODAL DE FORMULARIO (Registrar / Editar) */}
+      <UniversalModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        title={editingUser?.id ? 'Editar usuario' : 'Registrar usuario'}
+        size="medium"
+      >
+        <div className="users-form-wrapper yellow-scrollbar">
+          <UserFormFields 
+            editingUser={editingUser}
+            formData={formData}
+            handleInputChange={handleInputChange}
+            errors={errors}
+            users={users}
+            closeModal={closeModal}
+            handleSave={handleSave}
+            isAdministrador={isAdministrador}
+            availableRoles={availableRoles}
+          />
+        </div>
+      </UniversalModal>
+
+      {/* MODAL DE DETALLES (Igual al de Registrar/Editar pero ReadOnly) */}
+      <UniversalModal
+        isOpen={isDetailsOpen}
+        onClose={closeDetails}
+        title="Detalles del usuario"
+        size="medium"
+      >
+        <div className="users-form-wrapper yellow-scrollbar">
+          <UserFormFields 
+            editingUser={selectedUser}
+            formData={{
+              nombreCompleto: `${selectedUser?.nombre || ''} ${selectedUser?.apellido || ''}`.trim() || selectedUser?.nombreCompleto,
+              email: selectedUser?.email || '',
+              tipoDocumento: selectedUser?.tipoDocumento || '',
+              numeroDocumento: selectedUser?.numeroDocumento || selectedUser?.NumeroDocumento || '',
+              contacto: selectedUser?.telefono || selectedUser?.Telefono || selectedUser?.contacto || '',
+              rol: selectedUser?.rol || '',
+              idRol: selectedUser?.idRol || selectedUser?.IdRol || '',
+              clave: '',
+              isActive: selectedUser?.isActive
+            }}
+            handleInputChange={() => {}}
+            errors={{}}
+            users={users}
+            closeModal={closeDetails}
+            handleSave={() => {}}
+            isAdministrador={isAdministrador}
+            availableRoles={availableRoles}
+            isReadOnly={true}
+          />
+        </div>
+      </UniversalModal>
+    </div>
+  );
+};
+
+export default UsersPage;

@@ -1,0 +1,138 @@
+/* Layout & Global para ComprasPage */
+.compras-container {
+  display: flex;
+  flex-direction: column;
+  padding: 0 12px 12px 12px;
+  flex: 1;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.compras-header {
+  margin-bottom: 4px;
+}
+
+.compras-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.compras-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.compras-btn-back {
+  background: transparent;
+  border: 1px solid #F5C81B;
+  color: #F5C81B;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.compras-title {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.compras-subtitle {
+  color: #9CA3AF;
+  font-size: 14px;
+  margin: 0;
+}
+
+.compras-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.compras-btn-register {
+  padding: 0 16px;
+  background-color: transparent;
+  border: 1px solid #F5C81B;
+  color: #F5C81B;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 600;
+  height: 36px;
+}
+
+.compras-btn-register:hover {
+  background-color: #F5C81B20;
+}
+
+.compras-btn-submit {
+  padding: 6px 14px;
+  background-color: transparent;
+  border: 1px solid #F5C81B;
+  color: #F5C81B;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.compras-btn-submit:hover {
+  background-color: #F5C81B;
+  color: #000;
+}
+
+.compras-search-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.compras-search-wrapper {
+  flex: 1;
+}
+
+.compras-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  border: 1px solid #F5C81B;
+  overflow: hidden;
+  background-color: #1e293b;
+}
+
+.compras-table-wrapper {
+  flex: 1;
+  overflow: auto;
+}
+
+.compras-entity-table {
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+/* Remove row borders in list mode */
+.compras-entity-table .entity-row {
+  border-bottom: none !important;
+}
+
+.compras-date-input-field {
+  background-color: #1e293b;
+  border: 1px solid #33415540;
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: #fff;
+  width: 100%;
+  height: 34px;
+  font-size: 13px;
+}

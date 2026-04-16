@@ -1,0 +1,58 @@
+[
+  {
+    "column_name": "IdDevolucion",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "IdProducto",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "IdVenta",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "IdEstado",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "Cantidad",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "Valor",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "Fecha",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "Estado",
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "Motivo",
+    "data_type": "text"
+  },
+  {
+    "column_name": "Observacion",
+    "data_type": "text"
+  },
+  {
+    "column_name": "TipoDocumento",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "NumeroDocumento",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "ProductoOriginal",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "ProductoCambio",
+    "data_type": "character varying"
+  }
+]

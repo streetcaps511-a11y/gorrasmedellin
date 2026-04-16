@@ -1,0 +1,96 @@
+/* Vista Detalle para UsersPage - Estilo idéntico a Productos */
+.detalle-usuario-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.detalle-section-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.detalle-section {
+  width: 100%;
+}
+
+.detalle-section-title {
+  color: #F5C81B;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.detalle-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.detalle-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.detalle-label {
+  font-size: 10px;
+  color: #9CA3AF;
+  font-weight: 500;
+  margin-bottom: 2px;
+  display: block;
+  text-transform: uppercase;
+}
+
+.detalle-display {
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  padding: 6px 10px;
+  color: #fff;
+  font-size: 12px;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+}
+
+.detalle-display.admin {
+  color: #F5C81B;
+  font-weight: 600;
+}
+
+.detalle-display.status-active {
+  color: #10B981;
+  font-weight: 600;
+}
+
+.detalle-display.status-inactive {
+  color: #EF4444;
+  font-weight: 600;
+}
+
+.form-actions-detalle {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #334155;
+}
+
+.btn-detalle-close {
+  padding: 8px 16px;
+  background-color: transparent;
+  color: #fff;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.btn-detalle-close:hover {
+  background-color: #334155;
+}

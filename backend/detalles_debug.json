@@ -1,0 +1,82 @@
+[
+  {
+    "idVenta": 1,
+    "idProducto": 4,
+    "talla": "7/1/8"
+  },
+  {
+    "idVenta": 1,
+    "idProducto": 4,
+    "talla": "Ajustable"
+  },
+  {
+    "idVenta": 3,
+    "idProducto": 1,
+    "talla": "Ajustable"
+  },
+  {
+    "idVenta": 36,
+    "idProducto": 10,
+    "talla": "Ajustable"
+  },
+  {
+    "idVenta": 37,
+    "idProducto": 10,
+    "talla": "Ajustable"
+  },
+  {
+    "idVenta": 38,
+    "idProducto": 10,
+    "talla": "Ajustable"
+  },
+  {
+    "idVenta": 39,
+    "idProducto": 3,
+    "talla": "Ajustable"
+  },
+  {
+    "idVenta": 40,
+    "idProducto": 7,
+    "talla": "7"
+  },
+  {
+    "idVenta": 41,
+    "idProducto": 10,
+    "talla": "Ajustable"
+  },
+  {
+    "idVenta": 42,
+    "idProducto": 10,
+    "talla": "Ajustable"
+  },
+  {
+    "idVenta": 43,
+    "idProducto": 10,
+    "talla": "Ajustable"
+  },
+  {
+    "idVenta": 44,
+    "idProducto": 10,
+    "talla": "Ajustable"
+  },
+  {
+    "idVenta": 45,
+    "idProducto": 10,
+    "talla": "Ajustable"
+  },
+  {
+    "idVenta": 46,
+    "idProducto": 10,
+    "talla": "Ajustable"
+  },
+  {
+    "idVenta": 47,
+    "idProducto": 10,
+    "talla": "Ajustable"
+  },
+  {
+    "idVenta": 48,
+    "idProducto": 10,
+    "talla": "Ajustable"
+  }
+]

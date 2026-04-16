@@ -1,0 +1,50 @@
+[
+  {
+    "table_name": "Categorias"
+  },
+  {
+    "table_name": "Clientes"
+  },
+  {
+    "table_name": "CompraDetalles"
+  },
+  {
+    "table_name": "Compras"
+  },
+  {
+    "table_name": "DetallePermisos"
+  },
+  {
+    "table_name": "DetalleVentas"
+  },
+  {
+    "table_name": "Devoluciones"
+  },
+  {
+    "table_name": "Estado"
+  },
+  {
+    "table_name": "Imagenes"
+  },
+  {
+    "table_name": "Permisos"
+  },
+  {
+    "table_name": "Productos"
+  },
+  {
+    "table_name": "Proveedores"
+  },
+  {
+    "table_name": "Roles"
+  },
+  {
+    "table_name": "Tallas"
+  },
+  {
+    "table_name": "Usuarios"
+  },
+  {
+    "table_name": "Ventas"
+  }
+]

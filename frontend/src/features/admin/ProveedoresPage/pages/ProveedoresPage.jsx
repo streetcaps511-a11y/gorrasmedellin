@@ -1,0 +1,268 @@
+import '../style/index.css';
+import React from 'react';
+
+// ===== COMPONENTES COMPARTIDOS =====
+import { Alert, EntityTable, SearchInput, UniversalModal, ConfirmDeleteModal, AnularOperacionModal, CustomPagination, StatusPill } from '../../../shared/services';
+// ===== COMPONENTES LOCALES =====
+import ProveedorFormFields from '../components/ProveedorFormFields';
+import StatusFilter from '../components/StatusFilter';
+
+// ===== HOOKS =====
+import { useProveedoresLogic } from '../hooks/useProveedoresLogic';
+
+const columns = [
+  { 
+    header: 'Tipo Proveedor', 
+    field: 'supplierType', 
+    width: '120px',
+    render: (item) => (
+      <span className="supplier-type-text">
+        {item.supplierType === 'Persona Natural' ? 'Natural' : 'Jurídica'}
+      </span>
+    )
+  }, 
+  { 
+    header: 'Nombre/Empresa', 
+    field: 'companyName', 
+    width: '150px',
+    render: (item) => (
+      <div className="company-name-text">
+        {item.companyName || item.contactName || 'Sin nombre'}
+      </div>
+    )
+  },
+  { 
+    header: 'Documento/NIT', 
+    field: 'documentNumber', 
+    width: '100px',
+    render: (item) => (
+      <div className="document-number-text">
+        {item.documentNumber || 'Sin NIT'}
+      </div>
+    )
+  },
+  { 
+    header: 'Email', 
+    field: 'email', 
+    width: '190px',
+    render: (item) => (
+      <a 
+        href={`mailto:${item.email}`}
+        className="email-link"
+        title={item.email}
+      >
+        {item.email || 'Sin correo'}
+      </a>
+    )
+  },
+  { 
+    header: 'Teléfono', 
+    field: 'phone', 
+    width: '140px',
+    render: (item) => (
+      <span className="phone-text">
+        {item.phone || 'Sin teléfono'}
+      </span>
+    )
+  },
+  {
+    header: 'Estado',
+    field: 'isActive',
+    width: '120px',
+    render: (item) => <StatusPill status={item.isActive} />
+  }
+];
+
+const ProveedoresPage = () => {
+  const {
+    searchTerm, setSearchTerm,
+    filterStatus, setFilterStatus,
+    currentPage, setCurrentPage,
+    loading,
+    actionLoading,
+    actionLoadingText,
+    departamentos,
+    ciudades,
+    loadingCities,
+    modalState,
+    formData,
+    errors,
+    deleteModal,
+    filteredProveedores,
+    paginatedProveedores,
+    totalPages,
+    showingStart,
+    endIndex,
+    handleFieldChange,
+    openModal,
+    closeModal,
+    handleSave,
+    handleToggleStatus,
+    openDeleteModal,
+    closeDeleteModal,
+    handleDelete,
+    anularModal,
+    closeAnularModal,
+    confirmToggleStatus,
+    availableStatuses
+  } = useProveedoresLogic();
+
+  const getModalTitle = () => {
+    if (modalState.mode === 'view') return 'Detalle del proveedor';
+    if (modalState.mode === 'edit') return 'Editar proveedor';
+    return 'Registrar proveedor';
+  };
+
+  const isFormView = modalState.isOpen;
+
+  return (
+    <div className="proveedores-page-wrapper">
+      {alert.show && (
+        <Alert
+          message={alert.message}
+          type={alert.type}
+          onClose={() => setAlert({ show: false, message: '', type: 'success' })}
+        />
+      )}
+
+      {/* MODAL DE ELIMINACIÓN */}
+      <>
+        <ConfirmDeleteModal
+          isOpen={deleteModal.isOpen}
+          onClose={closeDeleteModal}
+          onConfirm={handleDelete}
+          entityName="proveedor"
+          entityData={deleteModal.proveedor}
+          loading={actionLoading}
+          loadingText={actionLoadingText}
+        />
+
+        <AnularOperacionModal
+          isOpen={anularModal?.isOpen}
+          onClose={closeAnularModal}
+          onConfirm={confirmToggleStatus}
+          title={anularModal?.proveedor?.isActive ? 'Confirmar Desactivación' : 'Confirmar Activación'}
+          operationType="proveedor"
+          operationData={anularModal?.proveedor}
+          confirmButtonText={anularModal?.proveedor?.isActive ? 'Desactivar' : 'Activar'}
+          cancelButtonText="Cancelar"
+          loading={actionLoading}
+          loadingText={actionLoadingText}
+        />
+      </>
+
+      <div className="proveedores-container">
+        {/* HEADER */}
+        <div className="proveedores-header">
+          <div className="proveedores-header-top">
+            <div>
+              <h1 className="proveedores-title">Gestión de Proveedores</h1>
+              <p className="proveedores-subtitle">Administre la información y contacto de sus proveedores</p>
+            </div>
+            <button
+              onClick={() => openModal('create')}
+              className="proveedores-btn-add"
+            >
+              Registrar Proveedor
+            </button>
+          </div>
+
+          <div className="proveedores-controls">
+            <div style={{ flex: 1 }}>
+              <SearchInput
+                value={searchTerm}
+                onChange={setSearchTerm}
+                placeholder="Buscar por nombre, NIT, correo o teléfono..."
+                onClear={() => setSearchTerm('')}
+                fullWidth={true}
+              />
+            </div>
+            <StatusFilter 
+              filterStatus={filterStatus} 
+              onFilterSelect={setFilterStatus} 
+              statuses={availableStatuses}
+            />
+          </div>
+        </div>
+
+        {/* TABLA DE PROVEEDORES */}
+        <div className="proveedores-table-container">
+          <div className="proveedores-table-wrapper yellow-scrollbar">
+            <EntityTable
+              entities={paginatedProveedores}
+              columns={columns}
+              onView={(item) => openModal('view', item)}
+              onEdit={(item) => openModal('edit', item)}
+              onDelete={openDeleteModal}
+              onAnular={handleToggleStatus}
+              onReactivar={handleToggleStatus}
+              showDeleteButton={true}
+              idField="id"
+              estadoField="isActive"
+              moduleType="proveedores"
+            />
+          </div>
+
+          <CustomPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            totalItems={filteredProveedores.length}
+            showingStart={showingStart}
+            endIndex={endIndex}
+            itemsName="proveedores"
+          />
+        </div>
+      </div>
+
+     <UniversalModal
+  isOpen={modalState.isOpen}
+  onClose={closeModal}
+  title={getModalTitle()}
+  size="medium"
+  loading={actionLoading}
+  loadingText={actionLoadingText}
+  actions={modalState.mode === 'view' ? [
+    { 
+      label: 'Cerrar', 
+      variant: 'primary', 
+      key: 'close',
+      closeOnClick: true,
+      onClick: closeModal
+    }
+  ] : [
+    { 
+      label: 'Cancelar', 
+      variant: 'secondary', 
+      key: 'cancel',
+      closeOnClick: true 
+    },
+    { 
+      label: 'Guardar', 
+      variant: 'primary', 
+      key: 'save',
+      closeOnClick: false,
+      onClick: handleSave
+    }
+  ]}
+>
+  <div className="proveedores-form-wrapper yellow-scrollbar">
+    <ProveedorFormFields 
+      modalMode={modalState.mode}
+      formData={formData}
+      handleFieldChange={handleFieldChange}
+      errors={errors}
+      departamentos={departamentos}
+      ciudades={ciudades}
+      loadingCities={loadingCities}
+      closeModal={closeModal}
+      handleSave={handleSave}
+      availableStatuses={availableStatuses}
+    />
+  </div>
+</UniversalModal>
+    </div>
+  );
+};
+
+export default ProveedoresPage;

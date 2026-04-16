@@ -1,0 +1,93 @@
+    updateDevolucion: async (req, res) => {
+        const { id } = req.params;
+        const t = await sequelize.transaction();
+        
+        try {
+            console.log(`\n--- INICIO UPDATE DEVOLUCION ${id} ---`);
+            const dev = await Devolucion.findByPk(id);
+            if (!dev) {
+                await t.rollback();
+                console.log(`❌ Dev ${id} no encontrada.`);
+                return res.status(404).json({ success: false, message: 'Devolución no encontrada' });
+            }
+
+            const oldStatusId = dev.idEstado;
+            const statusNameRaw = String(req.body.estado || req.body.Estado || '').toLowerCase();
+            
+            console.log(`📊 Dev ${id} - Estado actual: ${oldStatusId}, Solicitado: ${statusNameRaw}`);
+
+            // Buscar ID correspondiente en la tabla Estado de forma dinámica
+            let targetStatusName = 'Pendiente';
+            if (statusNameRaw.includes('completad') || statusNameRaw.includes('aproba')) targetStatusName = 'Completada';
+            else if (statusNameRaw.includes('rechazad') || statusNameRaw.includes('anulad')) targetStatusName = 'Rechazada';
+
+            console.log(`🔍 Buscando estado: "${targetStatusName}"...`);
+            const matchEstado = await Estado.findOne({ 
+                where: { nombre: { [Op.iLike]: targetStatusName } },
+                transaction: t
+            });
+
+            let newStatusId = matchEstado ? matchEstado.id : oldStatusId;
+            console.log(`📍 Mapeo final: ${targetStatusName} -> ID ${newStatusId}`);
+
+            // Lógica de Inventario: Solo si cambia a Aprobada/Completada
+            const esAprobada = targetStatusName === 'Completada';
+            
+            if (esAprobada && oldStatusId !== newStatusId) {
+                console.log(`📦 AJUSTANDO INVENTARIO...`);
+                // 1. Aumentar stock del producto devuelto (Original)
+                if (dev.idProducto) {
+                    console.log(`⬆️ Incrementando stock de producto ID ${dev.idProducto}`);
+                    await Producto.increment('stock', { 
+                        by: dev.cantidad || 1, 
+                        where: { id: dev.idProducto }, 
+                        transaction: t 
+                    });
+                }
+                
+                // 2. Disminuir stock del producto que se entrega (Cambio)
+                let idCambio = dev.idProducto; 
+                if (dev.productoCambio && dev.productoCambio !== dev.productoOriginal) {
+                    console.log(`🔍 Buscando ID para producto de cambio: "${dev.productoCambio}"`);
+                    const prodC = await Producto.findOne({ 
+                        where: { nombre: { [Op.iLike]: dev.productoCambio } },
+                        transaction: t 
+                    });
+                    if (prodC) {
+                        idCambio = prodC.id;
+                        console.log(`✅ Encontrado ID ${idCambio}`);
+                    }
+                }
+
+                if (idCambio) {
+                    console.log(`⬇️ Decrementando stock de producto ID ${idCambio}`);
+                    await Producto.decrement('stock', { 
+                        by: dev.cantidad || 1, 
+                        where: { id: idCambio }, 
+                        transaction: t 
+                    });
+                }
+            }
+
+            const updateData = {
+                idEstado: newStatusId,
+                observacion: req.body.motivoRechazo || dev.observacion
+            };
+
+            console.log(`💾 Actualizando registro de Devolución...`);
+            await dev.update(updateData, { transaction: t });
+
+            await t.commit();
+            console.log(`✅ FINALIZADO CON ÉXITO: Dev ${id} actualizada.`);
+            res.json({ success: true, message: 'Estado actualizado correctamente' });
+
+        } catch (error) {
+            if (t) await t.rollback();
+            console.error('❌ ERROR FATAL en updateDevolucion:', error);
+            res.status(500).json({ 
+                success: false, 
+                message: error.message,
+                detail: 'Ocurrió un error al procesar el cambio de estado. Por favor verifique el stock y los nombres de los productos.' 
+            });
+        }
+    },

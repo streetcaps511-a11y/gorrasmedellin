@@ -1,0 +1,566 @@
+/* ===== PRODUCT MODAL — UNIFIED STAR DESIGN ===== */
+
+.gm-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 18px;
+  animation: gm-fade-in 0.2s ease;
+}
+
+@keyframes gm-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.gm-modal {
+  position: relative;
+  width: min(920px, 95vw);
+  background: #0b1220;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  display: flex;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+  animation: gm-modal-in 0.25s ease;
+}
+
+@keyframes gm-modal-in {
+  from { opacity: 0; transform: scale(0.96) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* === CLOSE BUTTON === */
+.gm-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.gm-modal-close:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+/* === LEFT SIDE (IMAGE) === */
+.gm-modal-left {
+  flex: 0 0 48%;
+  min-width: 300px;
+  position: relative;
+  background: #000;
+}
+
+.gm-modal-imgbox {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.gm-modal-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Image dots */
+.gm-modal-dots {
+  position: absolute;
+  bottom: 14px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.gm-modal-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.5);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s ease;
+}
+
+.gm-modal-dot.active {
+  background: #F5C81B;
+  border-color: #F5C81B;
+  width: 24px;
+  border-radius: 10px;
+}
+
+/* === RIGHT SIDE (INFO) === */
+.gm-modal-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 30px;
+  overflow-y: auto;
+  max-height: 85vh;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.gm-modal-right::-webkit-scrollbar {
+  display: none;
+}
+
+/* === HEADER: TITLE + COLORS === */
+.gm-modal-header-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gm-modal-title-colors {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.gm-modal-title {
+  margin: 0;
+  font-size: 1.7rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: #fff;
+}
+
+/* Color tags inline with title */
+.gm-modal-colors-inline {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.gm-color-tag {
+  padding: 3px 12px;
+  border-radius: 4px;
+  font-weight: 900;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(255,255,255,0.15);
+  display: inline-flex;
+  align-items: center;
+}
+
+/* === PRICE === */
+.gm-modal-price-main {
+  color: #F5C81B;
+  font-weight: 900;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+/* Bulk discount message */
+.gm-bulk-discount-info {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #94a3b8;
+  display: inline-block;
+  background: rgba(42,74,111,0.25);
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Price + bulk message row */
+.gm-price-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+/* Original price (struck through) — only shown for offers */
+.gm-original-price-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.gm-original-price {
+  color: #6B7280;
+  font-size: 0.95rem;
+  text-decoration: line-through;
+}
+
+.gm-discount-badge {
+  background: rgba(245, 200, 27, 0.12);
+  color: #F5C81B;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-weight: 900;
+  font-size: 0.75rem;
+  border: 1px solid rgba(245, 200, 27, 0.25);
+}
+
+/* === DESCRIPTION BOX === */
+.gm-modal-desc-box {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 12px 16px;
+  border-left: 3px solid #F5C81B;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  border-right: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.gm-modal-description {
+  margin: 0;
+  color: rgba(255,255,255,0.8);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* === SIZES === */
+.gm-sizes {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.gm-sizes-head {
+  margin-bottom: 10px;
+}
+
+.gm-sizes-label {
+  font-weight: 800;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.gm-sizes-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.gm-size-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 40px;
+}
+
+.gm-size-chip:hover:not(.is-disabled) {
+  border-color: rgba(245, 200, 27, 0.5);
+  background: rgba(245, 200, 27, 0.08);
+}
+
+.gm-size-chip.is-selected {
+  background: #F5C81B;
+  border-color: #F5C81B;
+  color: #000;
+}
+
+.gm-size-chip.is-disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.gm-size-error-msg {
+  color: #ef4444;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 8px;
+  animation: gm-shake 0.4s ease-in-out;
+}
+
+@keyframes gm-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* === QUANTITY === */
+.gm-quantity-selector {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 4px 0;
+}
+
+.gm-quantity-label {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #fff;
+}
+
+.gm-quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.gm-qty-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.gm-qty-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.15);
+  color: #F5C81B;
+}
+
+.gm-qty-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.gm-qty-input-manual {
+  width: 48px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  text-align: center;
+  font-weight: 900;
+  font-size: 1.05rem;
+  outline: none;
+  appearance: none;
+  -moz-appearance: textfield;
+  transition: all 0.2s ease;
+}
+
+.gm-qty-input-manual:focus {
+  border-color: #F5C81B;
+  background: rgba(245, 200, 27, 0.05);
+  box-shadow: 0 0 10px rgba(245, 200, 27, 0.1);
+}
+
+.gm-qty-input-manual::-webkit-outer-spin-button,
+.gm-qty-input-manual::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Stock badge */
+.gm-stock-badge {
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border: 1px solid;
+}
+
+/* === ADD TO CART BUTTON === */
+.gm-btn-add-cart {
+  width: 100%;
+  height: 48px;
+  min-height: 48px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  border: none;
+  background: #F5C81B;
+  color: #000;
+  font-weight: 900;
+  font-size: 1.05rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.25s ease;
+  margin-top: 12px;
+}
+
+.gm-btn-add-cart:hover:not(:disabled) {
+  background: #FFA000;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 160, 0, 0.35);
+}
+
+.gm-btn-add-cart:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.gm-btn-error {
+  animation: gm-pulse-red 0.4s ease-in-out;
+  background: #ef4444 !important;
+  color: white !important;
+}
+
+@keyframes gm-pulse-red {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); }
+  100% { transform: scale(1); }
+}
+
+/* Wholesale tag badges */
+.gm-tag {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.72rem;
+  border: 1px solid rgba(96,165,250,0.35);
+  color: #fff;
+}
+
+.gm-tag--featured {
+  background: rgba(96,165,250,0.2);
+  border-color: rgba(96,165,250,0.4);
+}
+
+.gm-tag--destacado {
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.gm-modal-tags-inline {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 980px) {
+  .gm-modal {
+    flex-direction: column;
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+  .gm-modal-left {
+    min-width: auto;
+    width: 100%;
+  }
+  .gm-modal-right {
+    padding: 14px 12px;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .gm-modal {
+    width: 96vw;
+    padding: 8px;
+  }
+  .gm-modal-left {
+    max-height: 40vh;
+  }
+  .gm-modal-imgbox {
+    max-height: 40vh;
+    aspect-ratio: auto;
+    min-height: 200px;
+  }
+  .gm-modal-img {
+    object-fit: contain;
+  }
+  .gm-modal-right {
+    max-height: 52vh;
+    gap: 8px;
+    padding: 12px 10px;
+  }
+  .gm-modal-title {
+    font-size: 1.2rem;
+  }
+  .gm-modal-price-main {
+    font-size: 1.5rem;
+  }
+  .gm-sizes {
+    padding: 10px;
+    border-radius: 8px;
+  }
+  .gm-size-chip {
+    padding: 5px 12px;
+    font-size: 0.78rem;
+    border-radius: 6px;
+    min-width: 36px;
+  }
+  .gm-modal-desc-box {
+    padding: 8px 12px;
+  }
+  .gm-modal-description {
+    font-size: 0.82rem;
+  }
+  .gm-bulk-discount-info {
+    font-size: 0.68rem;
+    padding: 3px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .gm-modal {
+    padding: 6px;
+  }
+  .gm-modal-title {
+    font-size: 1.05rem;
+  }
+  .gm-modal-price-main {
+    font-size: 1.3rem;
+  }
+  .gm-size-chip {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    min-width: 32px;
+  }
+  .gm-btn-add-cart {
+    height: 42px;
+    font-size: 0.9rem;
+  }
+  .gm-qty-btn {
+    width: 32px;
+    height: 32px;
+  }
+  .gm-qty-input-manual {
+    width: 40px;
+    height: 32px;
+    font-size: 0.9rem;
+  }
+}
