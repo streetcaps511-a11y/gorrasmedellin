@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { getCategorias } from "../services/categoriasApi";
 import { NitroCache } from "../../../shared/utils/NitroCache";
+import { useSearch } from "../../../shared/contexts";
 
 const CATS_CACHE_KEY = 'tienda_categorias';
 const CATS_TTL = 3 * 60 * 1000; // 3 minutos
@@ -28,7 +29,7 @@ const imgPorCategoria = {
 };
 
 export const useCategories = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const { searchTerm: searchQuery } = useSearch();
   const [categories, setCategories] = useState(() => getCachedCats());
   const [loading, setLoading] = useState(() => getCachedCats().length === 0);
 
@@ -65,14 +66,6 @@ export const useCategories = () => {
     };
     fetchCats();
     window.scrollTo(0, 0);
-  }, []);
-
-  useEffect(() => {
-    const handleSearch = (event) => {
-      setSearchQuery(event.detail.query || '');
-    };
-    window.addEventListener('globalSearchFilter', handleSearch);
-    return () => window.removeEventListener('globalSearchFilter', handleSearch);
   }, []);
 
   const sortedCategories = useMemo(() => {

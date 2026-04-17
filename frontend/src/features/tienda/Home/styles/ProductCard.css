@@ -99,7 +99,7 @@
 .gm-product-name {
   margin: 0;
   font-size: 0.95rem;
-  font-weight: 800;
+  font-weight: 500;
   color: #fff;
   cursor: pointer;
   overflow: hidden;
@@ -169,6 +169,23 @@
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.gm-discount-tag-simple {
+  position: absolute;
+  top: -24px;
+  right: -5px;
+  background: #F5C81B !important; /* Yellow */
+  color: #000 !important; /* Black text */
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(245, 200, 27, 0.45);
+  z-index: 5;
+  pointer-events: none;
+  font-family: ui-sans-serif, system-ui;
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .gm-current-price {

@@ -159,16 +159,21 @@ const AdminLayoutClean = () => {
     if (sidebarItems.length > 0) {
       const isTryingBaseRoute = 
         location.pathname === '/admin' || 
-        location.pathname === '/admin/' || 
-        location.pathname === '/admin/dashboard';
+        location.pathname === '/admin/';
       
-      // Buscar dashboard en links directos o subitems
       const hasDashboard = sidebarItems.some(item => 
         item.id === 'dashboard' || (item.subItems && item.subItems.some(s => s.id === 'dashboard'))
       );
 
+      // Si intenta entrar a /admin y tiene dashboard, mandarlo directo al dashboard
+      if (isTryingBaseRoute && hasDashboard) {
+        console.log("🚀 [REDIR] Mandando al Dashboard inmediatamente...");
+        navigate('/admin/dashboard', { replace: true });
+        return;
+      }
+
+      // Si no tiene dashboard, llevar al primer módulo disponible
       if (isTryingBaseRoute && !hasDashboard) {
-        // Redirigir al primer path válido que encontremos
         const firstItem = sidebarItems[0];
         const firstPath = firstItem.type === 'link' ? firstItem.path : firstItem.subItems[0].path;
         console.log("🚀 [REDIR] Redirigiendo a primer módulo permitido:", firstPath);

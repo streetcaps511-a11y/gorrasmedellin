@@ -51,23 +51,25 @@ const Ofertas = () => {
         loading={loading}
       />
 
-      <ProductModal 
-        product={selectedProduct}
-        closeModal={closeModal}
-        inventory={inventory}
-        getAvailableFor={getAvailableFor}
-        selectedSize={selectedSize}
-        handleSizeSelect={handleSizeSelect}
-        quantity={quantity}
-        incrementQuantity={incrementQuantity}
-        decrementQuantity={decrementQuantity}
-        handleModalAddToCart={handleModalAddToCart}
-        showSizeError={showSizeError}
-        normalizeSizes={normalizeSizes}
-        safeImg={safeImg}
-        BULK_MIN_QTY={BULK_MIN_QTY}
-        handleQuantityInput={handleQuantityInput}
-      />
+      {selectedProduct && (
+        <ProductModal 
+          product={selectedProduct}
+          closeModal={closeModal}
+          inventory={inventory}
+          getAvailableFor={getAvailableFor}
+          selectedSize={selectedSize}
+          handleSizeSelect={handleSizeSelect}
+          quantity={quantity}
+          incrementQuantity={incrementQuantity}
+          decrementQuantity={decrementQuantity}
+          handleModalAddToCart={handleModalAddToCart}
+          showSizeError={showSizeError}
+          normalizeSizes={normalizeSizes}
+          safeImg={safeImg}
+          BULK_MIN_QTY={BULK_MIN_QTY}
+          handleQuantityInput={handleQuantityInput}
+        />
+      )}
 
       <SuccessToast show={showSuccessToast} />
       

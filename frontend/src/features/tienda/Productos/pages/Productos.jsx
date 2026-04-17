@@ -24,18 +24,26 @@ const Productos = () => {
     incrementQuantity,
     decrementQuantity,
     handleModalAddToCart,
-    handleQuantityInput, // 🔥 NUEVO
+    handleQuantityInput, 
     showSizeError,
     normalizeSizes,
     safeImg,
     getRatingFromProduct,
-    BULK_MIN_QTY
+    BULK_MIN_QTY,
+    
+    // Filtros
+    selectedColors,
+    selectedSizes,
+    selectedCategories,
+    allAvailableFilters,
+    toggleFilter,
+    clearFilters
   } = useProductos();
 
 
   return (
     <div className="gm-productos-page">
-      <ProductosHero />
+      {/* <ProductosHero /> Se elimina para limpiar la vista como se solicitó */}
       
       <ProductosGrid 
         filteredProducts={filteredProducts}
@@ -45,6 +53,14 @@ const Productos = () => {
         openModal={openModal}
         safeImg={safeImg}
         getRatingFromProduct={getRatingFromProduct}
+        
+        // Filtros
+        selectedColors={selectedColors}
+        selectedSizes={selectedSizes}
+        selectedCategories={selectedCategories}
+        allAvailableFilters={allAvailableFilters}
+        toggleFilter={toggleFilter}
+        clearFilters={clearFilters}
       />
 
       {selectedProduct && (

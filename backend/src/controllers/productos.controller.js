@@ -126,6 +126,78 @@ const productoController = {
     },
 
     /**
+     * Obtener productos por nombre de categoría (para la tienda)
+     * @route GET /api/productos/por-categoria/:nombre
+     */
+    getProductosByCategoriaNombre: async (req, res) => {
+        try {
+            const { nombre } = req.params;
+
+            // 1. Encontrar la categoría exacta para evitar bugs del ORM de Sequelize con JOINs y aliases
+            const matchingCat = await Categoria.findOne({
+                where: { nombre: { [Op.iLike]: nombre } },
+                attributes: ['id']
+            });
+
+            // 2. Armar las condiciones de la búsqueda: nombre legacy OR ID relacional
+            const orConditions = [ { categoria: { [Op.iLike]: nombre } } ];
+            if (matchingCat) {
+                orConditions.push({ idCategoria: matchingCat.id });
+            }
+
+            // 3. Ejecutar la búsqueda final
+            const rows = await Producto.findAll({
+                where: {
+                    isActive: { [Op.ne]: false },
+                    [Op.or]: orConditions
+                },
+                include: [{
+                    model: Categoria,
+                    as: 'categoriaData',
+                    attributes: ['id', 'nombre', 'estado'],
+                    required: false
+                }],
+                order: [['id', 'DESC']],
+                limit: 100
+            });
+
+            const products = rows.map(p => {
+                const plain = p.get({ plain: true });
+                let stock = plain.stock || 0;
+                if (stock === 0 && Array.isArray(plain.tallasStock)) {
+                    stock = plain.tallasStock.reduce((s, t) => s + (Number(t.cantidad) || 0), 0);
+                }
+                return {
+                    ...plain,
+                    id_producto: plain.id,
+                    stock,
+                    precio_normal: plain.precioVenta,
+                    precio_descuento: plain.precioOferta,
+                    precio_mayorista6: plain.precioMayorista6,
+                    precio_mayorista80: plain.precioMayorista80,
+                    has_discount: plain.enOfertaVenta,
+                    enOfertaVenta: plain.enOfertaVenta,
+                    is_featured: plain.destacado || false,
+                    is_oferta: plain.enOfertaVenta,
+                    is_active: plain.isActive !== undefined ? plain.isActive : true,
+                    categoria_nombre: plain.categoriaData?.nombre || plain.categoria || 'General',
+                    tallas: Array.isArray(plain.tallasStock) ? plain.tallasStock.map(t => t.talla) : [],
+                    tallasStock: plain.tallasStock || [],
+                    sales_count: plain.sales || 0
+                };
+            });
+
+            res.status(200).json({
+                success: true,
+                data: { products, count: products.length }
+            });
+        } catch (error) {
+            console.error('❌ Error en getProductosByCategoriaNombre:', error);
+            res.status(500).json({ success: false, message: error.message });
+        }
+    },
+
+    /**
      * Obtener un producto por ID
      * @route GET /api/productos/:id
      */

@@ -49,9 +49,19 @@ const ProductModal = ({
   BULK_MIN_QTY,
   handleQuantityInput
 }) => {
+  const [modalImgIndex, setModalImgIndex] = useState(0);
+
+  React.useEffect(() => {
+    if (product) {
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [product]);
+
   if (!product) return null;
 
-  const [modalImgIndex, setModalImgIndex] = useState(0);
   const images = Array.isArray(product.imagenes) && product.imagenes.filter(Boolean).length
     ? product.imagenes.filter(Boolean).map(x => String(x).trim()).filter(Boolean)
     : [safeImg(product)];
@@ -84,6 +94,7 @@ const ProductModal = ({
     return '#ef4444';
   };
 
+  const isAgotado = Number(product.stock) === 0;
   const isOffer = (product.enOfertaVenta || product.oferta || product.hasDiscount) && product.precioOferta;
 
   const getDynamicPrice = () => {
@@ -125,19 +136,23 @@ const ProductModal = ({
             <h2 className="gm-modal-title">{product.nombre}</h2>
             {product.colores && product.colores.length > 0 && (
               <div className="gm-modal-colors-inline">
-                {product.colores.map((c, i) => (
-                  <span
-                    key={i}
-                    className="gm-color-tag"
-                    style={{
-                      backgroundColor: colorNameToHex(c),
-                      color: isLightColor(c) ? '#000' : '#fff',
-                      borderColor: isLightColor(c) ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)'
-                    }}
-                  >
-                    {c}
-                  </span>
-                ))}
+                {product.colores.map((c, idx) => {
+                  const hex = colorNameToHex(c);
+                  const displayColor = (c.toLowerCase() === 'negro' || hex === '#000000' || hex === '#000') ? '#aaa' : hex;
+                  return (
+                    <span
+                      key={idx}
+                      className="gm-color-tag"
+                      style={{
+                        color: displayColor,
+                        borderColor: displayColor,
+                        backgroundColor: 'transparent'
+                      }}
+                    >
+                      {c}
+                    </span>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -192,16 +207,20 @@ const ProductModal = ({
                 <span className="gm-sizes-label">Talla:</span>
               </div>
               <div className="gm-sizes-wrap">
-                {sizes.map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    className={`gm-size-chip ${selectedSize === t ? "is-selected" : ""}`}
-                    onClick={() => handleSizeSelect(t)}
-                  >
-                    {t}
-                  </button>
-                ))}
+                {sizes.map((t) => {
+                  const isSelected = selectedSize === t;
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      className={`gm-size-chip ${isSelected ? "is-selected" : ""} ${isAgotado ? "is-disabled" : ""}`}
+                      onClick={() => !isAgotado && handleSizeSelect(t)}
+                      disabled={isAgotado}
+                    >
+                      {t}
+                    </button>
+                  );
+                })}
               </div>
               {showSizeError && (
                 <div className="gm-size-error-msg">
@@ -235,7 +254,7 @@ const ProductModal = ({
               <button 
                 className="gm-qty-btn" 
                 onClick={incrementQuantity} 
-                disabled={selectedSize && parseInt(quantity) >= remaining}
+                disabled={(selectedSize && parseInt(quantity) >= remaining)}
                 type="button"
               >
                 <FaPlus size={10} />
@@ -257,11 +276,11 @@ const ProductModal = ({
 
           {/* 7. Add to Cart (full width) */}
           <button
-            className={`gm-btn-add-cart ${Number(product.stock) === 0 ? "gm-btn-disabled-agotado" : ""} ${showSizeError ? "gm-btn-error" : ""}`}
+            className={`gm-btn-add-cart ${isAgotado ? "gm-btn-disabled-agotado" : ""} ${showSizeError ? "gm-btn-error" : ""}`}
             onClick={handleModalAddToCart}
-            disabled={Number(product.stock) === 0 || parseInt(quantity) === 0 || (selectedSize && parseInt(quantity) > remaining)}
+            disabled={(selectedSize && parseInt(quantity) > remaining)}
           >
-            {Number(product.stock) === 0 ? (
+            {isAgotado ? (
               <><FaBan size={18} /> AGOTADO</>
             ) : (
               <><FaShoppingCart size={18} /> Añadir al Carrito</>

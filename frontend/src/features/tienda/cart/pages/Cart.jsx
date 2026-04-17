@@ -1,5 +1,5 @@
 import '../styles/Cart.css';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaTrash, FaMinus, FaPlus, FaShoppingCart, FaTimes, FaArrowLeft, FaWhatsapp } from 'react-icons/fa';
 
@@ -16,6 +16,10 @@ import { useCartPage } from '../hooks/useCartPage';
 
 // ✨ COMPONENTE PRINCIPAL
 const Cart = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const {
     user,
     cartItems,
@@ -81,22 +85,13 @@ const Cart = () => {
   if (cartItems.length === 0) {
     return (
       <div className="page-container" style={{ background: '#0f172a' }}>
-        <section style={{
-          background: "#1e293b",
-          padding: "100px 20px 70px",
-          textAlign: "center",
-          borderBottomLeftRadius: "30px",
-          borderBottomRightRadius: "30px",
-          position: "relative",
-          overflow: "hidden"
-        }}>
-          <div style={{ position: "absolute", top: "-40px", left: 0, width: "100%", height: "80px", background: "#1e293b" }} />
-          <h1 style={{ color: "white", fontSize: "3rem", fontWeight: "700", marginBottom: "20px" }}>🛒 Carrito de Compras</h1>
-          <p style={{ color: "#cbd5e1", fontSize: "1.2rem", maxWidth: "900px", margin: "0 auto", lineHeight: "1.6" }}>
-            Gestiona todos tus productos seleccionados en un solo lugar.
-          </p>
-          <div style={{ position: "absolute", bottom: "-40px", left: 0, width: "100%", height: "80px", background: "#0f172a", borderTopLeftRadius: "50% 80%", borderTopRightRadius: "50% 80%" }} />
-        </section>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%', padding: '30px 20px 0', textAlign: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '6px' }}>
+            <FaShoppingCart style={{ color: '#F5C81B', fontSize: '26px' }} />
+            <h1 style={{ color: '#FFFFFF', fontSize: '26px', fontWeight: '800', margin: 0 }}>Carrito de Compras</h1>
+          </div>
+          <p style={{ color: '#94a3b8', fontSize: '15px', margin: '0' }}>Administra tus productos y avanza en tu compra</p>
+        </div>
 
         <div style={{ 
           flex: 1, 
@@ -164,7 +159,7 @@ const Cart = () => {
 
   // Renderizado: Carrito con productos
   return (
-    <div className="page-container" style={{ background: '#0b0f1a', minHeight: '100vh' }}>
+    <div className="page-container" style={{ background: '#0b0f1a', minHeight: '100vh', position: 'relative' }}>
       <CustomConfirm 
         isOpen={showClearConfirm} 
         onConfirm={confirmClearCart} 
@@ -268,12 +263,12 @@ const Cart = () => {
       )}
 
       {/* TÍTULO DEL CARRITO */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%', padding: '5px 20px 0', textAlign: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', marginBottom: '8px' }}>
-          <FaShoppingCart style={{ color: '#F5C81B', fontSize: '32px' }} />
-          <h1 style={{ color: '#FFFFFF', fontSize: '32px', fontWeight: '800', margin: 0 }}>Carrito de Compras</h1>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%', padding: '30px 20px 0', textAlign: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '6px' }}>
+          <FaShoppingCart style={{ color: '#F5C81B', fontSize: '26px' }} />
+          <h1 style={{ color: '#FFFFFF', fontSize: '26px', fontWeight: '800', margin: 0 }}>Carrito de Compras</h1>
         </div>
-        <p style={{ color: '#94a3b8', fontSize: '16px', margin: '0' }}>Administra tus productos y avanza en tu compra</p>
+        <p style={{ color: '#94a3b8', fontSize: '15px', margin: '0' }}>Administra tus productos y avanza en tu compra</p>
       </div>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -282,8 +277,8 @@ const Cart = () => {
             
             {/* LISTA DE PRODUCTOS */}
             <div style={{ flex: 1, minWidth: '320px', maxWidth: '750px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h2 style={{ color: '#F5C81B', fontSize: '18px', fontWeight: '700', margin: 0 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                <h2 style={{ color: '#F5C81B', fontSize: '16px', fontWeight: '700', margin: 0 }}>
                   Productos seleccionados ({cartItems.length})
                 </h2>
               </div>
@@ -294,91 +289,99 @@ const Cart = () => {
                 const productName = getProductName(item);
                 
                 return (
-                  <div 
-                    key={`${index}-${item.id}`} 
-                    style={{ 
-                      backgroundColor: '#111827', 
-                      padding: '12px', 
-                      borderRadius: '12px', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: '15px', 
-                      marginBottom: '12px',
-                      boxShadow: '0 4px 15px rgba(0,0,0,0.15)',
-                      border: '1px solid rgba(255,255,255,0.03)'
-                    }}
-                  >
-                    <img 
+                    <div 
+                      key={`${index}-${item.id}`} 
+                      style={{ 
+                        backgroundColor: 'transparent', 
+                        padding: '15px', 
+                        borderRadius: '12px', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '15px', 
+                        marginBottom: '15px',
+                        border: '1px solid rgba(255,193,7,0.2)'
+                      }}
+                    >
+                    {/* Imagen */}
+                      <img 
                       src={getImageUrl(item)} 
                       alt={productName} 
                       style={{ 
-                        width: '90px', 
-                        height: '90px', 
-                        borderRadius: '8px', 
+                        width: '65px', 
+                        height: '65px', 
+                        borderRadius: '10px', 
                         objectFit: 'cover', 
                         cursor: 'pointer',
-                        boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
+                        flexShrink: 0
                       }} 
                       onError={handleImageError}
                       onClick={() => setSelectedDetailProduct(item)}
                     />
-                    <div style={{ flex: 1 }}>
-                      <h3 
-                        style={{ margin: '0 0 5px 0', color: '#F5C81B', fontSize: '15px', fontWeight: 'bold', cursor: 'pointer' }}
-                        onClick={() => setSelectedDetailProduct(item)}
-                      >
-                        {productName}
-                      </h3>
-                      <div style={{ display: 'flex', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '10px', color: '#CBD5E1', backgroundColor: 'rgba(51, 65, 85, 0.8)', padding: '2px 6px', borderRadius: '6px' }}>
-                          {getProductCategory(item)}
-                        </span>
-                        {item.talla && (
-                          <span style={{ fontSize: '10px', color: '#CBD5E1', backgroundColor: 'rgba(51, 65, 85, 0.8)', padding: '2px 6px', borderRadius: '6px' }}>
-                            Talla: {item.talla}
+
+                    {/* Info + controles en una sola fila */}
+                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+
+                      {/* Nombre + badges */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <h3 
+                          style={{ margin: '0 0 4px 0', color: '#fff', fontSize: '13px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                          onClick={() => setSelectedDetailProduct(item)}
+                        >
+                          {productName}
+                        </h3>
+                        <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.18)', padding: '1px 7px', borderRadius: '20px' }}>
+                            {getProductCategory(item)}
                           </span>
-                        )}
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', padding: '3px' }}>
-                            <button 
-                              onClick={() => updateQuantity(item.id, item.talla, -1)} 
-                              style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'transparent', border: 'none', color: '#F5C81B', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                            >
-                              <FaMinus size={10} />
-                            </button>
-                            <input 
-                              type="number"
-                              value={item.quantity || 1}
-                              onChange={(e) => handleManualQuantity(item.id, item.talla, e.target.value)}
-                              style={{ width: '35px', border: 'none', background: 'transparent', color: 'white', textAlign: 'center', fontSize: '13px', fontWeight: 'bold', outline: 'none' }}
-                            />
-                            <button 
-                              onClick={() => updateQuantity(item.id, item.talla, 1)} 
-                              disabled={item.quantity >= getStockForSize(item)}
-                              style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'transparent', border: 'none', color: item.quantity >= getStockForSize(item) ? '#444' : '#F5C81B', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                            >
-                              <FaPlus size={10} />
-                            </button>
-                          </div>
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: '13px', color: '#F5C81B', fontWeight: 'bold' }}>
-                            ${Math.round(getPriceInfo(item).currentPrice).toLocaleString()} c/u
-                          </div>
-                          <div style={{ fontSize: '18px', color: '#F5C81B', fontWeight: '800', marginTop: '1px' }}>
-                            ${(Math.round(getPriceInfo(item).currentPrice) * (item.quantity || 1)).toLocaleString()}
-                          </div>
+                          {item.talla && (
+                            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.18)', padding: '1px 7px', borderRadius: '20px' }}>
+                              Talla: {item.talla}
+                            </span>
+                          )}
                         </div>
                       </div>
+
+                      {/* Selector de cantidad - pill redondeado */}
+                      <div style={{ display: 'flex', alignItems: 'center', border: '1px solid rgba(245,200,27,0.4)', borderRadius: '999px', padding: '1px 2px', background: 'rgba(0,0,0,0.3)', flexShrink: 0 }}>
+                        <button 
+                          onClick={() => updateQuantity(item.id, item.talla, -1)} 
+                          style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'transparent', border: 'none', color: '#F5C81B', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        >
+                          <FaMinus size={8} />
+                        </button>
+                        <input 
+                          type="number"
+                          value={item.quantity || 1}
+                          onChange={(e) => handleManualQuantity(item.id, item.talla, e.target.value)}
+                          style={{ width: '24px', border: 'none', background: 'transparent', color: '#fff', textAlign: 'center', fontSize: '12px', fontWeight: '600', outline: 'none' }}
+                        />
+                        <button 
+                          onClick={() => updateQuantity(item.id, item.talla, 1)} 
+                          disabled={item.quantity >= getStockForSize(item)}
+                          style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'transparent', border: 'none', color: item.quantity >= getStockForSize(item) ? '#333' : '#F5C81B', cursor: item.quantity >= getStockForSize(item) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        >
+                          <FaPlus size={8} />
+                        </button>
+                      </div>
+
+                      {/* Precio */}
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <div style={{ fontSize: '10px', color: 'rgba(245,200,27,0.6)', fontWeight: '600' }}>
+                          ${Math.round(getPriceInfo(item).currentPrice).toLocaleString()} c/u
+                        </div>
+                        <div style={{ fontSize: '14px', color: '#F5C81B', fontWeight: '700' }}>
+                          ${(Math.round(getPriceInfo(item).currentPrice) * (item.quantity || 1)).toLocaleString()}
+                        </div>
+                      </div>
+
+                      {/* Eliminar */}
+                      <button 
+                        onClick={() => handleRemoveFromCart(item.id, item.talla, productName)} 
+                        style={{ background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', cursor: 'pointer', padding: '8px', borderRadius: '8px', display: 'flex', flexShrink: 0 }}
+                      >
+                        <FaTrash size={13} />
+                      </button>
                     </div>
-                    <button 
-                      onClick={() => handleRemoveFromCart(item.id, item.talla, productName)} 
-                      style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '10px', borderRadius: '10px', transition: 'all 0.2s ease' }}
-                    >
-                      <FaTrash size={18} />
-                    </button>
                   </div>
                 );
               })}
@@ -436,32 +439,58 @@ const Cart = () => {
                 </button>
               </div>
               
-              <div style={{ backgroundColor: '#111827', padding: '24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.03)', boxShadow: '0 4px 25px rgba(0,0,0,0.2)' }}>
-                <h2 style={{ color: '#F5C81B', margin: '0 0 20px 0', textAlign: 'center', fontSize: '18px', fontWeight: '800' }}>
+              <div style={{ background: 'transparent', padding: '24px', borderRadius: '16px', border: '1px solid rgba(245,200,27,0.25)' }}>
+                <h2 style={{ color: '#F5C81B', margin: '0 0 20px 0', textAlign: 'center', fontSize: '16px', fontWeight: '800' }}>
                   Resumen del Pedido
                 </h2>
                 
                 <div style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                    <span style={{ color: '#94a3b8', fontSize: '14px' }}>Productos ({cartItems.length}):</span>
-                    <span style={{ color: '#fff', fontSize: '14px', fontWeight: 'bold' }}>${subtotal.toLocaleString()}</span>
+                    <span style={{ color: '#94a3b8', fontSize: '13px' }}>Productos ({cartItems.length}):</span>
+                    <span style={{ color: '#fff', fontSize: '13px', fontWeight: 'bold' }}>${subtotal.toLocaleString()}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <span style={{ color: '#94a3b8', fontSize: '14px' }}>Envío:</span>
+                    <span style={{ color: '#94a3b8', fontSize: '13px' }}>Envío:</span>
                     <span style={{ color: '#F5C81B', fontSize: '12px', fontStyle: 'italic' }}>{getShippingText()}</span>
                   </div>
                 </div>
                 
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '22px', marginBottom: '25px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '20px', marginBottom: '25px' }}>
                   <strong style={{ color: '#fff' }}>Total:</strong>
                   <strong style={{ color: '#F5C81B' }}>${total.toLocaleString()}</strong>
                 </div>
 
                 <button 
                   onClick={handleFinishPurchase}
-                  style={{ width: '100%', padding: '16px', backgroundColor: '#F5C81B', border: 'none', borderRadius: '12px', color: '#000', fontWeight: '900', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: 'all 0.3s ease' }}
+                  disabled={isProcessing}
+                  style={{ 
+                    width: '100%', 
+                    padding: '14px', 
+                    backgroundColor: '#F5C81B', 
+                    border: 'none', 
+                    borderRadius: '12px', 
+                    color: '#000', 
+                    fontWeight: '900', 
+                    cursor: isProcessing ? 'not-allowed' : 'pointer', 
+                    fontSize: '15px', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    gap: '8px', 
+                    opacity: isProcessing ? 0.75 : 1,
+                    transition: 'opacity 0.2s ease' 
+                  }}
                 >
-                  <FaWhatsapp size={20} /> CONTINUAR
+                  {isProcessing ? (
+                    <>
+                      <div className="gm-spinner-small" style={{ width: '16px', height: '16px', borderTopColor: '#000', borderColor: 'rgba(0,0,0,0.2)', borderTopWidth: '2px' }}></div>
+                      Procesando...
+                    </>
+                  ) : (
+                    <>
+                      <FaWhatsapp size={18} /> CONTINUAR
+                    </>
+                  )}
                 </button>
               </div>
             </div>

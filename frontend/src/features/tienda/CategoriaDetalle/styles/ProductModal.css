@@ -155,7 +155,7 @@
 
 /* Color tags inline with title */
 .gm-modal-colors-inline {
-  display: flex;
+  display: none; /* Ocultar en desktop */
   gap: 6px;
   flex-wrap: wrap;
 }
@@ -424,6 +424,13 @@
   box-shadow: none;
 }
 
+.gm-btn-disabled-agotado {
+  background: #F5C81B !important;
+  color: #000 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6 !important; 
+}
+
 .gm-btn-error {
   animation: gm-pulse-red 0.4s ease-in-out;
   background: #ef4444 !important;
@@ -475,6 +482,9 @@
   }
   .gm-modal-right {
     padding: 12px 4px;
+  }
+  .gm-modal-colors-inline {
+    display: flex;
   }
 }
 

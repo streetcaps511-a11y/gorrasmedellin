@@ -6,8 +6,8 @@
 
 .gm-products-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 30px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
   width: calc(100% + 20px);
   margin: 10px -10px 0 -10px;
   padding: 50px 10px; /* Espacio para hover expansion */

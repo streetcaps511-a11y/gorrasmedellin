@@ -14,8 +14,9 @@ import {
   FaCheckCircle,
 } from "react-icons/fa";
 import "../styles/Home.css";
+import "../styles/HomeHero.css";
 import "../styles/ProductCard.css";
-import { useCart } from "../../../shared/contexts";
+import { useCart, useSearch } from "../../../shared/contexts";
 
 const BANNER_URL =
   "https://res.cloudinary.com/dxc5qqsjd/image/upload/v1764642176/WhatsApp_Image_2025-12-01_at_9.07.34_PM_a3k3ob.jpg";
@@ -176,6 +177,7 @@ const getCachedProducts = () => {
 
 const Home = () => {
   const { addToCart } = useCart();
+  const { searchTerm, setSearchTerm } = useSearch();
   const { pathname } = useLocation();
   // ⚡ SIMPLIFICADO: Cargar desde caché SIN delays
   const [initialProducts, setInitialProducts] = useState(() => getCachedProducts());
@@ -285,6 +287,21 @@ const Home = () => {
       .slice(0, 8),
     [initialProducts]
   );
+  
+  const filteredProducts = useMemo(() => {
+    if (!searchTerm.trim()) return [];
+    const normalize = (str) =>
+      (str || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const query = normalize(searchTerm);
+    return initialProducts.filter((p) => {
+      if (!p.isActive) return false;
+      return (
+        normalize(p.nombre).includes(query) ||
+        normalize(p.categoria).includes(query) ||
+        (p.descripcion && normalize(p.descripcion).includes(query))
+      );
+    });
+  }, [searchTerm, initialProducts]);
 
   const [carouselScrollState, setCarouselScrollState] = useState({
     ofertas: { canScrollLeft: false, canScrollRight: true },
@@ -324,14 +341,17 @@ const Home = () => {
   };
 
   useEffect(() => {
-    // Inicializar estado una vez que carguen los datos
+    const handleInitialScroll = () => {
+      Object.keys(carouselRefs).forEach(id => {
+        if (carouselRefs[id].current) handleScroll(id);
+      });
+    };
+
     if (initialProducts.length > 0) {
-      setTimeout(() => {
-        Object.keys(carouselRefs).forEach(id => {
-          if (carouselRefs[id].current) handleScroll(id);
-        });
-      }, 300); // Pequeño delay para asegurar que el DOM este listo
+      setTimeout(handleInitialScroll, 500);
+      window.addEventListener('resize', handleInitialScroll);
     }
+    return () => window.removeEventListener('resize', handleInitialScroll);
   }, [initialProducts]);
 
   const handleCarouselScroll = (section, direction) => {
@@ -464,15 +484,28 @@ const Home = () => {
     const handleImgWheel = (e) => {
       if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
         e.currentTarget.scrollLeft += e.deltaX;
-        e.preventDefault();
       }
     };
 
     const isAgotado = Number(product.stock) === 0;
+    const isOffer = (product.hasDiscount || product.has_discount || product.oferta) && product.precioOferta;
 
     return (
       <div className="gm-card">
         <div className="gm-img-wrapper">
+          {/* BADGES EN LAS ESQUINAS */}
+          {isAgotado && (
+            <div className="gm-img-badge-corner agotado">
+              AGOTADO
+            </div>
+          )}
+          
+          {isOffer && (
+            <div className="gm-img-badge-corner oferta">
+              OFERTA
+            </div>
+          )}
+          
           <div className="gm-img-scroller" onScroll={handleScroll} onWheel={handleImgWheel} ref={scrollerRef}>
             {images.map((img, idx) => (
               <img
@@ -481,10 +514,9 @@ const Home = () => {
                 alt={`${product.nombre} - ${idx + 1}`}
                 onClick={(e) => {
                   e.stopPropagation();
+                  // Solo cambiar de ángulo/imagen
                   if (images.length > 1) {
                     setIndex((idx + 1) % images.length);
-                  } else {
-                    handleOpenDetail();
                   }
                 }}
                 loading="eager"
@@ -506,53 +538,41 @@ const Home = () => {
             </div>
           )}
         </div>
+        
         <div className="gm-info" onClick={handleOpenDetail} style={{ cursor: 'pointer' }}>
           <h3 className="gm-product-name">
             {product.nombre}
           </h3>
-          <div className="gm-stars-row">
-            <RatingStars value={rating} />
-          </div>
-          <div className="gm-badge-container">
-            {isAgotado && (
-              <span className="gm-badge-inline gm-badge--agotado">
-                Agotado
-              </span>
-            )}
-            {badge && (
-              <span className={`gm-badge-inline gm-badge-inline--${badgeType || "default"}`}>
-                {badge}
-              </span>
-            )}
-          </div>
+          
           <div className="gm-actions-row">
             <div className="gm-price-actions">
               {(product.hasDiscount || product.has_discount || product.oferta) && product.precioOferta ? (
-                <>
-                  <div className="gm-price-main-row">
-                    <span className="gm-current-price">
-                      ${Math.round(product.precioOferta).toLocaleString()}
-                    </span>
-                    <span className="gm-discount-tag">
-                      -{Math.round(((product.precio - product.precioOferta) / product.precio) * 100)}%
-                    </span>
-                  </div>
-                  <span className="gm-old-price">
+                <div className="gm-price-main-row">
+                  <span className="gm-current-price">
+                    ${Math.round(product.precioOferta).toLocaleString()}
+                  </span>
+                  <span className="gm-old-price-simple">
                     ${Math.round(product.precio).toLocaleString()}
                   </span>
-                </>
+                </div>
               ) : (
                 <span className="gm-current-price">
                   ${Math.round(product.precio || 0).toLocaleString()}
                 </span>
               )}
             </div>
+            
             <button
               className="gm-btn-cart"
               onClick={(e) => { e.stopPropagation(); handleOpenDetail(); }}
               type="button"
             >
               <FaShoppingCart size={15} color="#000" />
+              {(product.hasDiscount || product.has_discount || product.oferta) && product.precioOferta && (
+                <span className="gm-discount-tag-simple">
+                  -{Math.round(((product.precio - product.precioOferta) / product.precio) * 100)}%
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -571,10 +591,10 @@ const Home = () => {
   const handleSizeSelect = (talla) => {
     if (selectedSize === talla) {
       setSelectedSize(null);
-      setQuantity(0); // Reset a 0 al deseleccionar
+      setQuantity(1); // Reset a 1 al deseleccionar
     } else {
       setSelectedSize(talla);
-      setQuantity(0); // Reset a 0 al cambiar de talla
+      setQuantity(1); // Reset a 1 al cambiar de talla
       setShowSizeError(false);
     }
   };
@@ -794,27 +814,54 @@ const Home = () => {
       </section>
 
       <div className="gm-container">
-        {sections.map(renderSection)}
+        {searchTerm ? (
+          <div className="gm-home-section" style={{ minHeight: '60vh' }}>
+            <div className="gm-home-header">
+              <h2 className="gm-home-title">Resultados para: "{searchTerm}"</h2>
+              <button onClick={() => setSearchTerm("")} className="gm-home-pill">
+                <span>Limpiar búsqueda</span> <FaTimes size={13} />
+              </button>
+            </div>
+            
+            {filteredProducts.length > 0 ? (
+              <div className="gm-search-grid">
+                {filteredProducts.map(product => (
+                  <div key={product.id} className="gm-slot-search">
+                    <ProductCard product={product} />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="gm-no-results-home">
+                <p>No se encontraron productos que coincidan con "{searchTerm}"</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          sections.map(renderSection)
+        )}
       </div>
 
       {/* MODAL DE PRODUCTO */}
-      <ProductModal 
-        product={selectedProduct}
-        closeModal={closeModal}
-        inventory={inventory}
-        getAvailableFor={getAvailableFor}
-        selectedSize={selectedSize}
-        handleSizeSelect={handleSizeSelect}
-        quantity={quantity}
-        incrementQuantity={incrementQuantity}
-        decrementQuantity={decrementQuantity}
-        handleModalAddToCart={handleModalAddToCart}
-        showSizeError={showSizeError}
-        normalizeSizes={normalizeSizes}
-        safeImg={safeImg}
-        BULK_MIN_QTY={BULK_MIN_QTY}
-        handleQuantityInput={handleQuantityChange}
-      />
+      {selectedProduct && (
+        <ProductModal 
+          product={selectedProduct}
+          closeModal={closeModal}
+          inventory={inventory}
+          getAvailableFor={getAvailableFor}
+          selectedSize={selectedSize}
+          handleSizeSelect={handleSizeSelect}
+          quantity={quantity}
+          incrementQuantity={incrementQuantity}
+          decrementQuantity={decrementQuantity}
+          handleModalAddToCart={handleModalAddToCart}
+          showSizeError={showSizeError}
+          normalizeSizes={normalizeSizes}
+          safeImg={safeImg}
+          BULK_MIN_QTY={BULK_MIN_QTY}
+          handleQuantityInput={handleQuantityChange}
+        />
+      )}
 
       {/* TOAST DE ÉXITO */}
       {showSuccessToast && (

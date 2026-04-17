@@ -13,7 +13,7 @@ const AppRoutes = () => {
       <Routes>
       {/* 🏠 RUTAS DE LA TIENDA */}
       {STORE_ROUTES.map((route) => {
-        const sensitivePaths = ['/perfil', '/carrito', '/mis-pedidos'];
+        const sensitivePaths = ['/perfil', '/mis-pedidos'];
         const isSensitive = sensitivePaths.includes(route.path);
         
         return (

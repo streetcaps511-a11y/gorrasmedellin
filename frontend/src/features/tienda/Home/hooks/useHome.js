@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { getHomeProducts } from "../services/homeApi";
 import { useCart } from "../../../shared/contexts";
+import { NitroCache } from "../../../shared/utils/NitroCache";
 
 /* =========================
    CONSTANTES Y HELPERS
@@ -103,10 +104,21 @@ export const useHome = () => {
   const [showSizeError, setShowSizeError] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // FETCH PRODUCTOS
+  // FETCH PRODUCTOS CON CACHÉ
   useEffect(() => {
+    // 1. Carga instantánea desde caché si existe
+    if (NitroCache.isFresh('home_products', 5 * 60 * 1000)) {
+      const cached = NitroCache.get('home_products');
+      if (cached?.data) {
+        setInitialProducts(cached.data);
+        setInventory(buildInitialInventoryFromProducts(cached.data));
+        setLoading(false);
+        return;
+      }
+    }
+
     const fetchProductos = async () => {
-      setLoading(true);
+      setLoading(initialProducts.length === 0);
       try {
         const res = await getHomeProducts();
         if (res?.data?.data?.products) {
@@ -118,8 +130,8 @@ export const useHome = () => {
             precioOferta: p.precio_descuento,
             precioMayorista6: p.precio_mayorista6 || 0,
             precioMayorista80: p.precio_mayorista80 || 0,
-            hasDiscount: p.has_discount || false,
-            oferta: p.is_oferta || false,
+            hasDiscount: p.has_discount || (p.precio_descuento > 0 && p.precio_descuento < p.precio_normal),
+            oferta: p.is_oferta || (p.precio_descuento > 0 && p.precio_descuento < p.precio_normal),
             descripcion: p.descripcion || "",
             tallas: p.tallas || [],
             colores: p.colores || ["Negro"],
@@ -130,14 +142,16 @@ export const useHome = () => {
             stock: p.stock,
             tallasStock: p.tallasStock || []
           }));
+          
           setInitialProducts(productosDatabase);
           setInventory(buildInitialInventoryFromProducts(productosDatabase));
+          
+          // 💾 Guardar en caché compartida (usada por catego también)
+          NitroCache.set('home_products', productosDatabase);
+          NitroCache.set('gm_catalog', productosDatabase); // clave compartida con categorías
         }
       } catch (error) {
-        if (error.response?.status === 401) {
-          // Token faltante o expirado, pero no lanzamos error ruidoso en consola para invitados
-          setInitialProducts([]);
-        } else {
+        if (error.response?.status !== 401) {
           console.error("Error trayendo productos del Backend:", error);
         }
       } finally {
@@ -232,7 +246,7 @@ export const useHome = () => {
     const q = parseInt(qty) || 0;
     if (q <= 0) return;
 
-    let finalPrice = product.precioOferta && (product.hasDiscount || product.oferta) 
+    let finalPrice = (product.precioOferta > 0 && product.precioOferta < product.precio)
                     ? Math.round(product.precioOferta) 
                     : Math.round(product.precio || 0);
 
@@ -256,7 +270,7 @@ export const useHome = () => {
       categoria_nombre: product.categoria,
       
       // Precios (Asegurar que existan todos los nombres posibles)
-      precio: Math.round(product.precio || 0),
+      precio: finalPrice, 
       precio_normal: Math.round(product.precio || 0),
       precioNormal: Math.round(product.precio || 0),
       precioOferta: product.precioOferta ? Math.round(product.precioOferta) : null,

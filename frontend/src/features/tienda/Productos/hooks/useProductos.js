@@ -58,6 +58,11 @@ export const useProductos = () => {
   const [quantity, setQuantity] = useState(1);
   const [showSizeError, setShowSizeError] = useState(false);
   const [loading, setLoading] = useState(getInitialProducts().length === 0);
+  
+  // FILTROS
+  const [selectedColors, setSelectedColors] = useState([]);
+  const [selectedSizes, setSelectedSizes] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
 
   // FETCH PRODUCTOS CON AUTO-SINCRONIZACIÓN (Sincroniza Precios y Stock sin refrescar)
   useEffect(() => {
@@ -164,21 +169,94 @@ export const useProductos = () => {
     setCarouselIndices(indices);
   }, [productsByCategory]);
 
-  // BÚSQUEDA
+  // BÚSQUEDA Y FILTROS COMBINADOS
   const filteredProducts = useMemo(() => {
-    if (!searchTerm.trim()) return null;
+    // Si no hay nada seleccionado ni se está buscando, mostramos todos (null para la UI)
+    const hasSearch = searchTerm.trim().length > 0;
+    const hasFilters = selectedColors.length > 0 || selectedSizes.length > 0 || selectedCategories.length > 0;
+    
+    if (!hasSearch && !hasFilters) return null;
+
     const normalize = (str) =>
       (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    
     const query = normalize(searchTerm);
+
     return (initialProducts || []).filter((p) => {
       if (!p.isActive) return false;
-      return (
+
+      // 1. Filtro de Búsqueda (Texto)
+      const matchesSearch = !hasSearch || (
         normalize(p.nombre).includes(query) ||
         normalize(p.categoria).includes(query) ||
         normalize(p.descripcion).includes(query)
       );
+
+      // 2. Filtro de Colores (Multi-select)
+      const pColores = Array.isArray(p.colores) ? p.colores : [p.colores || 'Negro'];
+      const matchesColor = selectedColors.length === 0 || 
+        selectedColors.some(c => pColores.some(pc => String(pc).toLowerCase() === c.toLowerCase()));
+
+      // 3. Filtro de Tallas (Multi-select)
+      const pTallas = normalizeSizes(p);
+      const matchesSize = selectedSizes.length === 0 || 
+        selectedSizes.some(s => pTallas.some(pt => String(pt).toLowerCase() === s.toLowerCase()));
+
+      // 4. Filtro de Categorías (Multi-select)
+      const matchesCategory = selectedCategories.length === 0 || 
+        selectedCategories.some(cat => String(p.categoria).toLowerCase() === cat.toLowerCase());
+
+      return matchesSearch && matchesColor && matchesSize && matchesCategory;
     });
-  }, [searchTerm, initialProducts]);
+  }, [searchTerm, initialProducts, selectedColors, selectedSizes, selectedCategories]);
+
+  // VALORES ÚNICOS PARA LOS FILTROS
+  const allAvailableFilters = useMemo(() => {
+    const categories = new Set();
+    const colors = new Set();
+    const sizes = new Set();
+
+    (initialProducts || []).forEach(p => {
+      if (!p.isActive) return;
+      if (p.categoria) categories.add(p.categoria);
+      
+      const pColores = Array.isArray(p.colores) ? p.colores : [p.colores || 'Negro'];
+      pColores.forEach(c => colors.add(c));
+
+      const pTallas = normalizeSizes(p);
+      pTallas.forEach(s => sizes.add(s));
+    });
+
+    return {
+      categories: Array.from(categories).sort(),
+      colors: Array.from(colors).sort(),
+      sizes: Array.from(sizes).sort()
+    };
+  }, [initialProducts]);
+
+  const toggleFilter = (type, value) => {
+    const setters = {
+      color: [selectedColors, setSelectedColors],
+      size: [selectedSizes, setSelectedSizes],
+      category: [selectedCategories, setSelectedCategories]
+    };
+    
+    if (!setters[type]) return;
+    const [current, set] = setters[type];
+    
+    if (current.includes(value)) {
+      set(current.filter(v => v !== value));
+    } else {
+      set([...current, value]);
+    }
+  };
+
+  const clearFilters = () => {
+    setSelectedColors([]);
+    setSelectedSizes([]);
+    setSelectedCategories([]);
+    setGlobalSearch("");
+  };
 
   // CARRUSEL
   const handleCarouselScroll = (category, direction) => {
@@ -197,7 +275,7 @@ export const useProductos = () => {
   const openModal = (product) => {
     setSelectedProduct(product);
     setSelectedSize(null);
-    setQuantity(0);
+    setQuantity(1);
     setShowSizeError(false);
   };
 
@@ -211,7 +289,7 @@ export const useProductos = () => {
   const handleSizeSelect = (talla) => {
     setSelectedSize(talla);
     setShowSizeError(false);
-    setQuantity(0);
+    setQuantity(1);
   };
 
   const handleModalAddToCart = () => {
@@ -374,6 +452,14 @@ export const useProductos = () => {
     normalizeSizes,
     safeImg,
     getRatingFromProduct,
-    BULK_MIN_QTY
+    BULK_MIN_QTY,
+    
+    // Filtros
+    selectedColors,
+    selectedSizes,
+    selectedCategories,
+    allAvailableFilters,
+    toggleFilter,
+    clearFilters
   };
 };

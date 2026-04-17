@@ -6,12 +6,14 @@ import api from "../../../shared/services/api";
 export const getCategorias = () => api.get("/api/categorias");
 
 /**
- * Obtiene los productos filtrados por categoría.
- * @param {string} categoriaId - El ID o nombre de la categoría.
+ * Obtiene productos filtrados por nombre de categoría usando el endpoint optimizado.
+ * Solo trae los productos de la categoría solicitada (mucho más rápido).
+ * @param {string} categoriaName - Nombre de la categoría (ej: "Exclusiva")
  */
-export const getProductsByCategory = (categoriaId) => api.get(`/api/productos/categoria/${categoriaId}`);
+export const getProductsByCategoryName = (categoriaName) =>
+  api.get(`/api/productos/por-categoria/${encodeURIComponent(categoriaName)}`);
 
 /**
- * Obtiene todos los productos públicos (para filtrado manual si es necesario).
+ * Obtiene todos los productos públicos (carga completa del catálogo para caché).
  */
 export const getAllProducts = () => api.get("/api/productos", { params: { todos: true } });

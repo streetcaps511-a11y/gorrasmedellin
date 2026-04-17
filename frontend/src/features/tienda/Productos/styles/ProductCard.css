@@ -1,16 +1,18 @@
 .gm-card {
   background: #111827;
-  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 12px;
   overflow: hidden;
-  transition: all 0.3s ease;
-  display: flex !important;
-  flex-direction: column;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .gm-card:hover {
-  background: #1f2937;
+  transform: translateY(-4px) scale(1.01);
+  border-color: rgba(245, 200, 27, 0.3);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
   z-index: 10;
 }
@@ -151,6 +153,11 @@
   display: inline-flex;
 }
 
+.gm-img-badge-corner.agotado {
+  background: #ef4444;
+  color: #fff;
+}
+
 .gm-badge--oferta {
   background: rgba(17, 24, 39, 0.6);
   color: #FFD700;
@@ -180,10 +187,25 @@
   flex-direction: column;
 }
 
+.gm-discount-tag-simple {
+  position: absolute;
+  top: -28px; /* Higher */
+  right: -2px;
+  background: transparent !important;
+  color: #F5C81B !important; 
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.68rem; /* Smaller */
+  font-weight: 800;
+  border: 1.2px solid #F5C81B !important; /* Outline */
+  z-index: 5;
+  pointer-events: none;
+}
+
 .gm-price-main-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .gm-current-price {
@@ -192,22 +214,11 @@
   color: #F5C81B;
 }
 
-.gm-discount-tag {
-  font-size: 0.75rem;
-  font-weight: 800;
-  color: #F5C81B;
-  padding: 0px 4px;
-  border: 1px solid #F5C81B;
-  border-radius: 4px;
-  font-family: ui-sans-serif, system-ui;
-}
-
-.gm-old-price {
-  font-size: 0.8rem;
+.gm-old-price-simple {
+  font-size: 0.85rem;
   color: #9ca3af;
   text-decoration: line-through;
-  margin-top: -2px;
-  font-family: ui-sans-serif, system-ui;
+  opacity: 0.6;
 }
 
 .gm-btn-cart {
@@ -222,19 +233,23 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 10px rgba(245, 200, 27, 0.2);
+  position: relative; /* Para el badge flotante */
 }
 
 .gm-btn-cart:hover {
   background: #FFB300;
-  transform: scale(1.1);
+  transform: scale(1.08);
 }
 
 @media (max-width: 640px) {
-  .gm-card:hover { }
   .gm-info { padding: 12px; }
   .gm-product-name { font-size: 0.95rem; }
-  .gm-price-actions { font-size: 1.05rem; }
   .gm-current-price { font-size: 1.15rem; }
   .gm-btn-cart { width: 42px; height: 42px; }
+  .gm-discount-tag-simple { 
+    top: -32px; /* Even higher on mobile */
+    right: -2px; 
+    font-size: 0.68rem; 
+    padding: 1px 6px;
+  }
 }

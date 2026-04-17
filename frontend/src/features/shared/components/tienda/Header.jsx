@@ -23,6 +23,7 @@ const Header = () => {
     isCartOpen,
     setIsCartOpen,
     searchTerm,
+    setSearchTerm,
     showClearCartConfirm,
     setShowClearCartConfirm,
     isUserMenuOpen,
@@ -124,6 +125,7 @@ const Header = () => {
                 type="submit"
                 className="search-button"
                 aria-label="Buscar"
+                style={{ visibility: searchTerm ? 'hidden' : 'visible', opacity: searchTerm ? 0 : 1 }}
               >
                 <FaSearch />
               </button>
@@ -134,6 +136,7 @@ const Header = () => {
                   className="search-clear-button"
                   onClick={handleClearSearch}
                   aria-label="Limpiar búsqueda"
+                  style={{ visibility: 'visible', opacity: 1, right: '8px' }}
                 >
                   <FaTimes />
                 </button>

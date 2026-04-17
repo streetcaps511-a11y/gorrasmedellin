@@ -30,6 +30,7 @@ const colorNameToHex = (name) => {
     hueso: '#f5f5dc',
     dorado: '#d4ac0d', gold: '#d4ac0d',
     plata: '#c0c0c0', silver: '#c0c0c0',
+    negro_alt: '#777777', // Color alternativo para visibilidad
   };
   return map[name.toLowerCase()] || name.toLowerCase();
 };
@@ -50,8 +51,18 @@ const ProductModal = ({
   BULK_MIN_QTY,
   handleQuantityInput
 }) => {
-  if (!product) return null;
   const [modalImgIndex, setModalImgIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    if (product) {
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [product]);
+
+  if (!product) return null;
   const images = Array.isArray(product.imagenes) && product.imagenes.filter(Boolean).length
     ? product.imagenes.filter(Boolean).map(x => String(x).trim()).filter(Boolean)
     : [safeImg(product)];
@@ -91,7 +102,8 @@ const ProductModal = ({
     return '#ef4444';
   };
 
-  const isOffer = (product.hasDiscount || product.has_discount) && product.precioOferta;
+  const isAgotado = Number(product.stock) === 0;
+  const isOffer = (product.hasDiscount || product.has_discount || product.oferta) && product.precioOferta;
 
   // Wholesale dynamic pricing
   const getWholesalePrice = (qty, prod) => {
@@ -113,6 +125,18 @@ const ProductModal = ({
         {/* LEFT: IMAGE */}
         <div className="gm-modal-left">
           <div className="gm-modal-imgbox">
+            {/* BADGES EN LA IMAGEN DEL MODAL */}
+            {isAgotado && (
+              <div className="gm-img-badge-corner agotado">
+                AGOTADO
+              </div>
+            )}
+            {isOffer && (
+              <div className="gm-img-badge-corner oferta">
+                OFERTA
+              </div>
+            )}
+            
             <img src={images[modalImgIndex]} alt={product.nombre} className="gm-modal-img" />
             {images.length > 1 && (
               <div className="gm-modal-dots">
@@ -135,27 +159,44 @@ const ProductModal = ({
             <h2 className="gm-modal-title">{product.nombre}</h2>
             {product.colores && product.colores.length > 0 && (
               <div className="gm-modal-colors-inline">
-                {product.colores.map((c, idx) => (
-                  <span
-                    key={idx}
-                    className="gm-color-tag"
-                    style={{
-                      backgroundColor: colorNameToHex(c),
-                      color: isLightColor(c) ? '#000' : '#fff',
-                      borderColor: isLightColor(c) ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)'
-                    }}
-                  >
-                    {c}
-                  </span>
-                ))}
+                {product.colores.map((c, idx) => {
+                  const hex = colorNameToHex(c);
+                  const displayColor = (c.toLowerCase() === 'negro' || hex === '#000000' || hex === '#000') ? '#aaa' : hex;
+                  return (
+                    <span
+                      key={idx}
+                      className="gm-color-tag"
+                      style={{
+                        color: displayColor,
+                        borderColor: displayColor,
+                        backgroundColor: 'transparent'
+                      }}
+                    >
+                      {c}
+                    </span>
+                  );
+                })}
               </div>
             )}
           </div>
 
           {/* 2. Price + Bulk Message + Wholesale Tags */}
           <div className="gm-price-row">
-            <div className="gm-modal-price-main">
-              ${Math.round(currentPrice || 0).toLocaleString()}
+            <div className="gm-modal-price-container">
+              <div className="gm-modal-price-main">
+                ${Math.round(currentPrice || 0).toLocaleString()}
+              </div>
+
+              {isOffer && (
+                <div className="gm-original-price-row">
+                  <span className="gm-original-price">
+                     Antes: ${Math.round(product.precio).toLocaleString()}
+                  </span>
+                  <span className="gm-discount-badge">
+                    {Math.round(((product.precio - product.precioOferta) / product.precio) * 100)}% DCTO
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Wholesale Badges */}
@@ -176,18 +217,6 @@ const ProductModal = ({
             </div>
           </div>
 
-          {/* 3. Original price (only if offer) */}
-          {isOffer && (
-            <div className="gm-original-price-row">
-              <span className="gm-original-price">
-                Antes: ${Math.round(product.precio).toLocaleString()}
-              </span>
-              <span className="gm-discount-badge">
-                {Math.round(((product.precio - product.precioOferta) / product.precio) * 100)}% DCTO
-              </span>
-            </div>
-          )}
-
           {/* 4. Description */}
           <div className="gm-modal-desc-box">
             <p className="gm-modal-description">
@@ -204,7 +233,8 @@ const ProductModal = ({
               <div className="gm-sizes-wrap">
                 {sizes.map((t) => {
                   const ava = getAvailableFor(inventory, product.id, t);
-                  const disabled = ava <= 0;
+                  const isOutOfStock = Number(product.stock) === 0;
+                  const disabled = ava <= 0 || isOutOfStock;
                   const isSelected = selectedSize === t;
                   return (
                     <button
@@ -212,7 +242,7 @@ const ProductModal = ({
                       type="button"
                       className={`gm-size-chip ${disabled ? "is-disabled" : ""} ${isSelected ? "is-selected" : ""}`}
                       onClick={() => !disabled && handleSizeSelect(t)}
-                      title={disabled ? "Agotado" : `Disponible: ${ava}`}
+                      title={isOutOfStock ? "Producto Agotado" : (disabled ? "Talla Agotada" : `Disponible: ${ava}`)}
                     >
                       {t}
                     </button>
@@ -231,7 +261,12 @@ const ProductModal = ({
           <div className="gm-quantity-selector">
             <span className="gm-quantity-label">Cantidad:</span>
             <div className="gm-quantity-controls">
-              <button className="gm-qty-btn" onClick={decrementQuantity} disabled={parseInt(quantity) <= 0} type="button">
+              <button 
+                className="gm-qty-btn" 
+                onClick={decrementQuantity} 
+                disabled={Number(product.stock) === 0 || parseInt(quantity) <= 0} 
+                type="button"
+              >
                 <FaMinus size={10} />
               </button>
               <input
@@ -244,6 +279,7 @@ const ProductModal = ({
                   const val = e.target.value.replace(/\D/g, '');
                   handleQuantityInput(val);
                 }}
+                disabled={Number(product.stock) === 0}
                 onFocus={(e) => setTimeout(() => e.target.select(), 10)}
                 min="0"
                 max={remaining}
@@ -251,7 +287,7 @@ const ProductModal = ({
               <button 
                 className="gm-qty-btn" 
                 onClick={incrementQuantity} 
-                disabled={selectedSize && parseInt(quantity) >= remaining}
+                disabled={Number(product.stock) === 0 || (selectedSize && parseInt(quantity) >= remaining)} 
                 type="button"
               >
                 <FaPlus size={10} />
@@ -275,12 +311,12 @@ const ProductModal = ({
           <button
             className={`gm-btn-add-cart ${Number(product.stock) === 0 ? "gm-btn-disabled-agotado" : ""} ${showSizeError ? "gm-btn-error" : ""}`}
             onClick={handleModalAddToCart}
-            disabled={Number(product.stock) === 0 || parseInt(quantity) === 0 || (selectedSize && parseInt(quantity) > remaining)}
+            disabled={(selectedSize && parseInt(quantity) > remaining)}
           >
             {Number(product.stock) === 0 ? (
-              <><FaBan size={18} /> AGOTADO</>
+              <><FaBan size={18} /> <span className="gm-btn-label">AGOTADO</span></>
             ) : (
-              <><FaShoppingCart size={18} /> Añadir al Carrito</>
+              <><FaShoppingCart size={18} /> <span className="gm-btn-label">Añadir al Carrito</span></>
             )}
           </button>
         </div>

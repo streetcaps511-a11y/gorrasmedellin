@@ -104,13 +104,12 @@ export const CartProvider = ({ children }) => {
   const getItemPrice = (item) => {
     const qty = parseInt(item.quantity) || 1;
     
-    const basePrice = parseFloat(item.precioNormal || item.precio_normal || item.precio || 0);
-    const offerPrice = (item.precioOferta !== undefined && item.precioOferta !== null) 
-      ? parseFloat(item.precioOferta) 
-      : (item.precio_descuento ? parseFloat(item.precio_descuento) : null);
-    
     const isOfferActive = !!(item.enOfertaVenta || item.oferta || item.has_discount || item.is_oferta);
-    const retailPrice = isOfferActive && offerPrice ? offerPrice : basePrice;
+    const offerPrice = (item.precioOferta != null) ? parseFloat(item.precioOferta) : (item.precio_descuento ? parseFloat(item.precio_descuento) : null);
+    const basePrice = parseFloat(item.precioNormal || item.precio_normal || item.precio || 0);
+    
+    // Si hay oferta y tenemos el precio de oferta, ese es nuestro retail
+    const retailPrice = isOfferActive && offerPrice ? offerPrice : (item.precio ? parseFloat(item.precio) : basePrice);
 
     const p6 = parseFloat(item.precio_mayorista6 || item.precioMayorista6 || 0);
     const p80 = parseFloat(item.precio_mayorista80 || item.precioMayorista80 || 0);

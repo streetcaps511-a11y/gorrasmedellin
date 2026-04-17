@@ -155,19 +155,20 @@
 
 /* Color tags inline with title */
 .gm-modal-colors-inline {
-  display: flex;
+  display: none; /* Ocultar en desktop */
   gap: 6px;
   flex-wrap: wrap;
 }
 
 .gm-color-tag {
-  padding: 3px 12px;
+  padding: 2px 10px;
   border-radius: 4px;
-  font-weight: 900;
-  font-size: 0.7rem;
+  font-weight: 800;
+  font-size: 0.65rem;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border: 1px solid rgba(255,255,255,0.15);
+  letter-spacing: 0.4px;
+  background: transparent !important; /* Sin relleno */
+  border: 1px solid currentColor;
   display: inline-flex;
   align-items: center;
 }
@@ -195,8 +196,8 @@
 /* Price + bulk message row */
 .gm-price-row {
   display: flex;
-  align-items: center;
-  gap: 14px;
+  align-items: baseline;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
@@ -204,8 +205,8 @@
 .gm-original-price-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 2px;
+  gap: 8px;
+  margin-top: -4px;
 }
 
 .gm-original-price {
@@ -247,7 +248,7 @@
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 12px;
-  padding: 14px;
+  padding: 10px 14px; /* Reduced vertical padding */
 }
 
 .gm-sizes-head {
@@ -431,6 +432,13 @@
   box-shadow: none;
 }
 
+.gm-btn-disabled-agotado {
+  background: #F5C81B !important;
+  color: #000 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6 !important; 
+}
+
 .gm-btn-error {
   animation: gm-pulse-red 0.4s ease-in-out;
   background: #ef4444 !important;
@@ -483,6 +491,9 @@
   .gm-modal-right {
     padding: 14px 12px;
     gap: 10px;
+  }
+  .gm-modal-colors-inline {
+    display: flex;
   }
 }
 

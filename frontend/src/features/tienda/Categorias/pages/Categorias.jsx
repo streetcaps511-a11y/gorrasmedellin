@@ -30,11 +30,6 @@ const Categorias = () => {
         </div>
       </div>
 
-      {searchQuery && (
-        <div className="gm-search-indicator">
-          Buscando: {searchQuery}
-        </div>
-      )}
 
       <div className="categorias-grid">
         {sortedCategories.length > 0 ? (

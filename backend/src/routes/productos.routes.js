@@ -6,6 +6,7 @@ import { verifyToken, checkPermission } from '../middlewares/auth.middleware.js'
 
 // 1. LECTURA (PÚBLICO)
 router.get('/', productoController.getAllProductos);
+router.get('/por-categoria/:nombre', productoController.getProductosByCategoriaNombre);
 router.get('/:id', productoController.getProductoById);
 
 router.use(verifyToken);

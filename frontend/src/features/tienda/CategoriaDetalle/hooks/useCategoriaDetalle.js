@@ -1,7 +1,32 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { getAllProducts, getCategorias } from "../services/categoriaApi";
+import { getAllProducts, getCategorias, getProductsByCategoryName } from "../services/categoriaApi";
 import { useCart } from "../../../shared/contexts";
+import { NitroCache } from "../../../shared/utils/NitroCache";
+
+const getPersistentData = (catName) => {
+  try {
+    const data = localStorage.getItem(`gm_cat_v2_${catName}`);
+    return data ? JSON.parse(data) : null;
+  } catch { return null; }
+};
+
+const setPersistentData = (catName, data) => {
+  try {
+    localStorage.setItem(`gm_cat_v2_${catName}`, JSON.stringify(data));
+  } catch {}
+};
+
+const getCachedProducts = () => {
+  // Revisar múltiples claves: catálogo compartido > categorías > home
+  const keys = ['gm_catalog', 'tienda_productos', 'home_products'];
+  for (const key of keys) {
+    const cached = NitroCache.get(key);
+    const data = cached?.data;
+    if (Array.isArray(data) && data.length > 0) return data;
+  }
+  return [];
+};
 
 export const BULK_MIN_QTY = 6;
 export const BULK_DISCOUNT = 0.1;
@@ -44,60 +69,124 @@ export const safeImg = (product) => {
 export const useCategoriaDetalle = () => {
   const { nombreCategoria } = useParams();
   const { addToCart } = useCart();
-  const [productos, setProductos] = useState([]);
+  const [productos, setProductos] = useState(() => {
+    const cat = decodeURIComponent(nombreCategoria || '').toLowerCase();
+    const persistent = getPersistentData(cat);
+    // Si existe la key en LocalStorage (así sea []), la usamos y evitamos parpadeos
+    if (persistent !== null) return persistent;
+
+    const cached = getCachedProducts();
+    const filtered = cached.filter(p => p.categoria?.toLowerCase() === cat || p.categoria_nombre?.toLowerCase() === cat);
+    return filtered;
+  });
   const [descripcionCategoria, setDescripcionCategoria] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [showSizeError, setShowSizeError] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    const cat = decodeURIComponent(nombreCategoria || '').toLowerCase();
+    const persistent = getPersistentData(cat);
+    // Si la key existe en localStorage (incluso si es un array vacío []), no mostramos loader
+    if (persistent !== null) return false;
+    
+    const cached = getCachedProducts();
+    // En catálogo global comprobamos si hay al menos uno. Si no hay, ni modo, debe cargar.
+    const hasCat = cached.some(p => p.categoria?.toLowerCase() === cat || p.categoria_nombre?.toLowerCase() === cat);
+    if (hasCat) return false;
+    
+    return true; // Solo si no hay DE NADA en memoria ni en local, mostramos loader
+  });
 
   useEffect(() => {
-    const fetchAndFilter = async () => {
-      setLoading(true);
-      try {
-        const categoria = decodeURIComponent(nombreCategoria).toLowerCase();
+    const categoria = decodeURIComponent(nombreCategoria).toLowerCase();
 
-        // Obtener descripción de la categoría
-        const catRes = await getCategorias();
-        const allCats = catRes.data?.data || catRes.data || [];
-        const currentCat = allCats.find(c => c.nombre?.toLowerCase() === categoria);
-        if (currentCat) {
-          setDescripcionCategoria(currentCat.descripcion || "");
+    // Si ya tenemos persistencia, seteamos (incluso si es [] para evitar flickers de "sin productos")
+    const persistent = getPersistentData(categoria);
+    if (persistent !== null) {
+      setProductos(persistent);
+      setLoading(false);
+    } else {
+      const cached = getCachedProducts();
+      if (cached.length > 0) {
+        const filtradosCache = cached.filter(
+          p => p.categoria?.toLowerCase() === categoria || p.categoria_nombre?.toLowerCase() === categoria
+        );
+        if (filtradosCache.length > 0) {
+          setProductos(filtradosCache);
+          setLoading(false);
         }
+      }
+    }
 
-        const res = await getAllProducts();
-        const allProducts = res.data?.data?.products || [];
-        const filtrados = allProducts.filter(
-          (p) => p.categoria_nombre?.toLowerCase() === categoria && p.is_active !== false
-        ).map(p => ({
-            id: p.id_producto,
-            nombre: p.nombre,
-            categoria: p.categoria_nombre || p.categoria || p.categoriaData?.nombre || 'Gorra',
-            precio: p.precio_normal,
-            precioOferta: p.precio_descuento,
-            hasDiscount: p.has_discount || false,
-            oferta: p.is_oferta || false,
-            descripcion: p.descripcion || "",
-            tallas: p.tallas || [],
-            colores: p.colores || ["Negro"],
-            imagenes: p.imagenes || [],
-            isFeatured: p.is_featured || false,
-            sales: p.sales_count || 0,
-            isActive: p.is_active !== undefined ? p.is_active : true,
-            stock: p.stock,
-            tallasStock: p.tallasStock || [],
-            precioMayorista6: p.precio_mayorista6 || 0,
-            precioMayorista80: p.precio_mayor_80 || p.precio_mayorista80 || 0,
-        }));
-        setProductos(filtrados);
+    // ⚡ PASO 2: Refrescar en background (sin bloquear UI)
+    // ⚡ PASO 2: Refrescar en background si es necesario
+    // Solo omitimos el fetch si el cache tiene productos de ESTA categoría Y es reciente
+    const isFresh = NitroCache.isFresh('gm_catalog', 10 * 60 * 1000); // 10 min
+    const hasCategoryProducts = productos.length > 0;
+
+    if (isFresh && hasCategoryProducts) {
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    const fetchAndFilter = async () => {
+      try {
+        // ⚡ Pedir SOLO los productos de esta categoría al backend (mucho más rápido)
+        const res = await getProductsByCategoryName(categoria);
+        const allProducts = res.data?.data?.products || res.data?.data?.rows || [];
+
+        // Descripción en background, sin bloquear
+        getCategorias().then(catRes => {
+          const allCats = catRes.data?.data || catRes.data || [];
+          const found = allCats.find(c => c.nombre?.toLowerCase() === categoria);
+          if (found) setDescripcionCategoria(found.descripcion || "");
+        }).catch(() => {});
+
+        const mapProduct = p => ({
+          id: p.id_producto,
+          nombre: p.nombre,
+          categoria: p.categoria_nombre || p.categoria || p.categoriaData?.nombre || 'Gorra',
+          categoria_nombre: p.categoria_nombre,
+          precio: p.precio_normal,
+          precioOferta: p.precio_descuento,
+          hasDiscount: p.has_discount || (p.precio_descuento > 0 && p.precio_descuento < p.precio_normal),
+          oferta: p.is_oferta || (p.precio_descuento > 0 && p.precio_descuento < p.precio_normal),
+          descripcion: p.descripcion || "",
+          tallas: p.tallas || [],
+          colores: p.colores || ["Negro"],
+          imagenes: p.imagenes || [],
+          isFeatured: p.is_featured || false,
+          sales: p.sales_count || 0,
+          isActive: p.is_active !== undefined ? p.is_active : true,
+          stock: p.stock,
+          tallasStock: p.tallasStock || [],
+          precioMayorista6: p.precio_mayorista6 || 0,
+          precioMayorista80: p.precio_mayor_80 || p.precio_mayorista80 || 0,
+        });
+
+        const filtrados = allProducts.map(mapProduct);
+
+        setProductos(prev => {
+          if (JSON.stringify(prev) !== JSON.stringify(filtrados)) return filtrados;
+          return prev;
+        });
+
+        // Guardar persistente (LocalStorage)
+        setPersistentData(categoria, filtrados);
+
+        // Guardar en cache compartido
+        NitroCache.set('tienda_productos', allProducts.map(mapProduct));
+        NitroCache.set('gm_catalog', allProducts.map(mapProduct));
+
       } catch (err) {
         console.error("Error fetching products for category:", err);
       } finally {
         setLoading(false);
       }
     };
+
     fetchAndFilter();
     window.scrollTo(0, 0);
   }, [nombreCategoria]);
@@ -231,7 +320,7 @@ export const useCategoriaDetalle = () => {
       categoria_nombre: selectedProduct.categoria,
       
       // Precios (Asegurar que existan todos los nombres posibles)
-      precio: Math.round(selectedProduct.precio || 0),
+      precio: finalPrice, 
       precio_normal: Math.round(selectedProduct.precio || 0),
       precioNormal: Math.round(selectedProduct.precio || 0),
       precioOferta: selectedProduct.precioOferta ? Math.round(selectedProduct.precioOferta) : null,

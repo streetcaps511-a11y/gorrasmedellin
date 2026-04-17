@@ -32,13 +32,6 @@ const CategoriaDetalle = () => {
     BULK_MIN_QTY
   } = useCategoriaDetalle();
 
-  if (loading) {
-    return (
-      <div className="gm-home" style={{ background: "var(--gm-bg)", display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', color: 'white' }}>
-        <p>Cargando productos...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="gm-home" style={{ background: "var(--gm-bg)" }}>
@@ -47,7 +40,7 @@ const CategoriaDetalle = () => {
         <div className="gm-hero-fade-top" />
         <div className="gm-hero-fade-bottom" />
         <div className="gm-hero-inner">
-          <Link to="/categorias" className="gm-pill-btn" style={{ position: 'absolute', top: '20px', left: '20px', zIndex: 10 }}>
+          <Link to="/categorias" className="gm-pill-btn gm-back-btn">
             <FaArrowLeft /> <span>Volver a Categorías</span>
           </Link>
           <h1 className="gm-hero-title">{nombreCategoria}</h1>
@@ -58,41 +51,60 @@ const CategoriaDetalle = () => {
       </div>
 
       <div className="gm-container">
+        {/* Spinner discreto solo si está cargando Y no hay productos aún */}
+        {loading && productos.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '80px 20px', color: '#9CA3AF', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+            <div className="gm-loader" style={{ 
+              width: '36px', height: '36px', 
+              border: '3px solid rgba(255,215,0,0.1)', 
+              borderTop: '3px solid #F5C81B', 
+              borderRadius: '50%',
+              animation: 'gm-spin 1s linear infinite'
+            }} />
+            <p style={{ fontStyle: 'italic', opacity: 0.6, margin: 0 }}>Cargando productos...</p>
+            <style>{`@keyframes gm-spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }`}</style>
+          </div>
+        )}
+
+        {/* Grid de productos */}
         {productos.length > 0 ? (
           <div className="gm-products-grid" style={{ marginTop: '0' }}>
             {productos.map((product) => (
-              <div key={product.id} className="gm-slot" style={{ minWidth: 'auto', padding: '0' }}>
-                <ProductCard 
-                  product={product} 
-                  onOpenModal={handleOpenModal}
-                  getRatingFromProduct={getRatingFromProduct}
-                  safeImg={safeImg}
-                />
-              </div>
+              <ProductCard 
+                key={product.id}
+                product={product} 
+                onOpenModal={handleOpenModal}
+                getRatingFromProduct={getRatingFromProduct}
+                safeImg={safeImg}
+              />
             ))}
           </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '100px 20px', color: '#9CA3AF' }}>
-            <p>No se encontraron productos en esta categoría.</p>
-          </div>
+          !loading && (
+            <div style={{ textAlign: 'center', padding: '100px 20px', color: '#9CA3AF' }}>
+              <p>No se encontraron productos en esta categoría.</p>
+            </div>
+          )
         )}
       </div>
 
-      <ProductModal 
-        product={selectedProduct}
-        closeModal={closeModal}
-        safeImg={safeImg}
-        BULK_MIN_QTY={BULK_MIN_QTY}
-        sizesForModal={sizesForModal}
-        selectedSize={selectedSize}
-        handleSizeSelect={handleSizeSelect}
-        showSizeError={showSizeError}
-        quantity={quantity}
-        decrementQuantity={decrementQuantity}
-        incrementQuantity={incrementQuantity}
-        handleQuantityInput={handleQuantityInput}
-        handleAddToCart={handleAddToCart}
-      />
+      {selectedProduct && (
+        <ProductModal 
+          product={selectedProduct}
+          closeModal={closeModal}
+          safeImg={safeImg}
+          BULK_MIN_QTY={BULK_MIN_QTY}
+          sizesForModal={sizesForModal}
+          selectedSize={selectedSize}
+          handleSizeSelect={handleSizeSelect}
+          showSizeError={showSizeError}
+          quantity={quantity}
+          decrementQuantity={decrementQuantity}
+          incrementQuantity={incrementQuantity}
+          handleQuantityInput={handleQuantityInput}
+          handleAddToCart={handleAddToCart}
+        />
+      )}
 
       <SuccessToast show={showSuccessToast} />
       

@@ -41,23 +41,26 @@
   position: absolute;
   top: 14px;
   right: 14px;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: none;
-  background: transparent;
-  color: rgba(255,255,255,0.7);
+  background: rgba(255, 255, 255, 0.85); /* Fondo claro para contraste con X negra */
+  backdrop-filter: blur(4px);
+  color: #000; /* X Negra */
   cursor: pointer;
-  z-index: 10;
+  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
 .gm-modal-close:hover {
-  background: rgba(255,255,255,0.1);
-  color: #fff;
+  background: #f5c81b; 
+  color: #000;
+  transform: scale(1.1);
 }
 
 /* === LEFT SIDE (IMAGE) === */
@@ -119,8 +122,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 24px 30px;
+  gap: 24px; /* Aumentado para no estar "apeñuscado" */
+  padding: 30px 35px;
   overflow-y: auto;
   max-height: 85vh;
   scrollbar-width: none;
@@ -147,37 +150,49 @@
 
 .gm-modal-title {
   margin: 0;
-  font-size: 1.7rem;
-  font-weight: 800;
+  font-size: 1.8rem;
+  font-weight: 300 !important; /* Forzar sin negrita */
   line-height: 1.15;
   color: #fff;
+  letter-spacing: -0.5px;
 }
 
 /* Color tags inline with title */
 .gm-modal-colors-inline {
-  display: flex;
+  display: none; /* Ocultar en desktop */
   gap: 6px;
   flex-wrap: wrap;
 }
 
 .gm-color-tag {
-  padding: 3px 12px;
+  padding: 4px 12px;
   border-radius: 4px;
-  font-weight: 900;
-  font-size: 0.7rem;
-  text-transform: uppercase;
+  font-weight: 300;
+  font-size: 0.72rem;
+  text-transform: none;
   letter-spacing: 0.5px;
-  border: 1px solid rgba(255,255,255,0.15);
+  background: transparent !important;
+  border: 1px solid currentColor;
+  text-shadow: 0 0 10px rgba(0,0,0,0.5); /* Sombra solicitada */
   display: inline-flex;
   align-items: center;
 }
 
 /* === PRICE === */
 .gm-modal-price-main {
-  color: #F5C81B;
-  font-weight: 900;
+  color: #fff;
+  font-weight: 300 !important; /* Forzar sin negrita */
   font-size: 2rem;
   line-height: 1;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Rediseño para que salgan al lado del precio */
+.gm-modal-price-container {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 /* Bulk discount message */
@@ -209,8 +224,8 @@
 }
 
 .gm-original-price {
-  color: #6B7280;
-  font-size: 0.95rem;
+  color: rgba(255,255,255,0.3);
+  font-size: 0.9rem;
   text-decoration: line-through;
 }
 
@@ -240,24 +255,31 @@
   color: rgba(255,255,255,0.8);
   font-size: 0.9rem;
   line-height: 1.5;
+  font-weight: 300;
 }
 
 /* === SIZES === */
 .gm-sizes {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px;
-  padding: 14px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column; /* Apilado en desktop */
+  align-items: flex-start; 
+  gap: 8px; /* Pegado a los dos puntos */
 }
 
 .gm-sizes-head {
-  margin-bottom: 10px;
+  margin-bottom: 0; /* Quitar margen para que sea inline */
+  flex-shrink: 0;
 }
 
 .gm-sizes-label {
-  font-weight: 800;
+  font-weight: 300 !important;
   color: #fff;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  text-transform: none; /* Quitar mayúsculas sostenidas */
+  letter-spacing: 0.5px;
 }
 
 .gm-sizes-wrap {
@@ -275,7 +297,7 @@
   border: 1px solid rgba(255,255,255,0.18);
   background: rgba(255, 255, 255, 0.05);
   color: #fff;
-  font-weight: 600;
+  font-weight: 300;
   font-size: 0.82rem;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -301,7 +323,7 @@
 .gm-size-error-msg {
   color: #ef4444;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 300;
   margin-top: 8px;
   animation: gm-shake 0.4s ease-in-out;
 }
@@ -315,15 +337,18 @@
 /* === QUANTITY === */
 .gm-quantity-selector {
   display: flex;
+  flex-direction: row; /* Volver a inline en desktop */
   align-items: center;
-  gap: 14px;
-  margin: 4px 0;
+  gap: 15px;
+  margin: 10px 0;
 }
 
 .gm-quantity-label {
-  font-weight: 800;
+  font-weight: 300 !important;
   font-size: 0.95rem;
   color: #fff;
+  text-transform: none; /* Quitar mayúsculas sostenidas */
+  letter-spacing: 0.5px;
 }
 
 .gm-quantity-controls {
@@ -366,7 +391,7 @@
   border: none;
   color: #fff;
   text-align: center;
-  font-weight: 900;
+  font-weight: 300;
   font-size: 1.05rem;
   outline: none;
   appearance: none;
@@ -384,7 +409,7 @@
   padding: 3px 12px;
   border-radius: 20px;
   font-size: 0.72rem;
-  font-weight: 800;
+  font-weight: 300;
   text-transform: uppercase;
   letter-spacing: 0.3px;
   border: 1px solid;
@@ -394,21 +419,16 @@
 .gm-btn-add-cart {
   width: 100%;
   height: 48px;
-  min-height: 48px;
-  flex-shrink: 0;
   border-radius: 10px;
-  border: none;
   background: #F5C81B;
   color: #000;
-  font-weight: 900;
+  font-weight: 900 !important; /* Negrita solicitada para el botón */
   font-size: 1.05rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  transition: all 0.25s ease;
-  margin-top: 12px;
 }
 
 .gm-btn-add-cart:hover:not(:disabled) {
@@ -425,10 +445,12 @@
 }
 
 .gm-btn-disabled-agotado {
-  background: #374151 !important;
-  color: #9ca3af !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
   cursor: not-allowed !important;
-  opacity: 1 !important; /* Mostramos que está agotado claramento, no solo transparente */
+  opacity: 1 !important; 
+  text-decoration: line-through;
 }
 
 @keyframes gm-pulse-red {
@@ -441,7 +463,7 @@
 .gm-tag {
   padding: 4px 10px;
   border-radius: 4px;
-  font-weight: 700;
+  font-weight: 300;
   font-size: 0.72rem;
   border: 1px solid rgba(96,165,250,0.35);
   color: #fff;
@@ -495,14 +517,31 @@
     object-fit: cover;
   }
   .gm-modal-right {
-    /* Info: sin max-height fijo — crece con su contenido */
     max-height: none;
     overflow-y: visible;
     padding: 16px 14px;
-    gap: 10px;
+    gap: 12px;
+  }
+  .gm-sizes, .gm-quantity-selector {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+  .gm-img-badge-corner.oferta {
+    right: auto !important;
+    left: 10px !important; /* Mover a la izquierda para que no tape la X */
+  }
+  .gm-img-badge-corner.agotado {
+    left: auto !important;
+    right: 10px !important;
   }
   .gm-modal-title { font-size: 1.25rem; }
   .gm-modal-price-main { font-size: 1.55rem; }
+  .gm-modal-colors-inline { 
+    display: flex; 
+  }
 }
 
 @media (max-width: 640px) {

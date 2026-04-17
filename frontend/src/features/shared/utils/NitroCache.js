@@ -16,7 +16,7 @@ export const NitroCache = {
         timestamp: Date.now(),
         isInitialized: true
       };
-      sessionStorage.setItem(`${CACHE_PREFIX}${key}`, JSON.stringify(payload));
+      localStorage.setItem(`${CACHE_PREFIX}${key}`, JSON.stringify(payload));
     } catch (error) {
       console.error(`❌ [NitroCache] Error saving ${key}:`, error);
     }
@@ -30,7 +30,7 @@ export const NitroCache = {
    */
   get: (key, defaultValue = null, maxAgeMs = null) => {
     try {
-      const saved = sessionStorage.getItem(`${CACHE_PREFIX}${key}`);
+      const saved = localStorage.getItem(`${CACHE_PREFIX}${key}`);
       if (!saved) return defaultValue;
       
       const parsed = JSON.parse(saved);
@@ -39,7 +39,7 @@ export const NitroCache = {
       if (maxAgeMs != null && parsed.timestamp) {
         const age = Date.now() - parsed.timestamp;
         if (age > maxAgeMs) {
-          sessionStorage.removeItem(`${CACHE_PREFIX}${key}`);
+          localStorage.removeItem(`${CACHE_PREFIX}${key}`);
           return defaultValue;
         }
       }
@@ -58,7 +58,7 @@ export const NitroCache = {
    */
   isFresh: (key, maxAgeMs = 60000) => {
     try {
-      const saved = sessionStorage.getItem(`${CACHE_PREFIX}${key}`);
+      const saved = localStorage.getItem(`${CACHE_PREFIX}${key}`);
       if (!saved) return false;
       const parsed = JSON.parse(saved);
       if (!parsed?.timestamp) return false;
@@ -73,11 +73,11 @@ export const NitroCache = {
    */
   clear: (key = null) => {
     if (key) {
-      sessionStorage.removeItem(`${CACHE_PREFIX}${key}`);
+      localStorage.removeItem(`${CACHE_PREFIX}${key}`);
     } else {
-      Object.keys(sessionStorage).forEach(k => {
+      Object.keys(localStorage).forEach(k => {
         if (k.startsWith(CACHE_PREFIX)) {
-          sessionStorage.removeItem(k);
+          localStorage.removeItem(k);
         }
       });
     }

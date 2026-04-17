@@ -1,7 +1,7 @@
 .gm-hero {
   position: relative;
   width: 100%;
-  height: clamp(200px, 35vh, 350px);
+  height: clamp(150px, 20vh, 220px);
   overflow: hidden;
   background: var(--gm-black);
   margin-bottom: 30px;

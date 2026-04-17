@@ -5,16 +5,149 @@
   overflow: hidden;
 }
 
+/* LAYOUT CON SIDEBAR */
+.gm-products-page-layout {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+  width: 100%;
+  padding-top: 20px;
+}
+
+.gm-filters-sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 90px;
+}
+
+.gm-filters-content {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.gm-filters-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.gm-filters-header-row h3 {
+  color: #F5C81B;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.gm-clear-all-btn {
+  background: none;
+  border: none;
+  color: #FFC107;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.gm-filter-group h4 {
+  color: #fff;
+  font-size: 14px;
+  margin: 0 0 12px 0;
+  font-weight: 700;
+}
+
+.gm-filter-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gm-filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #94a3b8;
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.gm-filter-checkbox:hover {
+  color: #fff;
+}
+
+.gm-filter-checkbox input[type="checkbox"] {
+  accent-color: #FFC107;
+  width: 16px;
+  height: 16px;
+}
+
+.gm-sizes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.gm-size-pill {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #cbd5e1;
+  padding: 6px 0;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.gm-size-pill:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.gm-size-pill.active {
+  background: #FFC107;
+  border-color: #FFC107;
+  color: #000;
+}
+
+.gm-products-main-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* GRID PRINCIPAL - 5 Columnas */
 .gm-products-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 30px;
+  grid-template-columns: repeat(5, 1fr); 
+  gap: 15px;
   width: 100%;
   margin: 0;
-  padding: 30px 0;
-  margin-bottom: 60px;
+  padding: 10px 0 30px 0;
   overflow: visible;
 }
+
+@media (max-width: 900px) {
+  .gm-products-page-layout {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .gm-filters-sidebar {
+    width: 100%;
+    position: static;
+  }
+  .gm-filters-placeholder {
+    min-height: auto;
+    padding: 20px;
+  }
+}
+
 
 @media (max-width: 1024px) {
   .gm-products-grid {

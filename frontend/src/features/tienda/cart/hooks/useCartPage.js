@@ -196,36 +196,39 @@ export const useCartPage = () => {
   };
 
   const handleFinishPurchase = async () => {
+    setIsProcessing(true); // Mostrar que estamos cargando datos desde el inicio
     // 🔥 AUTO-SINCRO: Antes de proceder, intentamos refrescar la data de los productos para asegurar stock actualizado
     try {
       if (cartItems.length > 0) {
-        for (const item of cartItems) {
-          const res = await cartApi.getProductoById(item.id);
-          const p = res.data?.data;
-          if (p) {
-            // Mapear p al formato que usamos en el carrito
-            const freshItem = {
-              ...item,
-              tallasStock: p.tallasStock || p.TallasStock || [],
-              categoria: p.categoria || p.Categoria || p.categoria_nombre || 'Gorra'
-            };
-            // Actualizar en el contexto (usando addToCart con qty 0 para solo actualizar metadata)
-            // O mejor, crear una función updateMetadata si fuera necesario, pero addToCart con qty 0 debería funcionar con mi lógica de merge
-            addToCart({ ...freshItem, quantity: 0 }); 
+        // Ejecutamos en paralelo para máxima velocidad
+        await Promise.all(cartItems.map(async (item) => {
+          try {
+            const res = await cartApi.getProductoById(item.id);
+            const p = res.data?.data;
+            if (p) {
+              const freshItem = {
+                ...item,
+                tallasStock: p.tallasStock || p.TallasStock || [],
+                categoria: p.categoria || p.Categoria || p.categoria_nombre || 'Gorra'
+              };
+              addToCart({ ...freshItem, quantity: 0 }); // qty 0 solo actualiza metadata
+            }
+          } catch (e) {
+            // Silencio intencional para un item individual
           }
-        }
+        }));
       }
     } catch (e) {
       console.warn("No se pudo sincronizar el stock antes de pagar:", e);
     }
 
     if (!user) {
+      setIsProcessing(false); 
       navigate('/login');
       return;
     }
     
-    setIsProcessing(true); // Mostrar que estamos cargando datos...
-
+    // Ya está en true desde el inicio
     try {
       // 🔥 OBTENER DATOS DIRECTO DE LA BASE DE DATOS
       const response = await cartApi.getMiPerfil();

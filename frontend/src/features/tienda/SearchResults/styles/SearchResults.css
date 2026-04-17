@@ -195,8 +195,8 @@
 
 .sr-products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
   padding: 20px 0;
 }
 
@@ -242,9 +242,10 @@
 
 .sr-img-container {
   position: relative;
-  height: 220px;
-  overflow: hidden;
-  background: #0F172A;
+  height: clamp(150px, 20vh, 220px); 
+  overflow: hidden; 
+  background: var(--gm-black); 
+  margin-bottom: 20px; 
 }
 
 .sr-product-img {
@@ -304,7 +305,7 @@
   font-size: 16px;
   color: #FFFFFF;
   margin: 0 0 10px 0;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.4;
   height: 45px;
   overflow: hidden;
