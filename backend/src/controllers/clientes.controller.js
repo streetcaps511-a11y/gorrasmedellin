@@ -582,12 +582,12 @@ const clienteController = {
             // 🟢 TRADUCTOR DE CAMPOS (Soportamos camelCase, PascalCase y modelos)
             const updateData = {
                 nombreCompleto: name || Name || nombreCompleto || Nombre || cliente.nombreCompleto,
-                telefono: (phone || Telefono || telefono || cliente.telefono || '').toString().replace(/\D/g, ''),
+                telefono: (phone || Telefono || telefono || cliente.telefono || '').toString().replace(/\D/g, '') || null,
                 direccion: address || Direccion || direccion || cliente.direccion,
                 ciudad: city || Ciudad || ciudad || cliente.ciudad,
                 departamento: department || Departamento || departamento || cliente.departamento,
                 tipoDocumento: documentType || tipoDocumento || TipoDocumento || cliente.tipoDocumento,
-                numeroDocumento: (documentNumber || numeroDocumento || NumeroDocumento || Documento || cliente.numeroDocumento || '').toString().replace(/\D/g, ''),
+                numeroDocumento: (documentNumber || numeroDocumento || NumeroDocumento || Documento || cliente.numeroDocumento || '').toString().replace(/\D/g, '') || null,
                 avatarUrl: avatarUrl || Avatar || cliente.avatarUrl,
                 email: (email || Email || Correo || cliente.email).toLowerCase()
             };

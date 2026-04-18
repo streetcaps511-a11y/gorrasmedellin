@@ -85,6 +85,33 @@
   object-position: center;
 }
 
+/* Corner badges in image */
+.gm-img-badge-corner {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 950;
+  text-transform: uppercase;
+  z-index: 5;
+  letter-spacing: 0.5px;
+}
+
+.gm-img-badge-corner.agotado {
+  background: transparent;
+  border: 2px solid #ff0000;
+  color: #ff0000;
+  backdrop-filter: blur(4px);
+}
+
+.gm-img-badge-corner.oferta {
+  background: #F5C81B;
+  color: #000;
+  font-weight: 950;
+}
+
 /* Image dots */
 .gm-modal-dots {
   position: absolute;
@@ -129,6 +156,28 @@
 
 .gm-modal-right::-webkit-scrollbar {
   display: none;
+}
+
+/* ── BANNER AGOTADO — solo mobile, arriba del info panel ── */
+.gm-agotado-banner-mobile {
+  display: none; /* oculto en desktop */
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 2px solid #ff0000;
+  border-radius: 8px;
+  padding: 8px 14px;
+  color: #ff0000;
+  font-size: 0.85rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 980px) {
+  .gm-agotado-banner-mobile {
+    display: flex;
+  }
 }
 
 /* === HEADER: TITLE + COLORS === */
@@ -255,7 +304,7 @@
 }
 
 .gm-sizes-label {
-  font-weight: 800;
+  font-weight: 900 !important;
   color: #fff;
   font-size: 0.9rem;
 }
@@ -312,19 +361,29 @@
   75% { transform: translateX(5px); }
 }
 
-/* === QUANTITY === */
+/* === QUANTITY ROW (Cantidad + Etiqueta + Botón inline) === */
+.gm-quantity-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0;
+  flex-wrap: nowrap;
+}
+
 .gm-quantity-selector {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin: 4px 0;
+  flex: 1;
 }
 
 .gm-quantity-label {
-  font-weight: 800;
+  font-weight: 900 !important;
   font-size: 0.95rem;
   color: #fff;
+  white-space: nowrap;
 }
+
 
 .gm-quantity-controls {
   display: flex;
@@ -360,14 +419,14 @@
 }
 
 .gm-qty-input-manual {
-  width: 48px;
+  width: 50px;
   height: 36px;
   background: transparent;
   border: none;
   color: #fff;
   text-align: center;
   font-weight: 900;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   outline: none;
   appearance: none;
   -moz-appearance: textfield;
@@ -379,16 +438,6 @@
   margin: 0;
 }
 
-/* Stock badge */
-.gm-stock-badge {
-  padding: 3px 12px;
-  border-radius: 20px;
-  font-size: 0.72rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  border: 1px solid;
-}
 
 /* === ADD TO CART BUTTON === */
 .gm-btn-add-cart {
@@ -425,10 +474,76 @@
 }
 
 .gm-btn-disabled-agotado {
-  background: #F5C81B !important;
-  color: #000 !important;
+  background: transparent !important;
+  color: #ff0000 !important;
+  border: 2px solid #ff0000 !important;
   cursor: not-allowed !important;
-  opacity: 0.6 !important; 
+  opacity: 1 !important;
+  justify-content: flex-start !important;
+  padding-left: 20px !important;
+  box-shadow: none !important;
+  text-transform: uppercase;
+  font-weight: 950;
+}
+
+@media (max-width: 768px) {
+  .gm-size-error-msg {
+    margin-top: 4px;
+    font-size: 0.75rem;
+  }
+}
+
+/* ── Botón inline — siempre visible en responsive al lado de cantidad ── */
+.gm-btn-add-mobile {
+  display: none;
+  background: #F5C81B;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 900;
+  font-size: 0.95rem;
+  cursor: pointer;
+  margin-left: auto;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(245, 200, 27, 0.2);
+  transition: all 0.2s ease;
+}
+
+.gm-btn-add-mobile:hover:not(:disabled) {
+  background: #FFA000;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 160, 0, 0.3);
+}
+
+.gm-btn-add-mobile:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 1024px) {
+  .gm-btn-add-mobile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* ── Botón grande — oculto en responsive para evitar scroll ── */
+.gm-btn-desktop-only {
+  display: flex;
+}
+
+@media (max-width: 1024px) {
+  .gm-modal-right {
+    padding: 15px 18px;
+    gap: 10px;
+  }
+  .gm-btn-desktop-only {
+    display: none !important;
+  }
 }
 
 .gm-btn-error {
@@ -534,3 +649,4 @@
     font-size: 0.95rem;
   }
 }
+

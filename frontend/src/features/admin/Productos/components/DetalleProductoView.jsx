@@ -36,19 +36,19 @@ const DetalleProductoView = ({ producto }) => {
             <div className="product-form-group">
               <div className="form-row">
                 <div className="form-field">
-                  <label className="form-label">Nombre</label>
-                  <div className="form-input disabled">{producto.nombre}</div>
+                  <label className="form-label">Nombre:</label>
+                  <div className="form-input disabled" style={{ width: '100%' }}>{producto.nombre}</div>
                 </div>
 
                 <div className="form-field">
-                  <label className="form-label">Categoría</label>
-                  <div className="form-input disabled">{producto.categoria || producto.idCategoria || 'N/A'}</div>
+                  <label className="form-label">Categoría:</label>
+                  <div className="form-input disabled" style={{ width: '100%' }}>{producto.categoria || producto.idCategoria || 'N/A'}</div>
                 </div>
               </div>
 
               <div className="form-field full-width">
-                <label className="form-label">Descripción</label>
-                <div className="form-textarea disabled" style={{ minHeight: '80px' }}>
+                <label className="form-label">Descripción:</label>
+                <div className="form-textarea disabled" style={{ height: '40px', minHeight: '40px', display: 'flex', alignItems: 'center' }}>
                   {producto.descripcion || 'Sin descripción'}
                 </div>
               </div>
@@ -60,14 +60,14 @@ const DetalleProductoView = ({ producto }) => {
             <h4 className="product-form-section-title">Precios</h4>
             <div className="product-form-grid prices">
               <div className="form-field">
-                <label className="form-label">Venta (Normal)</label>
+                <label className="form-label">Venta (Normal):</label>
                 <div className="form-input price-input disabled">
                    $ {formatCurrencyValue(producto.precioVenta)}
                 </div>
               </div>
 
               <div className="form-field">
-                <label className="form-label">Precio Oferta</label>
+                <label className="form-label">Precio Oferta:</label>
                 <div className="offer-input-wrapper">
                   <div className="price-with-discount">
                     <div className={`form-input price-input-offer disabled ${!producto.enOfertaVenta ? 'opacity-50' : ''}`}>
@@ -94,14 +94,14 @@ const DetalleProductoView = ({ producto }) => {
               )}
 
               <div className="form-field">
-                <label className="form-label">+6 Unidades</label>
+                <label className="form-label">+6 Unidades:</label>
                 <div className="form-input price-input disabled">
                   $ {formatCurrencyValue(producto.precioMayorista6)}
                 </div>
               </div>
 
               <div className="form-field">
-                <label className="form-label">+80 Unidades</label>
+                <label className="form-label">+80 Unidades:</label>
                 <div className="form-input price-input disabled">
                   $ {formatCurrencyValue(producto.precioMayorista80)}
                 </div>
@@ -112,7 +112,7 @@ const DetalleProductoView = ({ producto }) => {
 
         {/* SECCIÓN 3: DETALLE (Grid Row 2) */}
         <div className="product-form-bottom-row">
-          <div className="product-form-section detailed">
+          <div className="product-form-section detailed no-frame">
             <div className="detailed-grid">
               {/* TALLAS */}
               <div className="form-card tallas">
@@ -125,14 +125,12 @@ const DetalleProductoView = ({ producto }) => {
                   ) : (
                     <div className="form-card-list">
                       {producto.tallasStock.map((item, index) => (
-                        <div key={index} className="form-list-row talla-row">
-                          <div className="form-select-sm disabled" style={{ display: 'flex', alignItems: 'center' }}>
+                        <div key={index} className="form-list-row talla-row" style={{ width: '100%' }}>
+                          <div className="form-input disabled" style={{ flex: 1, height: '40px', display: 'flex', alignItems: 'center' }}>
                             {item.talla}
                           </div>
-                          <div className="quantity-controls disabled">
-                             <span style={{ padding: '0 10px', color: '#F5C81B', fontWeight: 'bold', fontSize: '12px' }}>
-                                {item.cantidad} uds
-                             </span>
+                          <div className="form-input disabled" style={{ width: '100px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F5C81B', fontWeight: '800' }}>
+                            {item.cantidad} uds
                           </div>
                         </div>
                       ))}
@@ -152,12 +150,13 @@ const DetalleProductoView = ({ producto }) => {
                   ) : (
                     <div className="form-card-list">
                       {producto.colores.map((color, index) => (
-                        <div key={index} className="form-list-row color-row">
-                           <div className="form-input-sm disabled" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div key={index} className="form-list-row color-row" style={{ width: '100%' }}>
+                           <div className="form-input disabled" style={{ flex: 1, height: '40px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                               <span style={{ 
-                                width: '12px', 
-                                height: '12px', 
+                                width: '16px', 
+                                height: '16px', 
                                 borderRadius: '50%', 
+                                border: '1px solid rgba(255,255,255,0.2)',
                                 backgroundColor: color.toLowerCase() === 'blanco' ? '#fff' : color.toLowerCase() === 'negro' ? '#000' : color 
                               }} />
                               {color}
@@ -181,7 +180,7 @@ const DetalleProductoView = ({ producto }) => {
                     <div className="form-card-list">
                       {producto.imagenes.filter(url => url.trim() !== '').map((url, index) => (
                         <div key={index} className="form-list-row image-row">
-                          <div className="form-input-sm disabled truncate" title={url}>
+                          <div className="form-input disabled truncate" title={url} style={{ flex: 1, height: '40px', display: 'flex', alignItems: 'center' }}>
                             {url}
                           </div>
                         </div>

@@ -312,21 +312,21 @@ export const useUsersLogic = () => {
   const confirmToggleStatus = async () => {
     const user = anularModal.user;
     if (!user) return;
+
+    setAnularModal({ isOpen: false, user: null });
     
-    setLoading(true);
+    const targetStatus = !user.isActive;
+    
+    // 🚀 Optimistic Update
+    setUsers(prev => prev.map(u => u.id === user.id ? { ...u, isActive: targetStatus } : u));
+    showAlert(`Usuario ${targetStatus ? 'activado' : 'desactivado'} correctamente ✅`);
+
     try {
-      const response = await usersService.toggleUserStatus(user.id);
-      const nuevoEstado = response.estado || (user.isActive ? 'inactivo' : 'activo');
-      const isActive = nuevoEstado === 'activo';
-      
-      setUsers(prev => prev.map(u => u.id === user.id ? { ...u, isActive } : u));
-      showAlert(`Usuario ${isActive ? 'activado' : 'desactivado'} correctamente`);
-      closeAnularModal();
+      await usersService.toggleUserStatus(user.id);
+      fetchData(); // Sync in background
     } catch (error) {
-      console.error('❌ Error al cambiar estado:', error);
+      fetchData(); // Revert on failure
       showAlert('Error al actualizar estado del usuario', 'error');
-    } finally {
-      setLoading(false);
     }
   };
 

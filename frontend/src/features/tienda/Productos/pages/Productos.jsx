@@ -43,7 +43,7 @@ const Productos = () => {
 
   return (
     <div className="gm-productos-page">
-      {/* <ProductosHero /> Se elimina para limpiar la vista como se solicitó */}
+      <ProductosHero />
       
       <ProductosGrid 
         filteredProducts={filteredProducts}

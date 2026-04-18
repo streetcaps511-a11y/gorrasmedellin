@@ -6,18 +6,18 @@
 
 .gm-products-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 20px;
-  width: calc(100% + 20px);
-  margin: 10px -10px 0 -10px;
-  padding: 50px 10px; /* Espacio para hover expansion */
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  width: 100%;
+  margin: 10px 0 0 0;
+  padding: 10px 0;
   margin-bottom: 60px;
 }
 
 /* Responsive Grid */
 @media (max-width: 1100px) {
   .gm-products-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 

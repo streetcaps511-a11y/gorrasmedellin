@@ -44,7 +44,7 @@
   color: #000;
 }
 
-.filter-arrow { transition: transform 0.2s; }
+.filter-arrow { transition: transform 0.2s; color: #F5C81B; }
 .filter-arrow.open { transform: rotate(180deg); }
 
 .filter-overlay {

@@ -6,17 +6,17 @@
 .categorias-page {
   display: flex;
   flex-direction: column;
-  padding: 0;
-  background-color: #020617; /* Fondo ultra oscuro */
+  padding: 0 12px 12px 12px;
+  background-color: #000000;
+  min-height: 100%; /* Ajustar al contenedor main */
   flex: 1;
-  overflow: hidden;
   font-family: inherit;
 }
 
 .categorias-page__header {
-  padding: 0 0 10px 0;
+  padding: 0;
   flex-shrink: 0;
-  margin-bottom: 10px;
+  margin-bottom: 0px;
 }
 
 .categorias-page__title-section {
@@ -28,10 +28,11 @@
 
 .categorias-page__title {
   color: #ffffff;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 800;
   margin: 0 0 2px 0;
-  line-height: 1.2;
+  line-height: 1.1;
+  letter-spacing: -0.3px;
 }
 
 .categorias-page__subtitle {
@@ -43,7 +44,7 @@
 
 .categorias-page__actions {
   display: flex;
-  gap: 6px;
+  gap: 15px;
   align-items: center;
 }
 
@@ -54,8 +55,8 @@
 .btn-primary {
   padding: 6px 12px;
   background-color: transparent;
-  border: 1px solid #F5C81B;
-  color: #F5C81B;
+  border: 1px solid #FFC300;
+  color: #FFC300;
   border-radius: 4px;
   font-size: 11px;
   cursor: pointer;
@@ -380,117 +381,38 @@
    PAGINACIÓN
    ======================================== */
 
+.categories-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  flex: 1; /* Para que crezca y use el min-height del EntityTable */
+  background-color: #000000;
+  border-radius: 8px;
+  border: 1px solid #FFC300;
+  overflow: hidden;
+  margin-top: 5px;
+  min-height: 420px;
+  padding-bottom: 30px;
+}
+
+/* El table wrapper debe ocupar el espacio restante */
+.categories-table-wrapper {
+  flex: 1;
+  overflow: hidden;
+}
+
 .pagination {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 10px 16px;
-  background-color: #151822;
-  border: 1px solid #F5C81B;
-  border-radius: 6px;
+  background-color: #000000;
+  border-top: none; /* Quitamos la linea si ya terminó los datos */
   font-size: 12px;
-  color: #F5C81B;
+  color: #FFC300;
   height: 48px;
   flex-shrink: 0;
-  margin-top: 20px;
-}
-
-.pagination__info {
-  color: #F5C81B;
-  font-weight: 600;
-  font-size: 12px;
-  padding: 0 8px;
-}
-
-.pagination__button {
-  padding: 6px 12px;
-  background-color: transparent;
-  border: 1px solid #F5C81B;
-  border-radius: 4px;
-  color: #F5C81B;
-  cursor: pointer;
-  font-size: 12px;
-  transition: all 0.2s ease;
-}
-
-.pagination__button:hover:not(:disabled) {
-  background-color: #F5C81B;
-  color: #000;
-}
-
-.pagination__button:disabled {
-  color: #6B7280;
-  cursor: not-allowed;
-  border-color: #6B7280;
-}
-
-/* ========================================
-   ESTADO VACÍO
-   ======================================== */
-
-.empty-state {
-  grid-column: 1 / span 3;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #F5C81B;
-  text-align: center;
-  padding: 40px 20px;
-  height: 360px;
-  background-color: transparent;
-  border-radius: 6px;
-  border: 1px dashed #333;
-}
-
-.empty-state__icon {
-  width: 64px;
-  height: 64px;
-  stroke: #F5C81B;
-  stroke-width: 1.5;
-}
-
-.empty-state__title {
-  color: #F5C81B;
-  margin: 16px 0 8px 0;
-}
-
-.empty-state__message {
-  color: #9CA3AF;
-  font-size: 14px;
-  margin: 0;
-}
-
-/* Placeholder para grid incompleto */
-.category-card__placeholder {
-  background-color: transparent;
-  border-radius: 6px;
-  border: 1px dashed #222;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  height: 360px;
-  opacity: 0.3;
-}
-
-/* ========================================
-   GRID DE CATEGORÍAS
-   ======================================== */
-
-.categories-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  padding-top: 10px;
-  min-height: 420px;
-}
-
-.categories-container {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  background-color: transparent;
-  overflow: hidden;
+  margin-top: auto; 
 }
 
 /* ========================================
@@ -639,7 +561,7 @@
   max-width: 550px;
   display: flex;
   flex-direction: column;
-  background-color: #0b1220;
+  background-color: #000000;
   border-radius: 8px;
   border: none;
   position: relative;

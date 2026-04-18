@@ -6,9 +6,9 @@
 }
 
 .status-filter-trigger {
-  background-color: #1E293B;
-  border: 1px solid #F5C81B;
-  color: #F5C81B;
+  background-color: #FFC300;
+  border: 1px solid #FFC300;
+  color: #000000;
   border-radius: 6px;
   font-size: 13px;
   cursor: pointer;
@@ -24,12 +24,12 @@
 }
 
 .status-filter-trigger:hover {
-  background-color: #F5C81B15;
+  background-color: #FFC30015;
 }
 
 .status-filter-trigger .arrow-icon {
   transition: transform 0.2s;
-  color: #F5C81B;
+  color: #000000;
 }
 
 .status-filter-trigger .arrow-icon.open {
@@ -41,7 +41,7 @@
   top: calc(100% + 5px);
   right: 0;
   background-color: #111827;
-  border: 1px solid #F5C81B;
+  border: 1px solid #FFC300;
   border-radius: 8px;
   min-width: 160px;
   z-index: 1000;
@@ -67,12 +67,12 @@
 }
 
 .filter-option-item:hover {
-  background-color: #F5C81B15;
-  color: #F5C81B;
+  background-color: #FFC30015;
+  color: #FFC300;
 }
 
 .filter-option-item.active {
-  background-color: #F5C81B;
+  background-color: #FFC300;
   color: #000;
   font-weight: 700;
 }

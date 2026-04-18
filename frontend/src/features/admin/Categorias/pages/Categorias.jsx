@@ -1,7 +1,8 @@
 import React from 'react';
 import '../style/Categorias.css';
 import { useCategoriasLogic } from '../hooks/useCategoriasLogic';
-import { CategoryCard, StatusFilter } from '../components';
+import { StatusFilter } from '../components';
+import EntityTable from '../../../shared/components/admin/EntityTable';
 
 // Shared Components
 import SearchInput from '../../../shared/components/admin/SearchInput';
@@ -9,6 +10,8 @@ import UniversalModal from '../../../shared/components/admin/UniversalModal';
 import ConfirmDeleteModal from '../../../shared/components/admin/ConfirmDeleteModal';
 import AnularOperacionModal from '../../../shared/components/admin/AnularOperacionModal';
 import CustomPagination from '../../../shared/components/admin/CustomPagination';
+import Alert from '../../../shared/components/admin/Alert';
+import StatusPill from '../../../shared/components/admin/StatusPill';
 
 const CategoriasPage = () => {
   const {
@@ -79,7 +82,7 @@ const CategoriasPage = () => {
       <div className="categorias-page">
         {/* Header */}
         <div className="categorias-page__header">
-          <div className="categorias-page__title-section">
+          <div className="categorias-page__title-section" style={{ marginBottom: '4px' }}>
             <div>
               <h1 className="categorias-page__title">Categorías</h1>
               <p className="categorias-page__subtitle">Administra las categorías de productos</p>
@@ -103,40 +106,36 @@ const CategoriasPage = () => {
 
         {/* Content Area */}
         <div className="categories-container">
-          <div className="categories-grid yellow-scrollbar" style={{ overflowY: 'auto' }}>
+          <div className="categories-table-wrapper">
             {loading ? (
-                <div style={{ gridColumn: '1 / span 3', textAlign: 'center', color: '#F5C81B', padding: '40px' }}>
+                <div style={{ textAlign: 'center', color: '#F5C81B', padding: '40px' }}>
                   Cargando categorías...
                 </div>
-            ) : paginatedCategories.length > 0 ? (
-              paginatedCategories.map(category => (
-                <CategoryCard 
-                  key={category.id} 
-                  category={category} 
-                  onView={() => openModal('view', category)}
-                  onEdit={() => openModal('edit', category)}
-                  onDelete={() => openDeleteModal(category)}
-                  onToggleStatus={() => handleToggleStatus(category)}
-                />
-              ))
             ) : (
-              <div className="empty-state">
-                <svg className="empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path d="M4 5h16v14H4V5z" /><path d="M9 3l3 3m3-3l-3 3" />
-                </svg>
-                <h3 className="empty-state__title">No se encontraron categorías</h3>
-                <p className="empty-state__message">{searchTerm || filterStatus !== 'Todos' ? 'Intenta ajustar los filtros de búsqueda' : 'No hay categorías registradas'}</p>
-              </div>
+              <EntityTable 
+                entities={paginatedCategories}
+                columns={[
+                  { header: 'Nombre', field: 'nombre', width: '220px' },
+                  { header: 'Descripción', field: 'descripcion', width: '350px' },
+                  { 
+                    header: 'Estado', 
+                    field: 'isActive',
+                    width: '120px',
+                    render: (cat) => <StatusPill status={cat.isActive} />
+                  }
+                ]}
+                onView={(cat) => openModal('view', cat)}
+                onEdit={(cat) => openModal('edit', cat)}
+                onDelete={(cat) => openDeleteModal(cat)}
+                onAnular={(cat) => handleToggleStatus(cat)}
+                onReactivar={(cat) => handleToggleStatus(cat)}
+                isActiveField="isActive"
+                moduleType="categorias"
+              />
             )}
-            
-            {!loading && paginatedCategories.length > 0 && paginatedCategories.length < 3 &&
-              Array.from({ length: 3 - paginatedCategories.length }).map((_, index) => (
-                <div key={`empty-${index}`} className="category-card__placeholder" />
-              ))
-            }
           </div>
 
-          {totalItems > 0 && (
+          {totalItems > 0 && !loading && (
             <CustomPagination 
               currentPage={currentPage}
               totalPages={totalPages}
@@ -161,7 +160,7 @@ const CategoriasPage = () => {
         loading={loading}
       >
         <div className="modal-content">
-          <div className="modal-content__body yellow-scrollbar" style={{ overflowY: 'auto' }}>
+          <div className="modal-content__body">
             {renderField('Nombre', 'nombre')}
             {renderField('Descripción', 'descripcion', 'textarea')}
             {renderField('URL de Imagen', 'imagenUrl')}
@@ -204,9 +203,11 @@ const CategoriasPage = () => {
       />
 
       {alert.show && (
-        <div className={`categorias-alert ${alert.type}`}>
-          {alert.message}
-        </div>
+        <Alert
+          message={alert.message}
+          type={alert.type}
+          onClose={() => setAlert({ show: false, message: '', type: 'success' })}
+        />
       )}
     </>
   );

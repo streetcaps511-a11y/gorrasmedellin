@@ -87,6 +87,14 @@ const ProductModal = ({
           </div>
         </div>
         <div className="gm-modal-right">
+
+          {/* ── BANNER AGOTADO (solo mobile, siempre visible arriba) ── */}
+          {isAgotado && (
+            <div className="gm-agotado-banner-mobile">
+              <FaBan size={13} /> AGOTADO — Sin stock disponible
+            </div>
+          )}
+
           <div className="gm-modal-title-colors">
             <h2 className="gm-modal-title">{product.nombre}</h2>
             {product.colores?.length > 0 && (
@@ -95,15 +103,7 @@ const ProductModal = ({
                   const hex = colorNameToHex(c);
                   const displayColor = (c.toLowerCase() === 'negro' || hex === '#000000' || hex === '#000') ? '#555' : hex;
                   return (
-                    <span 
-                      key={i} 
-                      className="gm-color-tag" 
-                      style={{ 
-                        color: displayColor,
-                        borderColor: displayColor,
-                        backgroundColor: 'transparent' 
-                      }}
-                    >
+                    <span key={i} className="gm-color-tag" style={{ color: displayColor, borderColor: displayColor, backgroundColor: 'transparent' }}>
                       {c}
                     </span>
                   );
@@ -111,6 +111,7 @@ const ProductModal = ({
               </div>
             )}
           </div>
+
           <div className="gm-price-row">
             <div className="gm-modal-price-main">${Math.round(getPrice() || 0).toLocaleString()}</div>
             {isOffer && (
@@ -121,7 +122,9 @@ const ProductModal = ({
             )}
             <div className="gm-bulk-discount-info">A partir de {BULK_MIN_QTY} unidades tienes descuento por mayor</div>
           </div>
+
           <div className="gm-modal-desc-box"><p className="gm-modal-description">{product.descripcion || "Sin descripción disponible."}</p></div>
+
           {sizesForModal?.length > 0 && (
             <div className="gm-sizes">
               <span className="gm-sizes-label">Talla:</span>
@@ -133,18 +136,36 @@ const ProductModal = ({
               {showSizeError && !isAgotado && <div className="gm-size-error-msg">⚠️ Debes seleccionar una talla primero</div>}
             </div>
           )}
-          <div className="gm-quantity-selector">
+
+          {/* ── FILA: Cantidad + Botón pequeño (mobile) ── */}
+          <div className="gm-quantity-row">
             <span className="gm-quantity-label">Cantidad:</span>
-            <div className="gm-quantity-controls">
+            <div className={`gm-quantity-controls ${isAgotado ? 'is-disabled' : ''}`}>
               <button className="gm-qty-btn" onClick={decrementQuantity} disabled={isAgotado || parseInt(quantity) <= 0} type="button"><FaMinus size={10} /></button>
               <input type="text" className="gm-qty-input-manual" value={quantity} onChange={(e) => handleQuantityInput(e.target.value.replace(/\D/g, ''))} disabled={isAgotado} />
               <button className="gm-qty-btn" onClick={incrementQuantity} disabled={isAgotado} type="button"><FaPlus size={10} /></button>
             </div>
+            {/* Botón pequeño circular — solo mobile, al lado de cantidad */}
+            <button
+              className={`gm-btn-add-mobile ${isAgotado ? 'gm-btn-disabled-agotado' : ''}`}
+              onClick={!isAgotado ? handleAddToCart : undefined}
+              disabled={isAgotado || (!isAgotado && selectedSize && parseInt(quantity) > remaining)}
+              type="button"
+            >
+              Añadir
+            </button>
           </div>
+
+          {showSizeError && !isAgotado && (
+            <div className="gm-size-error-msg">⚠️ Debes seleccionar una talla primero</div>
+          )}
+
+          {/* ── Botón GRANDE — desktop únicamente ── */}
           <button
-            className={`gm-btn-add-cart ${isAgotado ? "gm-btn-disabled-agotado" : ""} ${showSizeError ? "gm-btn-error" : ""}`}
-            onClick={handleAddToCart}
-            disabled={(selectedSize && parseInt(quantity) > remaining)}
+            className={`gm-btn-add-cart gm-btn-desktop-only ${isAgotado ? 'gm-btn-disabled-agotado' : ''} ${showSizeError && !isAgotado ? 'gm-btn-error' : ''}`}
+            onClick={!isAgotado ? handleAddToCart : undefined}
+            disabled={isAgotado || (!isAgotado && selectedSize && parseInt(quantity) > remaining)}
+            type="button"
           >
             {isAgotado ? (
               <><FaBan size={18} /> <span className="gm-btn-label">AGOTADO</span></>
@@ -152,6 +173,7 @@ const ProductModal = ({
               <><FaShoppingCart size={18} /> <span className="gm-btn-label">Añadir al Carrito</span></>
             )}
           </button>
+
         </div>
       </div>
     </div>

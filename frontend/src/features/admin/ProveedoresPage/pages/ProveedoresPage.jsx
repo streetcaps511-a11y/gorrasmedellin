@@ -14,7 +14,7 @@ const columns = [
   { 
     header: 'Tipo Proveedor', 
     field: 'supplierType', 
-    width: '120px',
+    width: '100px',
     render: (item) => (
       <span className="supplier-type-text">
         {item.supplierType === 'Persona Natural' ? 'Natural' : 'Jurídica'}
@@ -24,7 +24,7 @@ const columns = [
   { 
     header: 'Nombre/Empresa', 
     field: 'companyName', 
-    width: '150px',
+    width: '140px',
     render: (item) => (
       <div className="company-name-text">
         {item.companyName || item.contactName || 'Sin nombre'}
@@ -44,7 +44,7 @@ const columns = [
   { 
     header: 'Email', 
     field: 'email', 
-    width: '190px',
+    width: '480px',
     render: (item) => (
       <a 
         href={`mailto:${item.email}`}
@@ -104,6 +104,7 @@ const ProveedoresPage = () => {
     anularModal,
     closeAnularModal,
     confirmToggleStatus,
+    alert, setAlert,
     availableStatuses
   } = useProveedoresLogic();
 
@@ -156,8 +157,8 @@ const ProveedoresPage = () => {
         <div className="proveedores-header">
           <div className="proveedores-header-top">
             <div>
-              <h1 className="proveedores-title">Gestión de Proveedores</h1>
-              <p className="proveedores-subtitle">Administre la información y contacto de sus proveedores</p>
+              <h1 className="proveedores-title">Proveedores</h1>
+              <p className="proveedores-subtitle">Administre la información de sus proveedores aquí</p>
             </div>
             <button
               onClick={() => openModal('create')}

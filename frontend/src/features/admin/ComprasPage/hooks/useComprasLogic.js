@@ -1,5 +1,6 @@
 // src/modules/purchases/hooks/useComprasLogic.js
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { NitroCache } from '../../../shared/utils/NitroCache';
 import Swal from 'sweetalert2';
 import { 
   fetchAllCompras, 
@@ -12,28 +13,37 @@ import {
   updateCompraStatus
 } from '../services/comprasApi';
 
-// 🧠 MEMORIA GLOBAL (Caché Nitro)
-let comprasCache = {
-  compras: [],
-  proveedores: [],
-  availableStatuses: [],
-  availablePaymentMethods: [],
-  availableSizes: [],
+// // 🧠 MEMORIA GLOBAL (Caché Nitro)
+const getInitialCompras = () => {
+    const cached = NitroCache.get('compras_v2');
+    return Array.isArray(cached?.data) ? cached.data : [];
+};
+const getInitialProv = () => {
+    const cached = NitroCache.get('compras_prov');
+    return cached?.data || [];
+};
+
+let localCache = {
   isInitialized: false
 };
 
 export const useComprasLogic = (location) => {
   const [modoVista, setModoVista] = useState("lista");
-  const [compras, setCompras] = useState(comprasCache.compras);
-  const [proveedores, setProveedores] = useState(comprasCache.proveedores);
-  const [availableStatuses, setAvailableStatuses] = useState(comprasCache.availableStatuses);
-  const [availablePaymentMethods, setAvailablePaymentMethods] = useState(comprasCache.availablePaymentMethods);
-  const [availableSizes, setAvailableSizes] = useState(comprasCache.availableSizes);
+  const [compras, setCompras] = useState(getInitialCompras());
+  const [proveedores, setProveedores] = useState(getInitialProv());
+  const [availableStatuses, setAvailableStatuses] = useState(['Todos', 'Pendiente', 'Completada', 'Anulada']);
+  const [availablePaymentMethods, setAvailablePaymentMethods] = useState(['Efectivo', 'Transferencia']);
+  const [availableSizes, setAvailableSizes] = useState([
+    { value: 'Ajustable', label: 'Ajustable' },
+    { value: '7', label: '7' },
+    { value: '7/1/4', label: '7/1/4' },
+    { value: '7/1/8', label: '7/1/8' }
+  ]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('Todos');
   const [filterDate, setFilterDate] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 7;
   const [productoPage, setProductoPage] = useState(1);
   const [alert, setAlert] = useState({ show: false, message: '', type: 'success' });
   const [errors, setErrors] = useState({});
@@ -41,15 +51,16 @@ export const useComprasLogic = (location) => {
   const [compraEditando, setCompraEditando] = useState(null);
   const [anularModal, setAnularModal] = useState({ isOpen: false, compra: null });
   const [completarModal, setCompletarModal] = useState({ isOpen: false, compra: null });
+  
   // ⚡ Solo mostramos cargando si NO tenemos nada en memoria
-  const [loading, setLoading] = useState(!comprasCache.isInitialized);
+  const [loading, setLoading] = useState(getInitialCompras().length === 0);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionLoadingText, setActionLoadingText] = useState('Procesando...');
 
   const [nuevaCompra, setNuevaCompra] = useState({
     proveedor: '',
     idProveedor: '',
-    metodoPago: comprasCache.availablePaymentMethods[0] || 'Efectivo',
+    metodoPago: 'Efectivo',
     fecha: new Date().toLocaleDateString('es-CO'),
     productos: [{
       id: '',
@@ -72,76 +83,40 @@ export const useComprasLogic = (location) => {
     })),
   [proveedores]);
 
-  // ✅ useCallback con dependencias correctas
-  const loadConfigData = useCallback(async () => {
+  // ✅ CARGA RÁPIDA (Nitro Sync)
+  const fetchData = useCallback(async () => {
     const token = sessionStorage.getItem('token');
     if (!token) return;
-    
-    let newStatuses = ['Todos', 'Pendiente', 'Completada', 'Anulada'];
-    let newMethods = ['Efectivo', 'Transferencia'];
-    let newSizes = [
-      { value: 'Ajustable', label: 'Ajustable' },
-      { value: '7', label: '7' },
-      { value: '7/1/4', label: '7/1/4' },
-      { value: '7/1/8', label: '7/1/8' }
-    ];
 
     try {
-      const [methodsData] = await Promise.allSettled([
-        getPaymentMethods()
-      ]);
+        const [cData, pData, methods] = await Promise.all([
+            fetchAllCompras(),
+            fetchAllProveedores(),
+            getPaymentMethods()
+        ]);
 
-      if (methodsData.status === 'fulfilled' && Array.isArray(methodsData.value)) {
-        newMethods = methodsData.value.map(m => typeof m === 'string' ? m : (m.Nombre || m.nombre));
-      }
-
-      // 💾 SINCRONIZAR CACHÉ
-      comprasCache = { ...comprasCache, availableStatuses: newStatuses, availablePaymentMethods: newMethods, availableSizes: newSizes };
-      setAvailableStatuses(newStatuses);
-      setAvailablePaymentMethods(newMethods);
-      setAvailableSizes(newSizes);
-
+        const sorted = [...cData].sort((a, b) => (parseInt(b.numCompra) || 0) - (parseInt(a.numCompra) || 0));
+        
+        // 💾 PERSISTENCIA NITRO
+        NitroCache.set('compras_v2', sorted);
+        NitroCache.set('compras_prov', pData);
+        
+        setCompras(sorted);
+        setProveedores(pData);
+        if (Array.isArray(methods)) {
+            setAvailablePaymentMethods(methods.map(m => typeof m === 'string' ? m : (m.Nombre || m.nombre)));
+        }
+        localCache.isInitialized = true;
     } catch (e) {
-      console.error("Error loading config for Compras", e);
-    }
-  }, []);
-
-  const loadCompras = useCallback(async () => {
-    const token = sessionStorage.getItem('token');
-    if (!token) return;
-    
-    try {
-      const data = await fetchAllCompras();
-      // Sort by numCompra descending (newest first)
-      const sortedData = [...data].sort((a, b) => (parseInt(b.numCompra) || 0) - (parseInt(a.numCompra) || 0));
-      comprasCache = { ...comprasCache, compras: sortedData, isInitialized: true };
-      setCompras(sortedData);
-    } catch (error) {
-      console.error('Error cargando compras', error);
+        console.error("Error fetchData Compras:", e);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   }, []);
 
-  const loadProveedores = useCallback(async () => {
-    const token = sessionStorage.getItem('token');
-    if (!token) return;
-    
-    try {
-      const data = await fetchAllProveedores();
-      comprasCache = { ...comprasCache, proveedores: data };
-      setProveedores(data);
-    } catch (error) {
-      console.error('Error cargando proveedores', error);
-    }
-  }, []);
-
-  // ✅ useEffect con TODAS las dependencias
   useEffect(() => {
-    loadCompras();
-    loadProveedores();
-    loadConfigData();
-  }, [loadCompras, loadProveedores, loadConfigData]);
+    fetchData();
+  }, [fetchData]);
 
   const showAlert = useCallback((message, type = 'success') => {
     setAlert({ show: true, message, type });
@@ -287,7 +262,7 @@ export const useComprasLogic = (location) => {
         await createNewCompra(payload);
         showAlert('Compra registrada correctamente');
       }
-      loadCompras();
+      fetchData();
       setTimeout(() => mostrarLista(), 1500);
     } catch (error) {
       const serverMsg = error.response?.data?.message;
@@ -295,7 +270,7 @@ export const useComprasLogic = (location) => {
     } finally {
       setActionLoading(false);
     }
-  }, [nuevaCompra, compraEditando, proveedoresActivos, calcularTotal, loadCompras, mostrarLista, showAlert]);
+  }, [nuevaCompra, compraEditando, proveedoresActivos, calcularTotal, fetchData, mostrarLista, showAlert]);
 
   const handleAnularCompra = useCallback(async () => {
     setActionLoadingText('Anulando...');
@@ -303,7 +278,7 @@ export const useComprasLogic = (location) => {
     try {
       await annulExistingCompra(anularModal.compra?.numCompra);
       showAlert('La compra ha sido anulada correctamente');
-      loadCompras();
+      fetchData();
       setTimeout(() => {
         setAnularModal({ isOpen: false, compra: null });
       }, 500);
@@ -312,7 +287,7 @@ export const useComprasLogic = (location) => {
     } finally {
       setActionLoading(false);
     }
-  }, [anularModal.compra, loadCompras, showAlert]);
+  }, [anularModal.compra, fetchData, showAlert]);
 
   const filtered = useMemo(() => {
     return compras.filter(c => {
@@ -346,13 +321,13 @@ export const useComprasLogic = (location) => {
       await updateCompraStatus(completarModal.compra.numCompra, 'Completada');
       showAlert('Registro completado correctamente');
       setCompletarModal({ isOpen: false, compra: null });
-      loadCompras();
+      fetchData();
     } catch (error) {
       showAlert('Error al actualizar el estado', 'error');
     } finally {
       setActionLoading(false);
     }
-  }, [completarModal.compra, loadCompras, showAlert]);
+  }, [completarModal.compra, fetchData, showAlert]);
 
   return {
     modoVista, setModoVista,

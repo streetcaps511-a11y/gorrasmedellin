@@ -58,30 +58,26 @@ const AdminDashboard = () => {
             className="slim-input" 
             value={selectedDay} 
             onChange={(e) => setSelectedDay(e.target.value)}
-            title="Filtrar por día"
           >
-            <option value="">Todo el mes</option>
+            <option value="">Día</option>
             {Array.from({ length: 31 }, (_, i) => i + 1).map(d => <option key={d} value={d}>{d}</option>)}
           </select>
           <select 
             className="slim-input slim-input-month" 
             value={selectedMonth} 
             onChange={(e) => setSelectedMonth(e.target.value)}
-            title="Filtrar por mes"
           >
-            <option value="">Todo el año</option>
+            <option value="">Mes</option>
             {Array.from({ length: 12 }, (_, i) => i + 1).map(m => <option key={m} value={m}>{getMonthName(m)}</option>)}
           </select>
-          <select 
-            className="slim-input slim-input-year" 
-            value={selectedYear} 
+          <input
+            type="number"
+            className="slim-input slim-input-year"
+            value={selectedYear}
             onChange={(e) => setSelectedYear(e.target.value)}
+            placeholder="Año"
             title="Filtrar por año"
-          >
-            {Array.from({ length: (new Date().getFullYear() - 2024) + 2 }, (_, i) => 2024 + i).map(y => (
-              <option key={y} value={y}>{y}</option>
-            ))}
-          </select>
+          />
 
           <button className="reset-button" onClick={resetFilters} title="Limpiar filtros">
             <FaSyncAlt size={12} />

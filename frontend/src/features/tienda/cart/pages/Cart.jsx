@@ -9,6 +9,7 @@ import ConfirmPurchaseModal from '../components/ConfirmPurchaseModal';
 import CustomConfirm from '../components/CustomConfirm';
 import CenterAlert from '../components/CenterAlert';
 import CheckoutModal, { PAYMENT_METHODS } from '../components/CheckoutModal';
+import CartHero from '../components/CartHero';
 
 
 
@@ -160,6 +161,8 @@ const Cart = () => {
   // Renderizado: Carrito con productos
   return (
     <div className="page-container" style={{ background: '#0b0f1a', minHeight: '100vh', position: 'relative' }}>
+      <CartHero />
+      
       <CustomConfirm 
         isOpen={showClearConfirm} 
         onConfirm={confirmClearCart} 
@@ -262,14 +265,6 @@ const Cart = () => {
         </div>
       )}
 
-      {/* TÍTULO DEL CARRITO */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%', padding: '30px 20px 0', textAlign: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '6px' }}>
-          <FaShoppingCart style={{ color: '#F5C81B', fontSize: '26px' }} />
-          <h1 style={{ color: '#FFFFFF', fontSize: '26px', fontWeight: '800', margin: 0 }}>Carrito de Compras</h1>
-        </div>
-        <p style={{ color: '#94a3b8', fontSize: '15px', margin: '0' }}>Administra tus productos y avanza en tu compra</p>
-      </div>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', flex: 1 }}>
@@ -341,26 +336,26 @@ const Cart = () => {
                         </div>
                       </div>
 
-                      {/* Selector de cantidad - pill redondeado */}
-                      <div style={{ display: 'flex', alignItems: 'center', border: '1px solid rgba(245,200,27,0.4)', borderRadius: '999px', padding: '1px 2px', background: 'rgba(0,0,0,0.3)', flexShrink: 0 }}>
+                      {/* Selector de cantidad - pill redondeado más delgado */}
+                      <div style={{ display: 'flex', alignItems: 'center', border: '1px solid rgba(245,200,27,0.4)', borderRadius: '999px', padding: '1px', background: 'rgba(0,0,0,0.3)', flexShrink: 0 }}>
                         <button 
                           onClick={() => updateQuantity(item.id, item.talla, -1)} 
-                          style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'transparent', border: 'none', color: '#F5C81B', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'transparent', border: 'none', color: '#F5C81B', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         >
-                          <FaMinus size={8} />
+                          <FaMinus size={7} />
                         </button>
                         <input 
                           type="number"
                           value={item.quantity || 1}
                           onChange={(e) => handleManualQuantity(item.id, item.talla, e.target.value)}
-                          style={{ width: '24px', border: 'none', background: 'transparent', color: '#fff', textAlign: 'center', fontSize: '12px', fontWeight: '600', outline: 'none' }}
+                          style={{ width: '22px', border: 'none', background: 'transparent', color: '#fff', textAlign: 'center', fontSize: '11px', fontWeight: '600', outline: 'none' }}
                         />
                         <button 
                           onClick={() => updateQuantity(item.id, item.talla, 1)} 
                           disabled={item.quantity >= getStockForSize(item)}
-                          style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'transparent', border: 'none', color: item.quantity >= getStockForSize(item) ? '#333' : '#F5C81B', cursor: item.quantity >= getStockForSize(item) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'transparent', border: 'none', color: item.quantity >= getStockForSize(item) ? '#333' : '#F5C81B', cursor: item.quantity >= getStockForSize(item) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         >
-                          <FaPlus size={8} />
+                          <FaPlus size={7} />
                         </button>
                       </div>
 

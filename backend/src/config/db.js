@@ -23,11 +23,11 @@ export const sequelize = new Sequelize({
     },
     logging: false, // Cambiar a console.log para debugging SQL
     pool: {
-        max: 3,              // Reducir para evitar chocar con el límite de 25 en Aiven Free (especialmente con múltiples pestañas)
-        min: 0,              // Permitir que llegue a 0 si no hay actividad
-        acquire: 30000, 
-        idle: 2000,          // Liberar conexión tras 2 segundos de inactividad (CRÍTICO para Aiven)
-        evict: 1000          // Revisar cada segundo
+        max: 5,              // Aumentado a 5 para mejor concurrencia
+        min: 1,              // Mantener 1 conexión caliente para respuesta rápida
+        acquire: 30000,
+        idle: 30000,         // 30 segundos de inactividad
+        evict: 15000         // Revisar cada 15 segundos
     },
     retry: {
         max: 5,              // Más reintentos para soportar micro-cortes de red
@@ -57,7 +57,7 @@ export const connectDB = async () => {
             return; // Éxito, salir
         } catch (error) {
             console.error(`❌ Intento ${attempt}/${MAX_RETRIES} - Error conectando a la BD: ${error.message}`);
-            
+
             if (attempt < MAX_RETRIES) {
                 console.log(`⏳ Reintentando en ${RETRY_DELAY / 1000} segundos...`);
                 await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));

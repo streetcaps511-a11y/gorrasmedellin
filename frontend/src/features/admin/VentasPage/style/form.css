@@ -56,7 +56,7 @@
 
 .form-label {
   font-size: 12px; 
-  color: #FFD700; 
+  color: #ffffff; 
   font-weight: 700;
   text-transform: uppercase;
   margin-bottom: 8px; 
@@ -355,8 +355,8 @@
 
 /* Botón Guardar Venta Estilo Imagen */
 .ventas-btn-submit {
-  background-color: #10B981;
-  color: #fff;
+  background-color: #FFC300;
+  color: #000;
   border: none;
   border-radius: 8px;
   padding: 0 24px;
@@ -371,9 +371,9 @@
 }
 
 .ventas-btn-submit:hover {
-  background-color: #059669;
+  background-color: #e5af00;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 12px rgba(255, 195, 0, 0.3);
 }
 
 .ventas-btn-submit:disabled {

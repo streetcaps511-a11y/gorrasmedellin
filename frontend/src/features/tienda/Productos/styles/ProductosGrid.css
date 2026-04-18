@@ -55,11 +55,37 @@
   cursor: pointer;
 }
 
+.gm-filter-group {
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  padding-bottom: 12px;
+}
+
+.gm-filter-group:last-child {
+  border-bottom: none;
+}
+
+.gm-filter-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  padding: 4px 0;
+}
+
 .gm-filter-group h4 {
   color: #fff;
   font-size: 14px;
-  margin: 0 0 12px 0;
+  margin: 0;
   font-weight: 700;
+}
+
+.gm-chevron-icon {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.4);
+  transition: transform 0.3s ease;
+  font-family: monospace;
 }
 
 .gm-filter-options {
@@ -117,16 +143,58 @@
   color: #000;
 }
 
+/* Bolitas de color en el filtro */
+.gm-color-options-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 5px 0;
+}
+
+.gm-color-circle-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.1);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.gm-color-circle-btn:hover {
+  transform: scale(1.15);
+  border-color: #FFC107;
+}
+
+.gm-color-circle-btn.active {
+  border-color: #FFC107;
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(255,193,7,0.4);
+}
+
+.gm-color-check {
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(0,0,0,0.5);
+  mix-blend-mode: difference;
+}
+
 .gm-products-main-content {
   flex: 1;
   min-width: 0;
 }
 
-/* GRID PRINCIPAL - 5 Columnas */
+/* GRID PRINCIPAL - 3 Columnas (Para tarjetas más grandes) */
 .gm-products-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr); 
-  gap: 15px;
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 24px;
   width: 100%;
   margin: 0;
   padding: 10px 0 30px 0;
@@ -138,13 +206,46 @@
     flex-direction: column;
     gap: 20px;
   }
+  
   .gm-filters-sidebar {
     width: 100%;
-    position: static;
+    position: relative;
+    top: 0;
+    display: none; /* Oculto por defecto en móvil */
   }
-  .gm-filters-placeholder {
-    min-height: auto;
-    padding: 20px;
+
+  .gm-filters-sidebar.mobile-open {
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  .gm-mobile-filter-toggle {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px;
+    background: rgba(245, 200, 27, 0.1);
+    border: 1px solid #F5C81B;
+    color: #F5C81B;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    margin-bottom: 15px;
+    transition: all 0.2s;
+  }
+
+  .gm-mobile-filter-toggle:active {
+    background: rgba(245, 200, 27, 0.2);
+    transform: scale(0.98);
+  }
+
+  .gm-filter-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
 }
 

@@ -16,7 +16,7 @@
 
 .categorias-grid {
   max-width: 1200px;
-  margin: 60px auto;
+  margin: 60px auto 160px; /* Espacio extra para el footer */
   padding: 0 10px;
   display: grid;
   grid-template-columns: repeat(5, 1fr);

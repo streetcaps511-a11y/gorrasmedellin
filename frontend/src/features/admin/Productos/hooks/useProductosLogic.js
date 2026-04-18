@@ -2,124 +2,73 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { NitroCache } from '../../../shared/utils/NitroCache';
 import * as productosService from "../services/productosApi";
 
-// 🧠 MEMORIA GLOBAL (Caché Nitro)
-let productosCache = {
-  productos: [],
-  categorias: [],
-  isInitialized: false
+const CACHE_KEY = 'admin_productos';
+const CATS_RAW_KEY = 'admin_categorias_raw';
+
+const getInitialCache = () => {
+  const cached = NitroCache.get(CACHE_KEY);
+  return Array.isArray(cached?.data) ? cached.data : [];
 };
 
-// 🧠 CONFIGURACIÓN INICIAL (Caché Nitro Persistente)
-const getInitialCache = () => {
-  const cached = NitroCache.get('productos');
-  const data = Array.isArray(cached?.data) ? cached.data : [];
-  productosCache.productos = data; // Sincronizar memoria interna
-  return data;
-};
 const getInitialCategories = () => {
-  const cached = NitroCache.get('categorias_raw');
-  const data = Array.isArray(cached?.data) ? cached.data : [];
-  productosCache.categorias = data; // Sincronizar memoria interna
-  return data;
+  const cached = NitroCache.get(CATS_RAW_KEY);
+  return Array.isArray(cached?.data) ? cached.data : [];
 };
 
 export const useProductosLogic = () => {
-  // =========================
-  // ESTADOS PARA CONTROL DE VISTA
-  // =========================
   const [modoVista, setModoVista] = useState("lista");
   const [productoEditando, setProductoEditando] = useState(null);
   const [productoViendo, setProductoViendo] = useState(null);
-
-  // =========================
-  // ESTADOS PARA LA LISTA (Desde Caché Nitro)
-  // =========================
-  const initialData = getInitialCache();
-  const [productos, setProductos] = useState(initialData);
+  const [productos, setProductos] = useState(() => getInitialCache());
   const [searchTerm, setSearchTerm] = useState('');
   const [categoriaFiltro, setCategoriaFiltro] = useState('Todas');
+  const [filterStatus, setFilterStatus] = useState('Todos');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 7;
 
-  // =========================
-  // ESTADOS PARA MODALES Y ALERTAS
-  // =========================
   const [alert, setAlert] = useState({ show: false, message: '', type: 'success' });
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, producto: null, customMessage: '' });
   const [toggleModal, setToggleModal] = useState({ isOpen: false, producto: null, targetStatus: true });
 
-  // =========================
-  // ESTADOS DEL FORMULARIO
-  // =========================
   const [formData, setFormData] = useState({
-    nombre: "",
-    idCategoria: "",
-    precioCompra: "0",
-    precioVenta: "0",
-    precioOferta: "0",
-    precioMayorista6: "0",
-    precioMayorista80: "0",
-    enOfertaVenta: false,
-    enInventario: false,
-    stock: 0,
-    descripcion: "",
-    isActive: true
+    nombre: "", idCategoria: "", precioCompra: "0", precioVenta: "0", precioOferta: "0",
+    precioMayorista6: "0", precioMayorista80: "0", enOfertaVenta: false, enInventario: false,
+    stock: 0, descripcion: "", isActive: true
   });
   const [tallasStock, setTallasStock] = useState([{ talla: "", cantidad: 0 }]);
-  const [categoriasRaw, setCategoriasRaw] = useState(getInitialCategories());
+  const [categoriasRaw, setCategoriasRaw] = useState(() => getInitialCategories());
   const [categoriasUnicas, setCategoriasUnicas] = useState(['Todas']);
   const [availableTallas, setAvailableTallas] = useState(['Ajustable', '7', '7/1/4', '7/1/8']);
-  const [availableStatuses, setAvailableStatuses] = useState([]);
   const [urlsImagenes, setUrlsImagenes] = useState(['']);
   const [coloresProducto, setColoresProducto] = useState(['']);
-  const [availableColores, setAvailableColores] = useState([]);
-  const [errors, setErrors] = useState({});
-  
-  // ⚡ SOLO cargamos si no hay datos en memoria
-  const [loading, setLoading] = useState(initialData.length === 0);
+  const [loading, setLoading] = useState(getInitialCache().length === 0);
 
-  // =========================
-  // CARGAR DATOS INICIALES (Nitro Sync)
-  // =========================
-  const fetchInitialData = useCallback(async () => {
-    // Si no hay datos, mostramos cargando
-    const currentData = getInitialCache();
-    if (currentData.length === 0) setLoading(true);
-
+  const fetchInitialData = useCallback(async (showLoading = false) => {
+    if (showLoading) setLoading(true);
     try {
-      const dbProductos = await productosService.getProductos();
-      const dbCategorias = await productosService.getCategorias();
-      const dbTallas = await productosService.getTallas();
-      const dbColores = await productosService.getColores();
+      const [dbProductos, dbCategorias] = await Promise.all([
+        productosService.getProductos(),
+        productosService.getCategorias()
+      ]);
       
       const cats = ['Todas', ...new Set(dbCategorias.map(c => c.nombre || c.Nombre))];
-      const finalTallas = ['Ajustable', '7', '7/1/4', '7/1/8'];
-      
-      // 💾 GUARDAR EN NITRO CACHE PERSISTENTE
-      NitroCache.set('productos', dbProductos);
-      NitroCache.set('categorias_raw', dbCategorias);
-      NitroCache.set('ventas_tallas', dbTallas);
-      NitroCache.set('ventas_colores', dbColores);
+      NitroCache.set(CACHE_KEY, dbProductos);
+      NitroCache.set(CATS_RAW_KEY, dbCategorias);
 
       setProductos(dbProductos);
       setCategoriasRaw(dbCategorias);
       setCategoriasUnicas(cats);
-      setAvailableTallas(finalTallas);
-      setAvailableColores(dbColores);
     } catch (error) {
-      console.error("Error loading initial data:", error);
+      console.error("Error loading products data:", error);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchInitialData();
-  }, [fetchInitialData]);
+    fetchInitialData(productos.length === 0);
+  }, [fetchInitialData, productos.length]);
 
-  // =========================
-  // FILTRADO Y PAGINACIÓN
-  // =========================
   const filteredProductos = useMemo(() => {
     let filtrados = productos;
     if (searchTerm) {
@@ -129,293 +78,32 @@ export const useProductosLogic = () => {
         p.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    if (categoriaFiltro !== "Todas") {
-      filtrados = filtrados.filter(p => p.categoria === categoriaFiltro);
+    if (categoriaFiltro !== "Todas") filtrados = filtrados.filter(p => p.categoria === categoriaFiltro);
+    if (filterStatus !== "Todos") {
+      filtrados = filtrados.filter(p => {
+        const estadoLabel = p.isActive ? 'Activo' : 'Inactivo';
+        return estadoLabel === filterStatus;
+      });
     }
     return filtrados;
-  }, [searchTerm, categoriaFiltro, productos]);
+  }, [searchTerm, categoriaFiltro, filterStatus, productos]);
 
-  const totalPages = Math.ceil(filteredProductos.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, filteredProductos.length);
-  const paginatedProductos = filteredProductos.slice(startIndex, endIndex);
-  const showingStart = filteredProductos.length > 0 ? startIndex + 1 : 0;
+  const totalPages = Math.ceil(filteredProductos.length / itemsPerPage) || 1;
+  const paginatedProductos = filteredProductos.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, categoriaFiltro]);
-
-  // =========================
-  // FUNCIONES DE UTILIDAD
-  // =========================
   const showAlert = (message, type = 'success') => {
     setAlert({ show: true, message, type });
     setTimeout(() => setAlert({ show: false, message: '', type: 'success' }), 3000);
   };
 
-  const handleFilterSelect = (categoria) => {
-    setCategoriaFiltro(categoria);
+  const notifySync = () => {
+    const channel = new BroadcastChannel('app_sync');
+    channel.postMessage('productos_updated');
+    channel.close();
   };
 
-  const agregarTalla = () => {
-    setTallasStock(prev => [...prev, { talla: "", cantidad: 0 }]);
-  };
-
-  const eliminarTalla = (index) => {
-    if (tallasStock.length > 1) {
-      setTallasStock(prev => prev.filter((_, i) => i !== index));
-    } else {
-      setTallasStock([{ talla: "", cantidad: 0 }]);
-    }
-  };
-
-  const handleTallaChange = (index, value) => {
-    const nuevasTallas = [...tallasStock];
-    nuevasTallas[index].talla = value;
-    setTallasStock(nuevasTallas);
-  };
-
-  const incrementarCantidad = (index) => {
-    const nuevasTallas = [...tallasStock];
-    nuevasTallas[index].cantidad += 1;
-    setTallasStock(nuevasTallas);
-  };
-
-  const decrementarCantidad = (index) => {
-    const nuevasTallas = [...tallasStock];
-    if (nuevasTallas[index].cantidad > 0) {
-      nuevasTallas[index].cantidad -= 1;
-      setTallasStock(nuevasTallas);
-    }
-  };
-
-  const handleCantidadChange = (index, value) => {
-    const nuevasTallas = [...tallasStock];
-    const rawValue = value.toString().replace(/[^0-9]/g, '');
-    nuevasTallas[index].cantidad = rawValue === '' ? 0 : parseInt(rawValue);
-    setTallasStock(nuevasTallas);
-  };
-
-  // =========================
-  // FUNCIONES DE URLS DE IMÁGENES
-  // =========================
-  const agregarUrlImagen = () => {
-    if (urlsImagenes.length < 4) {
-      setUrlsImagenes(prev => [...prev, '']);
-    }
-  };
-
-  const eliminarUrlImagen = (index) => {
-    if (urlsImagenes.length > 1) {
-      const nuevasUrls = urlsImagenes.filter((_, i) => i !== index);
-      setUrlsImagenes(nuevasUrls);
-      
-      // Limpiar errores para que no queden mensajes de campos eliminados
-      setErrors(prev => {
-        const nuevosErrores = { ...prev };
-        Object.keys(nuevosErrores).forEach(key => {
-          if (key.startsWith('url_')) delete nuevosErrores[key];
-        });
-        return nuevosErrores;
-      });
-    }
-  };
-
-  const actualizarUrlImagen = (index, value) => {
-    const nuevasUrls = [...urlsImagenes];
-    nuevasUrls[index] = value;
-    setUrlsImagenes(nuevasUrls);
-
-    // Si es la primera imagen con contenido, mostrar alerta informativa
-    const hasAnyContentTotal = nuevasUrls.some(u => u.trim() !== '');
-    const hadAnyContentBefore = urlsImagenes.some(u => u.trim() !== '');
-    
-    if (hasAnyContentTotal && !hadAnyContentBefore && !alert.show) {
-      showAlert("Las imágenes se verán abajo", "success");
-    }
-
-    // Regla de validación para URLs de imagen (optimizada y más permisiva) 
-    // Permite caracteres especiales comunes en URLs de CDN (discord, aiven, firebase, etc.)
-    const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .?=%&+\-#]*)*\/?$/i;
-    const isValid = value.trim() === '' || urlPattern.test(value);
-    
-    // Validar duplicados en tiempo real
-    const isDuplicate = value.trim() !== '' && nuevasUrls.filter(u => u === value).length > 1;
-    
-    setErrors(prev => ({
-      ...prev,
-      [`url_${index}`]: !isValid ? 'URL inválida' : (isDuplicate ? 'URL ya utilizada' : null)
-    }));
-  };
-
-  // =========================
-  // FUNCIONES DE COLORES
-  // =========================
-  const agregarColor = () => {
-    if (coloresProducto.length < 2) {
-      setColoresProducto(prev => [...prev, '']);
-    }
-  };
-
-  const eliminarColor = (index) => {
-    if (coloresProducto.length > 1) {
-      setColoresProducto(prev => prev.filter((_, i) => i !== index));
-    } else {
-      setColoresProducto(['']);
-    }
-  };
-
-  const actualizarColor = (index, value) => {
-    const nuevosColores = [...coloresProducto];
-    nuevosColores[index] = value;
-    setColoresProducto(nuevosColores);
-  };
-
-  // =========================
-  // FUNCIONES PARA CAMBIAR ENTRE VISTAS
-  // =========================
-  const mostrarLista = () => {
-    setModoVista("lista");
-    setProductoEditando(null);
-    setProductoViendo(null);
-    setFormData({
-      nombre: "",
-      categoria: "",
-      precioCompra: "0",
-      precioVenta: "0",
-      precioOferta: "0",
-      precioMayorista6: "0",
-      precioMayorista80: "0",
-      enOfertaVenta: false,
-      descripcion: "",
-      enInventario: false,
-      isActive: true
-    });
-    setTallasStock([{ talla: "", cantidad: 0 }]);
-    setUrlsImagenes(['']);
-    setColoresProducto(['']);
-    setErrors({});
-  };
-
-  const mostrarFormulario = (producto = null) => {
-    if (producto) {
-      setProductoEditando(producto);
-      setFormData({
-        nombre: producto.nombre,
-        idCategoria: producto.idCategoria || "",
-        precioCompra: producto.precioCompra || "0",
-        precioVenta: producto.precioVenta || "0",
-        precioOferta: producto.precioOferta || "0",
-        precioMayorista6: producto.precioMayorista6 || "0",
-        precioMayorista80: producto.precioMayorista80 || "0",
-        enOfertaVenta: producto.enOfertaVenta || false,
-        descripcion: producto.descripcion || "",
-        enInventario: producto.enInventario !== undefined ? producto.enInventario : true,
-        isActive: producto.isActive !== undefined ? producto.isActive : true
-      });
-      setTallasStock(producto.tallasStock?.length > 0 ? producto.tallasStock : [{ talla: "", cantidad: 0 }]);
-      setUrlsImagenes(producto.imagenes?.length > 0 ? producto.imagenes : ['']);
-      setColoresProducto(producto.colores?.length > 0 ? producto.colores : ['']);
-    } else {
-      setFormData({
-        nombre: "",
-        idCategoria: "",
-        precioCompra: "0",
-        precioVenta: "0",
-        precioOferta: "0",
-        precioMayorista6: "0",
-        precioMayorista80: "0",
-        enOfertaVenta: false,
-        descripcion: "",
-        enInventario: false,
-        isActive: true
-      });
-      setTallasStock([{ talla: "", cantidad: 0 }]);
-      setUrlsImagenes(['']);
-      setColoresProducto(['']);
-    }
-    setErrors({});
-    setModoVista("formulario");
-  };
-
-  const mostrarDetalle = (producto) => {
-    setProductoViendo(producto);
-    setModoVista("detalle");
-  };
-
-  // =========================
-  // ACCIONES CRUD
-  // =========================
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const newErrors = {};
-    
-    // 1. Validaciones de Campos Básicos
-    if (!formData.nombre?.trim()) newErrors.nombre = 'Obligatorio';
-    if (!formData.idCategoria) newErrors.idCategoria = 'Obligatorio';
-    if (!formData.descripcion?.trim()) newErrors.descripcion = 'Obligatorio';
-    
-    // 2. Validaciones de Precios
-    const precioVentaVal = parseFloat(formData.precioVenta) || 0;
-    const precioCompraVal = parseFloat(formData.precioCompra) || 0;
-    const mayorista6Val = parseFloat(formData.precioMayorista6) || 0;
-    const mayorista80Val = parseFloat(formData.precioMayorista80) || 0;
-
-    if (precioVentaVal <= 0) newErrors.precioVenta = 'Obligatorio';
-    if (mayorista6Val <= 0) newErrors.precioMayorista6 = 'Obligatorio';
-    if (mayorista80Val <= 0) newErrors.precioMayorista80 = 'Obligatorio';
-    if (formData.enInventario && precioCompraVal <= 0) newErrors.precioCompra = 'Obligatorio';
-
-    // Precio Oferta solo si está activado
-    if (formData.enOfertaVenta) {
-      const precioOfertaVal = parseFloat(formData.precioOferta) || 0;
-      if (precioOfertaVal <= 0) {
-        newErrors.precioOferta = 'Obligatorio';
-      } else if (precioOfertaVal >= precioVentaVal) {
-        newErrors.precioOferta = 'Debe ser menor al normal';
-      }
-    }
-    
-    // 3. Validación de Tallas y Colores (OBLIGATORIO elegir al menos uno)
-    const tieneTallasValidas = tallasStock.some(t => t.talla?.trim() !== '');
-    if (!tieneTallasValidas) {
-      newErrors.tallas = 'Debe agregar al menos una talla válida';
-    }
-
-    const tieneColoresValidos = coloresProducto.some(c => c?.trim() !== '');
-    if (!tieneColoresValidos) {
-      newErrors.colores = 'Debe agregar al menos un color';
-    }
-
-    // 4. Validación de Imágenes (OBLIGATORIO al menos una)
-    const tieneImagenesValidas = urlsImagenes.some(url => url?.trim() !== '');
-    if (!tieneImagenesValidas) {
-      newErrors.imagenes = 'Debe agregar al menos una URL de imagen';
-    }
-
-    // 5. Validar Formato de URLs de imágenes
-    const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .?=%&+\-#]*)*\/?$/i;
-    const urlsLlenas = urlsImagenes.filter(url => url.trim() !== '');
-    const invalidImageUrls = urlsLlenas.filter(url => !urlPattern.test(url));
-    
-    if (invalidImageUrls.length > 0) {
-      showAlert("Una o más URLs de imagen son inválidas", "error");
-      return;
-    }
-
-    // Validar URLs duplicadas
-    const duplicateUrls = urlsLlenas.filter((url, index) => urlsLlenas.indexOf(url) !== index);
-    if (duplicateUrls.length > 0) {
-      showAlert("No puedes usar la misma URL de imagen más de una vez", "error");
-      return;
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      showAlert("Por favor complete todos los campos obligatorios", "error");
-      return;
-    }
-
     setLoading(true);
     try {
       const payload = {
@@ -428,212 +116,136 @@ export const useProductosLogic = () => {
 
       if (productoEditando) {
         await productosService.updateProducto(productoEditando.id, payload);
-        showAlert(`Producto "${formData.nombre}" actualizado correctamente`, formData.isActive ? 'success' : 'error');
+        showAlert(`Actualizado correctamente ✅`);
       } else {
         await productosService.createProducto(payload);
-        showAlert(`Producto "${formData.nombre}" registrado correctamente`);
+        showAlert(`Registrado correctamente ✅`);
       }
-      
+      notifySync();
       await fetchInitialData();
-      
-      // ✅ Sincronizar Caché Manualmente tras crear/editar
-      const latestData = await productosService.getProductos();
-      NitroCache.set('productos', latestData);
-      
-      setTimeout(mostrarLista, 1000);
+      setModoVista("lista");
     } catch (error) {
-      let errorMsg = error.message;
-      if (error.response?.data) {
-        if (Array.isArray(error.response.data.errors)) {
-          errorMsg = error.response.data.errors.join(" / ");
-        } else if (error.response.data.message) {
-          errorMsg = error.response.data.message;
-        } else if (error.response.data.error) {
-          errorMsg = error.response.data.error;
-        }
-      }
-      showAlert("Error guardando el producto: " + errorMsg, "error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDesactivar = (producto) => {
-    if (!producto.isActive) return;
-    setToggleModal({
-      isOpen: true,
-      producto,
-      targetStatus: false
-    });
-  };
-
-  const handleReactivar = (producto) => {
-    if (producto.isActive) return;
-    setToggleModal({
-      isOpen: true,
-      producto,
-      targetStatus: true
-    });
+      showAlert("Error al guardar", "error");
+    } finally { setLoading(false); }
   };
 
   const confirmToggleStatus = async () => {
     const { producto, targetStatus } = toggleModal;
     if (!producto) return;
 
-    setLoading(true); // 🚀 Iniciar carga visual
-
-    // 🚀 Actualización Optimizada
-    const originalProductos = [...productos];
-    setProductos(prev => prev.map(p => 
-      p.id === producto.id 
-        ? { 
-            ...p, 
-            isActive: targetStatus,
-            estado: targetStatus ? "Activo" : "Inactivo"
-          } 
-        : p
-    ));
+    // Actualización instantánea de la UI
+    setProductos(prev => prev.map(p => p.id === producto.id ? 
+      { ...p, isActive: targetStatus, estado: targetStatus ? "Activo" : "Inactivo" } : p));
     
+    setToggleModal({ isOpen: false, producto: null, targetStatus: true });
+
+    // Sincronización instantánea entre pestañas
+    const channel = new BroadcastChannel('app_sync');
+    channel.postMessage('productos_updated');
+    channel.close();
+
     try {
+      showAlert(targetStatus ? 'Activado ✅' : 'Desactivado ⏸️'); // Alerta inmediata
       await productosService.updateProducto(producto.id, { ...producto, isActive: targetStatus });
-      showAlert(targetStatus ? 'Producto activado ✅' : 'Producto desactivado ⏸️', targetStatus ? 'success' : 'error');
       
-      // 🛠️ ACTUALIZAR CACHÉ PERSISTENTE
-      const current = NitroCache.get('productos')?.data || [];
-      const updatedCache = current.map(p => 
-        String(p.id) === String(producto.id) ? { ...p, isActive: targetStatus, estado: targetStatus ? "Activo" : "Inactivo" } : p
-      );
-      NitroCache.set('productos', updatedCache);
-      
-      setTimeout(() => {
-        setToggleModal({ isOpen: false, producto: null, targetStatus: true });
-        setLoading(false);
-      }, 500);
-      
+      // Actualizar caché local
+      const currentData = NitroCache.get(CACHE_KEY);
+      if (currentData) {
+        currentData.data = currentData.data.map(p => p.id === producto.id ? 
+          { ...p, isActive: targetStatus, estado: targetStatus ? "Activo" : "Inactivo" } : p);
+        NitroCache.set(CACHE_KEY, currentData.data);
+      }
     } catch (error) {
-      setProductos(originalProductos);
-      showAlert(`Error ${targetStatus ? 'reactivando' : 'desactivando'} el producto`, "error");
-      setToggleModal({ isOpen: false, producto: null, targetStatus: true });
-      setLoading(false);
+      await fetchInitialData(); // Revertir solo si falla
+      showAlert("Error al cambiar estado", "error");
     }
   };
-
-  const closeToggleModal = () => setToggleModal({ isOpen: false, producto: null, targetStatus: true });
-
-  const openDeleteModal = (producto) => {
-    if (producto.isActive) {
-      showAlert(`No se puede eliminar el producto "${producto.nombre}" porque está activo. Desactívelo primero.`, 'error');
-      return;
-    }
-    setDeleteModal({
-      isOpen: true,
-      producto,
-      customMessage: `¿Estás seguro que deseas eliminar permanentemente el producto "${producto.nombre}"?`
-    });
-  };
-
-  const closeDeleteModal = () => setDeleteModal({ isOpen: false, producto: null, customMessage: '' });
 
   const handleDelete = async () => {
-    if (!deleteModal.producto) return;
-    setLoading(true); // 🚀 Iniciar carga visual
-    
-    try {
-      await productosService.deleteProducto(deleteModal.producto.id);
-      
-      // 🛠️ ACTUALIZACIÓN OPTIMISTA (Eliminar de la tabla de inmediato)
-      const productoIdABorrar = deleteModal.producto.id;
-      setProductos(prev => prev.filter(p => String(p.id) !== String(productoIdABorrar)));
-      
-      // 🛠️ ACTUALIZAR CACHÉ GLOBAL
-      productosCache.productos = productosCache.productos.filter(p => String(p.id) !== String(productoIdABorrar));
-      
-      showAlert('Producto eliminado permanentemente', 'success');
-      
-      // Pausa para visualizar "Eliminando..."
-      setTimeout(() => {
-        closeDeleteModal();
-        setLoading(false);
-      }, 500);
-    } catch (error) {
-      let errorMsg = error.message;
-      if (error.response?.data?.message) {
-        errorMsg = error.response.data.message;
-      }
-      showAlert("Error eliminando el producto: " + errorMsg, "error");
-      setLoading(false);
-    }
-  };
+    const id = deleteModal.producto.id;
+    setProductos(prev => prev.filter(p => p.id !== id));
+    setDeleteModal({ isOpen: false, producto: null, customMessage: '' });
 
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => {
-      const newData = {
-        ...prev,
-        [name]: type === 'checkbox' ? checked : value
-      };
-      // Sincronizar isActive ya no es necesario desde el dropdown eliminado
-      return newData;
-    });
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: null }));
+    // Notar de inmediato a otras pestañas
+    const channel = new BroadcastChannel('app_sync');
+    channel.postMessage('productos_updated');
+    channel.close();
+
+    try {
+      showAlert('Eliminado permanentemente 🗑️');
+      await productosService.deleteProducto(id);
+      fetchInitialData();
+    } catch (error) {
+      fetchInitialData();
+      showAlert("Error al eliminar", "error");
     }
   };
 
   return {
-    modoVista,
-    productoEditando,
-    productoViendo,
-    productos,
-    searchTerm, setSearchTerm,
-    categoriaFiltro,
-    currentPage, setCurrentPage,
-    alert, setAlert,
-    deleteModal,
-    formData,
-    tallasStock,
-    categoriasRaw,
-    categoriasUnicas,
-    availableTallas,
-    availableColores,
-    availableStatuses,
-    urlsImagenes,
-    coloresProducto,
-    errors,
-    loading,
-    filteredProductos,
-    paginatedProductos,
-    totalPages,
-    startIndex,
-    endIndex,
-    showingStart,
-    handleFilterSelect,
-    agregarTalla,
-    eliminarTalla,
-    handleTallaChange,
-    incrementarCantidad,
-    decrementarCantidad,
-    agregarUrlImagen,
-    eliminarUrlImagen,
-    actualizarUrlImagen,
-    agregarColor,
-    eliminarColor,
-    actualizarColor,
-    handleCantidadChange,
-    mostrarLista,
-    mostrarFormulario,
-    mostrarDetalle,
+    modoVista, productoEditando, productoViendo, productos,
+    searchTerm, setSearchTerm, categoriaFiltro,
+    filterStatus, setFilterStatus,
+    currentPage, setCurrentPage, alert, setAlert, deleteModal,
+    formData, tallasStock, categoriasRaw, categoriasUnicas,
+    availableTallas, urlsImagenes, coloresProducto, errors: {},
+    loading, filteredProductos, paginatedProductos, totalPages,
+    showingStart: filteredProductos.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0,
+    endIndex: Math.min(currentPage * itemsPerPage, filteredProductos.length),
+    handleFilterSelect: (c) => { setCategoriaFiltro(c); setCurrentPage(1); },
+    handleStatusSelect: (s) => { setFilterStatus(s); setCurrentPage(1); },
+    agregarTalla: () => setTallasStock(prev => [...prev, { talla: "", cantidad: 0 }]),
+    eliminarTalla: (idx) => setTallasStock(prev => prev.length > 1 ? prev.filter((_, i) => i !== idx) : [{ talla: "", cantidad: 0 }]),
+    handleTallaChange: (idx, val) => { const n = [...tallasStock]; n[idx].talla = val; setTallasStock(n); },
+    incrementarCantidad: (idx) => { const n = [...tallasStock]; n[idx].cantidad += 1; setTallasStock(n); },
+    decrementarCantidad: (idx) => { const n = [...tallasStock]; if (n[idx].cantidad > 0) n[idx].cantidad -= 1; setTallasStock(n); },
+    handleCantidadChange: (idx, val) => { const n = [...tallasStock]; n[idx].cantidad = parseInt(val) || 0; setTallasStock(n); },
+    agregarUrlImagen: () => urlsImagenes.length < 4 && setUrlsImagenes(prev => [...prev, '']),
+    eliminarUrlImagen: (idx) => urlsImagenes.length > 1 && setUrlsImagenes(prev => prev.filter((_, i) => i !== idx)),
+    actualizarUrlImagen: (idx, val) => { const n = [...urlsImagenes]; n[idx] = val; setUrlsImagenes(n); },
+    agregarColor: () => coloresProducto.length < 2 && setColoresProducto(prev => [...prev, '']),
+    eliminarColor: (idx) => coloresProducto.length > 1 && setColoresProducto(prev => prev.filter((_, i) => i !== idx)),
+    actualizarColor: (idx, val) => { const n = [...coloresProducto]; n[idx] = val; setColoresProducto(n); },
+    mostrarLista: () => setModoVista("lista"),
+    mostrarFormulario: (p = null) => {
+      if (p) {
+        setFormData({ ...p, idCategoria: p.idCategoria || "" });
+        setTallasStock(p.tallasStock || [{ talla: "", cantidad: 0 }]);
+        setUrlsImagenes(p.imagenes || ['']);
+        setColoresProducto(p.colores || ['']);
+        setProductoEditando(p);
+      } else {
+        setFormData({ nombre: "", idCategoria: "", precioCompra: "0", precioVenta: "0", precioOferta: "0", precioMayorista6: "0", precioMayorista80: "0", enOfertaVenta: false, enInventario: false, stock: 0, descripcion: "", isActive: true });
+        setTallasStock([{ talla: "", cantidad: 0 }]);
+        setUrlsImagenes(['']);
+        setColoresProducto(['']);
+        setProductoEditando(null);
+      }
+      setModoVista("formulario");
+    },
+    mostrarDetalle: (p) => { setProductoViendo(p); setModoVista("detalle"); },
     handleSubmit,
-    handleDesactivar,
-    handleReactivar,
-    openDeleteModal,
-    closeDeleteModal,
+    handleDesactivar: (p) => setToggleModal({ isOpen: true, producto: p, targetStatus: false }),
+    handleReactivar: (p) => setToggleModal({ isOpen: true, producto: p, targetStatus: true }),
+    openDeleteModal: (p) => setDeleteModal({ isOpen: true, producto: p, customMessage: `¿Eliminar permanentemente "${p.nombre}"?` }),
+    closeDeleteModal: () => setDeleteModal({ isOpen: false, producto: null, customMessage: '' }),
     handleDelete,
-    toggleModal,
-    confirmToggleStatus,
-    closeToggleModal,
-    handleInputChange,
-    handleVerDetalle: mostrarDetalle,
-    handleEditarProducto: mostrarFormulario
+    toggleModal, confirmToggleStatus, closeToggleModal: () => setToggleModal({ isOpen: false, producto: null, targetStatus: true }),
+    handleInputChange: (e) => { const { name, value, type, checked } = e.target; setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value })); },
+    handleVerDetalle: (p) => { setProductoViendo(p); setModoVista("detalle"); },
+    handleEditarProducto: (p) => { 
+        setProductoEditando(p);
+        setFormData({
+            nombre: p.nombre, idCategoria: p.idCategoria || "", precioCompra: p.precioCompra || "0",
+            precioVenta: p.precioVenta || "0", precioOferta: p.precioOferta || "0",
+            precioMayorista6: p.precioMayorista6 || "0", precioMayorista80: p.precioMayorista80 || "0",
+            enOfertaVenta: p.enOfertaVenta || false, descripcion: p.descripcion || "",
+            enInventario: p.enInventario !== undefined ? p.enInventario : true,
+            isActive: p.isActive !== undefined ? p.isActive : true
+        });
+        setTallasStock(p.tallasStock || [{ talla: "", cantidad: 0 }]);
+        setUrlsImagenes(p.imagenes || ['']);
+        setColoresProducto(p.colores || ['']);
+        setModoVista("formulario");
+    }
   };
 };

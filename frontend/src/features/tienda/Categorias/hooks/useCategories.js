@@ -1,10 +1,10 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { getCategorias } from "../services/categoriasApi";
 import { NitroCache } from "../../../shared/utils/NitroCache";
 import { useSearch } from "../../../shared/contexts";
 
 const CATS_CACHE_KEY = 'tienda_categorias';
-const CATS_TTL = 3 * 60 * 1000; // 3 minutos
+const CATS_TTL = 30 * 1000; // 30 segundos
 
 const getCachedCats = () => {
   const cached = NitroCache.get(CATS_CACHE_KEY);
@@ -33,40 +33,51 @@ export const useCategories = () => {
   const [categories, setCategories] = useState(() => getCachedCats());
   const [loading, setLoading] = useState(() => getCachedCats().length === 0);
 
+  const fetchCats = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await getCategorias();
+      if (res?.data?.data) {
+        const cats = res.data.data.map(c => ({
+            id: c.id_categoria || c.id,
+            Nombre: c.nombre_categoria || c.nombre,
+            Descripcion: c.descripcion || '',
+            ImagenUrl: c.imagenUrl || c.ImagenUrl || ''
+        }));
+        setCategories(cats);
+        NitroCache.set(CATS_CACHE_KEY, cats);
+      }
+    } catch (err) {
+      if (err.response?.status === 401) {
+        setCategories([]);
+      } else {
+        console.error("Error fetching categories:", err);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    // Si hay caché fresco, no refetcheamos
     if (NitroCache.isFresh(CATS_CACHE_KEY, CATS_TTL)) {
       setLoading(false);
-      return;
+    } else {
+      fetchCats();
     }
-    const fetchCats = async () => {
-      setLoading(true);
-      try {
-        const res = await getCategorias();
-        if (res?.data?.data) {
-          const cats = res.data.data.map(c => ({
-              id: c.id_categoria || c.id,
-              Nombre: c.nombre_categoria || c.nombre,
-              Descripcion: c.descripcion || '',
-              ImagenUrl: c.imagenUrl || c.ImagenUrl || ''
-          }));
-          setCategories(cats);
-          NitroCache.set(CATS_CACHE_KEY, cats); // 💾 guardar en caché
-        }
-      } catch (err) {
-        if (err.response?.status === 401) {
-          // Token faltante o expirado, pero no lanzamos error ruidoso en consola para invitados
-          setCategories([]);
-        } else {
-          console.error("Error fetching categories:", err);
-        }
-      } finally {
-        setLoading(false);
+    
+    window.scrollTo(0, 0);
+
+    // 📡 ESCUCHAR ACTUALIZACIONES DESDE OTRAS PESTAÑAS (Sync Instantáneo)
+    const channel = new BroadcastChannel('app_sync');
+    channel.onmessage = (event) => {
+      if (event.data === 'categorias_updated') {
+        NitroCache.clear(CATS_CACHE_KEY);
+        fetchCats();
       }
     };
-    fetchCats();
-    window.scrollTo(0, 0);
-  }, []);
+
+    return () => channel.close();
+  }, [fetchCats]);
 
   const sortedCategories = useMemo(() => {
     let filtered = categories;
@@ -86,10 +97,7 @@ export const useCategories = () => {
   }, [searchQuery, categories]);
 
   const getCategoryImage = (cat) => {
-    // Si la categoría tiene una imagen propia en la BD, la usamos
     if (cat.ImagenUrl) return cat.ImagenUrl;
-    
-    // Si no, buscamos en el mapa estático por nombre (normalizado)
     const normalizedName = cat.Nombre?.toUpperCase();
     return imgPorCategoria[normalizedName] || imgPorCategoria[cat.Nombre] || imgPorCategoria.default;
   };

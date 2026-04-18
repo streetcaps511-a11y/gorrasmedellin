@@ -403,8 +403,24 @@ export const useClientesLogic = () => {
     const { cliente, onReactivar } = anularModal;
     if (!cliente) return;
     
-    await handleToggleStatus(cliente, onReactivar);
+    const newStatus = onReactivar;
+    
+    // 🚀 Update UI immediately
+    setClientes(prev => prev.map(c => c.id === cliente.id ? { ...c, isActive: newStatus } : c));
     closeAnularModal();
+
+    try {
+      const apiClienteData = {
+        ...cliente,
+        isActive: newStatus
+      };
+      await updateExistingCliente(cliente.id, apiClienteData);
+      showAlert(`Cliente "${cliente.nombreCompleto}" ${newStatus ? 'reactivado' : 'desactivado'} ✅`, newStatus ? 'success' : 'error');
+      loadClientes(); // Re-sync in background
+    } catch (err) {
+      loadClientes(); // Revert on failure
+      showAlert('Error al cambiar estado del cliente', 'error');
+    }
   };
 
   return {

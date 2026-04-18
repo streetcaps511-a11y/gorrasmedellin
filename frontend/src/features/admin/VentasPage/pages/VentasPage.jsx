@@ -242,7 +242,8 @@ const VentasPage = () => {
               style={{ 
                 margin: 0, 
                 padding: '10px 20px', 
-                background: (Number(partialPaymentModal.montoRecibido || 0) + Number(partialPaymentModal.montoNuevo || 0) < Number(partialPaymentModal.venta?.total || 0)) ? '#334155' : '#10b981',
+                background: (Number(partialPaymentModal.montoRecibido || 0) + Number(partialPaymentModal.montoNuevo || 0) < Number(partialPaymentModal.venta?.total || 0)) ? '#334155' : '#FFC300',
+                color: (Number(partialPaymentModal.montoRecibido || 0) + Number(partialPaymentModal.montoNuevo || 0) < Number(partialPaymentModal.venta?.total || 0)) ? '#94a3b8' : '#000',
                 cursor: (Number(partialPaymentModal.montoRecibido || 0) + Number(partialPaymentModal.montoNuevo || 0) < Number(partialPaymentModal.venta?.total || 0)) ? 'not-allowed' : 'pointer'
               }}
             >

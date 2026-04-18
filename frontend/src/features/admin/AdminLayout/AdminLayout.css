@@ -4,7 +4,7 @@
 
 .al-root {
   display: flex;
-  background-color: #030712; /* Azul marino más profundo */
+  background-color: #000000;
   min-height: 100vh;
   color: #fff;
   font-family: 'Inter', 'Segoe UI', -apple-system, sans-serif;
@@ -31,7 +31,7 @@
 }
 
 .al-sidebar-header {
-  padding: 18px 16px 8px 30px; /* Reduced padding */
+  padding: 12px 16px 8px 16px; /* Let's reduce padding so items move up */
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -58,12 +58,23 @@
 
 .al-nav {
   flex: 1;
-  padding: 4px 0;
+  padding: 4px 0 30px 0;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(245, 200, 27, 0.5) transparent;
   display: flex;
   flex-direction: column;
+}
+
+.al-nav::-webkit-scrollbar {
+  width: 4px;
+}
+.al-nav::-webkit-scrollbar-thumb {
+  background-color: rgba(245, 200, 27, 0.3);
+  border-radius: 10px;
+}
+.al-nav::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 /* ========================
@@ -77,12 +88,12 @@
 .al-nav-link, .al-nav-group-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 9px 16px 9px 30px; /* Compact padding */
+  gap: 10px;
+  padding: 8px 16px 8px 20px; /* Compact padding */
   border-radius: 0 30px 30px 0;
   text-decoration: none;
   color: #ffffff;
-  font-size: 0.88rem; /* Compact font size */
+  font-size: 0.8rem; /* Compact font size */
   font-weight: 700;
   transition: all 0.3s ease;
   opacity: 0.7;
@@ -153,11 +164,11 @@
 .al-nav-sub-link {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 16px 8px 45px; /* More compact sub-links */
+  gap: 10px;
+  padding: 6px 16px 6px 36px; /* More compact sub-links */
   text-decoration: none;
   color: #ffffff;
-  font-size: 0.82rem; /* Compact for sub-items */
+  font-size: 0.75rem; /* Compact for sub-items */
   font-weight: 600;
   transition: all 0.2s ease;
   opacity: 0.6;
@@ -260,9 +271,9 @@
 .al-logout-btn {
   width: 100%;
   padding: 9px; /* Compact logout */
-  color: #F5C81B;
+  color: #FFC300;
   background: transparent;
-  border: 1.5px solid rgba(245, 200, 27, 0.3);
+  border: 1.5px solid rgba(255, 195, 0, 0.3);
   border-radius: 10px;
   cursor: pointer;
   font-size: 0.8rem;
@@ -290,17 +301,28 @@
 
 .al-main {
   flex: 1;
-  padding: 20px 30px;
-  overflow-y: scroll;
+  padding: 12px 20px 60px 20px;
+  overflow-y: auto; /* Permitir scroll cuando el contenido excede la pantalla */
   height: 100vh;
-  background-color: #030712; /* Mismo azul marino profundo */
+  box-sizing: border-box;
+  background-color: #000000;
   font-family: inherit;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
 }
 
 .al-main::-webkit-scrollbar {
-  display: none;
+  width: 6px;
+}
+.al-main::-webkit-scrollbar-thumb {
+  background-color: rgba(245, 200, 27, 0.3);
+  border-radius: 10px;
+}
+.al-main::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(245, 200, 27, 0.6);
+}
+.al-main::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 /* ========================
@@ -309,7 +331,7 @@
 
 .al-welcome {
   min-height: 100vh;
-  background: radial-gradient(circle at top right, #111827, #0b1220);
+  background: radial-gradient(circle at top right, #0a0a0a, #000000);
   padding: 20px 30px;
   display: flex;
   flex-direction: column;

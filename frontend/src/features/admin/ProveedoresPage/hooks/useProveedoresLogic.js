@@ -1,18 +1,21 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import Swal from 'sweetalert2';
 import * as proveedoresService from '../services/proveedoresApi';
+import { NitroCache } from '../../../shared/utils/NitroCache';
 
 // 🧠 MEMORIA GLOBAL (Caché Nitro)
+const getInitialProv = () => {
+    const cached = NitroCache.get('proveedores_admin');
+    return Array.isArray(cached?.data) ? cached.data : [];
+};
+
 let proveedoresCache = {
-  proveedores: [],
-  departamentos: [],
-  availableStatuses: [],
   isInitialized: false
 };
 
 export const useProveedoresLogic = () => {
-  const [proveedores, setProveedores] = useState(proveedoresCache.proveedores);
-  const [availableStatuses, setAvailableStatuses] = useState(proveedoresCache.availableStatuses);
+  const [proveedores, setProveedores] = useState(getInitialProv());
+  const [availableStatuses, setAvailableStatuses] = useState(() => ['Activo', 'Inactivo']);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('Todos');
   const [currentPage, setCurrentPage] = useState(1);
@@ -20,12 +23,15 @@ export const useProveedoresLogic = () => {
 
   const [alert, setAlert] = useState({ show: false, message: '', type: 'success' });
   // ⚡ Solo mostramos cargando si NO tenemos nada en memoria
-  const [loading, setLoading] = useState(!proveedoresCache.isInitialized);
+  const [loading, setLoading] = useState(getInitialProv().length === 0);
   const [loadingCities, setLoadingCities] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionLoadingText, setActionLoadingText] = useState('Procesando...');
   
-  const [departamentos, setDepartamentos] = useState(proveedoresCache.departamentos);
+  const [departamentos, setDepartamentos] = useState(() => {
+    const cached = NitroCache.get('proveedores_depts');
+    return cached?.data || [];
+  });
   const [ciudades, setCiudades] = useState([]);
   
   const [modalState, setModalState] = useState({ 
@@ -60,35 +66,33 @@ export const useProveedoresLogic = () => {
 
   // ====== FETCH INICIAL ======
   const fetchData = useCallback(async () => {
-    // 🚀 Si ya tenemos datos, no bloqueamos la pantalla
-    if (!proveedoresCache.isInitialized) {
-      setLoading(true);
-    }
+    const token = sessionStorage.getItem('token');
+    if (!token) return;
+
+    if (proveedores.length === 0) setLoading(true);
     try {
       const [provData, depts, statusData] = await Promise.all([
         proveedoresService.getProveedores(),
         proveedoresService.getDepartments(),
         proveedoresService.getStatuses()
       ]);
-      const statuses = statusData.map(s => s.nombre || s.Nombre || s.estado || s.Estado || (typeof s === 'string' ? s : String(s.id)));
+      const statuses = ['Activo', 'Inactivo'];
       
-      // 💾 GUARDAR EN MEMORIA
-      proveedoresCache = {
-        proveedores: provData,
-        departamentos: depts,
-        availableStatuses: statuses,
-        isInitialized: true
-      };
+      // 💾 GUARDAR EN NITRO
+      NitroCache.set('proveedores_admin', provData);
+      NitroCache.set('proveedores_depts', depts);
+      NitroCache.set('proveedores_statuses', statuses);
 
       setProveedores(provData);
       setDepartamentos(depts);
       setAvailableStatuses(statuses);
+      proveedoresCache.isInitialized = true;
     } catch (error) {
-      setAlert({ show: true, message: 'Error cargando datos: ' + error.message, type: 'error' });
+      console.error("Error fetchData Proveedores:", error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [proveedores.length]);
 
   useEffect(() => {
     fetchData();
@@ -286,20 +290,20 @@ export const useProveedoresLogic = () => {
     const proveedor = anularModal.proveedor;
     if (!proveedor) return;
     
-    setActionLoadingText(proveedor.isActive ? 'Desactivando...' : 'Activando...');
-    setActionLoading(true);
+    const targetStatus = !proveedor.isActive;
+    
+    // 🚀 Optimistic Update
+    setProveedores(prev => prev.map(p => p.id === proveedor.id ? { ...p, isActive: targetStatus } : p));
+    showAlert(`Proveedor ${targetStatus ? 'activado' : 'desactivado'} correctamente ✅`);
+    closeAnularModal();
 
     try {
-      const nuevoEstado = !proveedor.isActive;
-      await proveedoresService.updateProveedor(proveedor.id, { ...proveedor, isActive: nuevoEstado });
-      setProveedores(prev => prev.map(p => p.id === proveedor.id ? { ...p, isActive: nuevoEstado } : p));
-      showAlert(`Proveedor ${nuevoEstado ? 'activado' : 'desactivado'} correctamente`);
-      closeAnularModal();
+      await proveedoresService.updateProveedor(proveedor.id, { ...proveedor, isActive: targetStatus });
+      fetchData(); // Sync in background
     } catch (error) {
+      fetchData(); // Revert on failure
       const errorMsg = error.response?.data?.message || 'Error al actualizar estado';
       showAlert(errorMsg, 'error');
-    } finally {
-      setActionLoading(false);
     }
   };
 
@@ -315,18 +319,21 @@ export const useProveedoresLogic = () => {
 
   const handleDelete = async () => {
     if (!deleteModal.proveedor) return;
-    setActionLoadingText('Eliminando...');
-    setActionLoading(true);
+    
+    const id = deleteModal.proveedor.id;
+    
+    // 🚀 Optimistic Update
+    setProveedores(prev => prev.filter(p => p.id !== id));
+    showAlert('Proveedor eliminado permanentemente 🗑️');
+    closeDeleteModal();
+
     try {
-      await proveedoresService.deleteProveedor(deleteModal.proveedor.id);
-      setProveedores(prev => prev.filter(p => p.id !== deleteModal.proveedor.id));
-      showAlert('Proveedor eliminado permanentemente', 'delete');
-      closeDeleteModal();
+      await proveedoresService.deleteProveedor(id);
+      fetchData();
     } catch (error) {
+      fetchData(); // Revert
       const errorMsg = error.response?.data?.message || 'Error al eliminar proveedor';
       showAlert(errorMsg, 'error');
-    } finally {
-      setActionLoading(false);
     }
   };
 

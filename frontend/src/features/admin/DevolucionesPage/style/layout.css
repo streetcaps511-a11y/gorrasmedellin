@@ -39,11 +39,11 @@
 
 .devoluciones-title {
   color: #fff;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 800;
   margin: 0;
-  margin-bottom: 4px;
-  line-height: 1.2;
+  line-height: 1.1;
+  letter-spacing: -0.3px;
 }
 
 .devoluciones-subtitle {
@@ -86,7 +86,7 @@
 .devoluciones-search-bar {
   margin-bottom: 6px;
   display: flex;
-  gap: 8px;
+  gap: 15px;
   align-items: center;
 }
 
@@ -101,10 +101,12 @@
   border-radius: 8px;
   border: 1px solid #F5C81B;
   overflow: hidden;
-  background-color: #000;
+  background-color: #000000;
+  padding-bottom: 30px;
+  min-height: 420px;
 }
 
 .devoluciones-table-wrapper {
   flex: 1;
-  overflow: auto;
+  overflow: hidden; /* Cero scroll */
 }

@@ -17,26 +17,25 @@
 .search-input-field {
   width: 100%;
   padding: 8px 36px 8px 36px;
-  background-color: rgba(30, 41, 59, 0.7);
-  border: 1px solid rgba(245, 200, 27, 0.2);
+  background-color: #000000;
+  border: 1px solid rgba(255, 195, 0, 0.6);
   border-radius: 8px;
   color: #fff;
   font-size: 13px;
   outline: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  caret-color: #F5C81B;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  caret-color: #FFC300;
 }
 
 .search-input-field:hover {
-  border-color: rgba(245, 200, 27, 0.4);
-  background-color: rgba(30, 41, 59, 1);
+  border-color: #FFC300;
+  background-color: #000000;
 }
 
 .search-input-field:focus {
-  border-color: #F5C81B;
-  background-color: rgba(15, 23, 42, 1);
-  box-shadow: 0 0 0 2px rgba(245, 200, 27, 0.15);
+  border-color: #FFC300;
+  background-color: #000000;
+  box-shadow: 0 0 10px rgba(245, 200, 27, 0.2);
 }
 
 .search-input-clear {
@@ -54,5 +53,5 @@
 }
 
 .search-input-clear:hover {
-  color: #F5C81B;
+  color: #FFC300;
 }

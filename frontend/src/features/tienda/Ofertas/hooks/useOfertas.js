@@ -180,6 +180,11 @@ export const useOfertas = () => {
   // Solo muestra loading si no hay caché disponible
   const [loading, setLoading] = useState(() => getCachedOfertas().length === 0);
 
+  // FILTROS
+  const [selectedColors, setSelectedColors] = useState([]);
+  const [selectedSizes, setSelectedSizes] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+
   useEffect(() => {
     window.scrollTo(0, 0);
     
@@ -243,17 +248,84 @@ export const useOfertas = () => {
   );
 
   const searchFiltered = useMemo(() => {
-    if (!searchTerm || !searchTerm.trim()) return null;
+    const hasSearch = searchTerm.trim().length > 0;
+    const hasFilters = selectedColors.length > 0 || selectedSizes.length > 0 || selectedCategories.length > 0;
+    
+    if (!hasSearch && !hasFilters) return null;
+
     const normalize = (str) =>
       (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    
     const query = normalize(searchTerm);
-    return ofertas.filter(
-      (p) =>
+
+    return ofertas.filter((p) => {
+      // 1. Texto search
+      const matchesSearch = !hasSearch || (
         normalize(p.nombre).includes(query) ||
         normalize(p.categoria).includes(query) ||
         normalize(p.descripcion).includes(query)
-    );
-  }, [searchTerm, ofertas]);
+      );
+
+      // 2. Colores
+      const pColores = Array.isArray(p.colores) ? p.colores : [p.colores || 'Negro'];
+      const matchesColor = selectedColors.length === 0 || 
+        selectedColors.some(c => pColores.some(pc => String(pc).toLowerCase() === c.toLowerCase()));
+
+      // 3. Tallas
+      const pTallas = normalizeSizes(p);
+      const matchesSize = selectedSizes.length === 0 || 
+        selectedSizes.some(s => pTallas.some(pt => String(pt).toLowerCase() === s.toLowerCase()));
+
+      // 4. Categorías
+      const matchesCategory = selectedCategories.length === 0 || 
+        selectedCategories.some(cat => String(p.categoria).toLowerCase() === cat.toLowerCase());
+
+      return matchesSearch && matchesColor && matchesSize && matchesCategory;
+    });
+  }, [searchTerm, ofertas, selectedColors, selectedSizes, selectedCategories]);
+
+  // VALORES ÚNICOS PARA FILTROS
+  const allAvailableFilters = useMemo(() => {
+    const categories = new Set();
+    const colors = new Set();
+    const sizes = new Set();
+
+    ofertas.forEach(p => {
+      if (p.categoria) categories.add(p.categoria);
+      const pColores = Array.isArray(p.colores) ? p.colores : [p.colores || 'Negro'];
+      pColores.forEach(c => colors.add(c));
+      const pTallas = normalizeSizes(p);
+      pTallas.forEach(s => sizes.add(s));
+    });
+
+    return {
+      categories: Array.from(categories).sort(),
+      colors: Array.from(colors).sort(),
+      sizes: Array.from(sizes).sort()
+    };
+  }, [ofertas]);
+
+  const toggleFilter = (type, value) => {
+    const setters = {
+      color: [selectedColors, setSelectedColors],
+      size: [selectedSizes, setSelectedSizes],
+      category: [selectedCategories, setSelectedCategories]
+    };
+    if (!setters[type]) return;
+    const [current, set] = setters[type];
+    if (current.includes(value)) {
+      set(current.filter(v => v !== value));
+    } else {
+      set([...current, value]);
+    }
+  };
+
+  const clearFilters = () => {
+    setSelectedColors([]);
+    setSelectedSizes([]);
+    setSelectedCategories([]);
+    setGlobalSearch("");
+  };
 
   const addQuickToCart = (product, size, qty) => {
     if (!size) return;
@@ -437,6 +509,13 @@ export const useOfertas = () => {
     normalizeSizes,
     safeImg,
     getRatingFromProduct,
-    BULK_MIN_QTY
+    BULK_MIN_QTY,
+    // Filtros
+    selectedColors,
+    selectedSizes,
+    selectedCategories,
+    allAvailableFilters,
+    toggleFilter,
+    clearFilters
   };
 };

@@ -63,6 +63,10 @@ const authController = {
             });
         } catch (error) {
             if (t) await t.rollback();
+            if (error.name === 'SequelizeUniqueConstraintError') {
+                console.error('🔴 [REGISTRO DENEGADO]: El correo ya existe ->', req.body.correo);
+                return res.status(400).json({ success: false, message: 'El correo electrónico ya está registrado. Por favor, intenta con otro o inicia sesión.' });
+            }
             console.error('🔴 [ERROR REGISTRO]:', error);
             res.status(400).json({ success: false, message: error.message });
         }

@@ -78,7 +78,7 @@ const ProductoForm = ({
               <div className="product-form-group">
                 <div className="form-row">
                   <div className="form-field">
-                    <label className="form-label">Nombre <span className="required">*</span></label>
+                    <label className="form-label">Nombre: <span className="required">*</span></label>
                     <input
                       autoFocus
                       type="text"
@@ -92,7 +92,7 @@ const ProductoForm = ({
                   </div>
 
                   <div className="form-field">
-                    <label className="form-label">Categoría <span className="required">*</span></label>
+                    <label className="form-label">Categoría: <span className="required">*</span></label>
                     <select
                       name="idCategoria"
                       value={formData.idCategoria || ""}
@@ -111,14 +111,13 @@ const ProductoForm = ({
                 </div>
 
                 <div className="form-field full-width">
-                  <label className="form-label">Descripción <span className="required">*</span></label>
+                  <label className="form-label">Descripción: <span className="required">*</span></label>
                   <textarea
                     name="descripcion"
                     value={formData.descripcion}
                     onChange={handleInputChange}
                     placeholder="Descripción obligatoria..."
                     className={`form-textarea ${errors.descripcion ? 'has-error' : ''}`}
-                    rows="3"
                   />
                   {errors.descripcion && <div className="field-error-text">{errors.descripcion}</div>}
                 </div>
@@ -130,7 +129,7 @@ const ProductoForm = ({
               <h4 className="product-form-section-title">Precios</h4>
               <div className="product-form-grid prices">
                 <div className="form-field">
-                  <label className="form-label">Venta (Normal) <span className="required">*</span></label>
+                  <label className="form-label">Venta (Normal): <span className="required">*</span></label>
                   <input
                     type="text"
                     name="precioVenta"
@@ -146,7 +145,7 @@ const ProductoForm = ({
                 </div>
 
                 <div className="form-field">
-                  <label className="form-label">Precio Oferta {formData.enOfertaVenta && <span className="required">*</span>}</label>
+                  <label className="form-label">Precio Oferta: {formData.enOfertaVenta && <span className="required">*</span>}</label>
                   <div className="offer-input-wrapper">
                     <div className="price-with-discount">
                       <input
@@ -185,7 +184,7 @@ const ProductoForm = ({
                 )}
 
                 <div className="form-field">
-                  <label className="form-label">+6 Unidades <span className="required">*</span></label>
+                  <label className="form-label">+6 Unidades: <span className="required">*</span></label>
                   <input
                     type="text"
                     name="precioMayorista6"
@@ -201,7 +200,7 @@ const ProductoForm = ({
                 </div>
 
                 <div className="form-field">
-                  <label className="form-label">+80 Unidades <span className="required">*</span></label>
+                  <label className="form-label">+80 Unidades: <span className="required">*</span></label>
                   <input
                     type="text"
                     name="precioMayorista80"
@@ -221,7 +220,7 @@ const ProductoForm = ({
 
           {/* SECCIÓN 3: DETALLE (Grid Row 2) */}
           <div className="product-form-bottom-row">
-            <div className="product-form-section detailed">
+            <div className="product-form-section no-frame detailed">
               <div className="detailed-grid">
                 {/* TALLAS */}
                 <div className={`form-card tallas ${errors.tallas ? 'card-has-error' : ''}`}>

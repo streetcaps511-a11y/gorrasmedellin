@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
-const StatusFilter = ({ filterStatus, onFilterSelect, statuses = [] }) => {
+const StatusFilter = ({ filterStatus, onFilterSelect, statuses = ['Activo', 'Inactivo'] }) => {
   const [open, setOpen] = useState(false);
   
   return (
-    <div className="status-filter-container">
+    <div className="status-filter-container" style={{ position: 'relative' }}>
       <button
         onClick={() => setOpen(!open)}
         className="status-filter-btn"
@@ -19,11 +19,12 @@ const StatusFilter = ({ filterStatus, onFilterSelect, statuses = [] }) => {
           borderRadius: '6px',
           fontSize: '13px',
           cursor: 'pointer',
-          minWidth: '130px',
+          minWidth: '110px',
           justifyContent: 'space-between',
           fontWeight: '600',
           height: '36px'
         }}
+        type="button"
       >
         <span>{filterStatus}</span>
         <svg 
@@ -50,7 +51,7 @@ const StatusFilter = ({ filterStatus, onFilterSelect, statuses = [] }) => {
             border: '1px solid #FFC300',
             borderRadius: '4px',
             padding: '4px 0',
-            minWidth: '130px',
+            minWidth: '110px',
             zIndex: 1000,
             boxShadow: '0 4px 12px rgba(245, 200, 27, 0.2)'
           }}>
@@ -69,6 +70,7 @@ const StatusFilter = ({ filterStatus, onFilterSelect, statuses = [] }) => {
                   cursor: 'pointer',
                   fontWeight: filterStatus === status ? '700' : '400'
                 }}
+                type="button"
               >
                 {status}
               </button>

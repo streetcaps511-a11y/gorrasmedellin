@@ -158,9 +158,33 @@ export const useHome = () => {
         setLoading(false);
       }
     };
-    fetchProductos();
+
+    if (NitroCache.isFresh('home_products', 5 * 60 * 1000)) {
+      const cached = NitroCache.get('home_products');
+      if (cached?.data) {
+        setInitialProducts(cached.data);
+        setInventory(buildInitialInventoryFromProducts(cached.data));
+        setLoading(false);
+      } else {
+        fetchProductos();
+      }
+    } else {
+      fetchProductos();
+    }
+
+    // 📡 ESCUCHAR ACTUALIZACIONES (Sincronización instantánea)
+    const channel = new BroadcastChannel('app_sync');
+    channel.onmessage = (event) => {
+      if (event.data === 'productos_updated' || event.data === 'home_products_updated') {
+        NitroCache.clear('home_products');
+        NitroCache.clear('gm_catalog');
+        fetchProductos();
+      }
+    };
+
     window.scrollTo(0, 0);
-  }, []);
+    return () => channel.close();
+  }, [initialProducts.length]);
 
   // SECCIONES
   const ofertas = useMemo(

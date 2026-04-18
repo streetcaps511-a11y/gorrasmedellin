@@ -51,13 +51,13 @@
   top: 100%; 
   right: 0; 
   margin-top: 4px; 
-  background-color: #1F2937;
+  background-color: #000000;
   border: 1px solid #F5C81B; 
   border-radius: 6px; 
   padding: 6px 0; 
   min-width: 120px;
   z-index: 1000; 
-  box-shadow: 0 4px 12px rgba(245, 200, 27, 0.2);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
 }
 
 .filter-option {

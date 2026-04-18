@@ -15,7 +15,7 @@ export const SalesChart = ({ data = [] }) => {
     <div className="chart-visual-box">
       <h3 className="chart-header-dark">Ventas Mensuales</h3>
       <ResponsiveContainer width="100%" height={250}>
-        <BarChart data={data} margin={{ top: 20, right: 30, left: 30, bottom: 5 }}>
+        <BarChart data={data} margin={{ top: 20, right: 30, left: -15, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
           <XAxis dataKey="month" tick={{ fill: '#ffffff', fontSize: 10 }} axisLine={false} tickLine={false} />
           <YAxis 
@@ -53,7 +53,7 @@ export const PurchasesChart = ({ data = [] }) => {
     <div className="chart-visual-box">
       <h3 className="chart-header-dark">Compras Mensuales</h3>
       <ResponsiveContainer width="100%" height={250}>
-        <BarChart data={data} margin={{ top: 20, right: 30, left: 30, bottom: 5 }}>
+        <BarChart data={data} margin={{ top: 20, right: 30, left: -15, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
           <XAxis dataKey="month" tick={{ fill: '#ffffff', fontSize: 10 }} axisLine={false} tickLine={false} />
           <YAxis 

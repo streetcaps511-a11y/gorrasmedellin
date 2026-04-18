@@ -1,7 +1,32 @@
-import React from 'react';
-import { FaTimes } from 'react-icons/fa';
+import React, { useState } from 'react';
+import { FaTimes, FaFilter } from 'react-icons/fa';
 import ProductCard from './ProductCard';
 import '../styles/ProductosGrid.css';
+
+// Mapeo de colores a HEX para las bolitas del filtro
+const COLOR_MAP = {
+  'negro': '#000000',
+  'blanco': '#FFFFFF',
+  'rojo': '#FF0000',
+  'azul': '#0000FF',
+  'verde': '#008000',
+  'amarillo': '#FFFF00',
+  'gris': '#808080',
+  'naranja': '#FFA500',
+  'morado': '#800080',
+  'cafe': '#A52A2A',
+  'marrón': '#A52A2A',
+  'rosado': '#FFC0CB',
+  'rosa': '#FFC0CB',
+  'beige': '#F5F5DC',
+  'crema': '#FFFDD0',
+  'dorado': '#FFD700',
+  'plateado': '#C0C0C0',
+  'azul marino': '#000080',
+  'vinotinto': '#800000',
+  'khaki': '#F0E68C',
+  'oliva': '#808000',
+};
 
 const ProductosGrid = ({ 
   filteredProducts, 
@@ -19,12 +44,28 @@ const ProductosGrid = ({
   toggleFilter,
   clearFilters
 }) => {
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [expandedFilters, setExpandedFilters] = useState({ categories: true, colors: true, sizes: true });
+
+  const toggleFilterSection = (section) => {
+    setExpandedFilters(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
   return (
     <div className="gm-container">
+      {/* Botón para móviles */}
+      <button 
+        className="gm-mobile-filter-toggle" 
+        onClick={() => setIsFilterOpen(!isFilterOpen)}
+        style={{ display: 'none' }} /* El CSS se encarga de mostrarlo en móvil */
+      >
+        <FaFilter /> {isFilterOpen ? 'Ocultar Filtros' : 'Mostrar Filtros'}
+      </button>
+
       <div className="gm-products-page-layout">
         
         {/* SIDEBAR DE FILTROS (Columna Izquierda) */}
-        <aside className="gm-filters-sidebar">
+        <aside className={`gm-filters-sidebar ${isFilterOpen ? 'mobile-open' : ''}`}>
           <div className="gm-filters-content">
             <div className="gm-filters-header-row">
               <h3>Filtros</h3>
@@ -34,53 +75,73 @@ const ProductosGrid = ({
             </div>
 
             {/* CATEGORÍAS */}
-            <div className="gm-filter-group">
-              <h4>Categorías</h4>
-              <div className="gm-filter-options">
-                {allAvailableFilters.categories.map(cat => (
-                  <label key={cat} className="gm-filter-checkbox">
-                    <input 
-                      type="checkbox" 
-                      checked={selectedCategories.includes(cat)}
-                      onChange={() => toggleFilter('category', cat)}
-                    />
-                    <span>{cat}</span>
-                  </label>
-                ))}
+            <div className={`gm-filter-group ${expandedFilters.categories ? 'is-expanded' : ''}`}>
+              <div className="gm-filter-group-header" onClick={() => toggleFilterSection('categories')}>
+                <h4>Categorías</h4>
+                <span className="gm-chevron-icon">{expandedFilters.categories ? '−' : '+'}</span>
               </div>
+              {expandedFilters.categories && (
+                <div className="gm-filter-options">
+                  {allAvailableFilters.categories.map(cat => (
+                    <label key={cat} className="gm-filter-checkbox">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedCategories.includes(cat)}
+                        onChange={() => toggleFilter('category', cat)}
+                      />
+                      <span>{cat}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* COLORES */}
-            <div className="gm-filter-group">
-              <h4>Colores</h4>
-              <div className="gm-filter-options">
-                {allAvailableFilters.colors.map(color => (
-                  <label key={color} className="gm-filter-checkbox">
-                    <input 
-                      type="checkbox" 
-                      checked={selectedColors.includes(color)}
-                      onChange={() => toggleFilter('color', color)}
-                    />
-                    <span>{color}</span>
-                  </label>
-                ))}
+            {/* COLORES (Círculos) */}
+            <div className={`gm-filter-group ${expandedFilters.colors ? 'is-expanded' : ''}`}>
+              <div className="gm-filter-group-header" onClick={() => toggleFilterSection('colors')}>
+                <h4>Colores</h4>
+                <span className="gm-chevron-icon">{expandedFilters.colors ? '−' : '+'}</span>
               </div>
+              {expandedFilters.colors && (
+                <div className="gm-color-options-row">
+                  {allAvailableFilters.colors.map(color => {
+                    const hex = COLOR_MAP[color.toLowerCase()] || '#555';
+                    const isActive = selectedColors.includes(color);
+                    return (
+                      <button 
+                        key={color}
+                        className={`gm-color-circle-btn ${isActive ? 'active' : ''}`}
+                        title={color}
+                        onClick={() => toggleFilter('color', color)}
+                        style={{ backgroundColor: hex }}
+                      >
+                        {isActive && <div className="gm-color-check" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* TALLAS */}
-            <div className="gm-filter-group">
-              <h4>Tallas</h4>
-              <div className="gm-filter-options gm-sizes-grid">
-                {allAvailableFilters.sizes.map(size => (
-                  <button 
-                    key={size} 
-                    className={`gm-size-pill ${selectedSizes.includes(size) ? 'active' : ''}`}
-                    onClick={() => toggleFilter('size', size)}
-                  >
-                    {size}
-                  </button>
-                ))}
+            <div className={`gm-filter-group ${expandedFilters.sizes ? 'is-expanded' : ''}`}>
+              <div className="gm-filter-group-header" onClick={() => toggleFilterSection('sizes')}>
+                <h4>Tallas</h4>
+                <span className="gm-chevron-icon">{expandedFilters.sizes ? '−' : '+'}</span>
               </div>
+              {expandedFilters.sizes && (
+                <div className="gm-filter-options gm-sizes-grid">
+                  {allAvailableFilters.sizes.map(size => (
+                    <button 
+                      key={size} 
+                      className={`gm-size-pill ${selectedSizes.includes(size) ? 'active' : ''}`}
+                      onClick={() => toggleFilter('size', size)}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </aside>
@@ -95,7 +156,7 @@ const ProductosGrid = ({
                   <h2 className="gm-search-title">
                     Resultados para: <span className="gm-search-term">"{searchTerm}"</span>
                   </h2>
-                  <button onClick={() => setGlobalSearch("")} className="gm-clean-btn">
+                  <button onClick={clearFilters} className="gm-clean-btn">
                     <FaTimes size={14} /> Limpiar búsqueda
                   </button>
                 </div>
@@ -107,7 +168,7 @@ const ProductosGrid = ({
               {filteredProducts.length === 0 ? (
                 <div className="gm-no-results">
                   <p>No se encontraron productos</p>
-                  <button onClick={() => setGlobalSearch("")} className="gm-primary-btn">
+                  <button onClick={clearFilters} className="gm-primary-btn">
                     Ver todos los productos
                   </button>
                 </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { getAllProducts, getCategorias, getProductsByCategoryName } from "../services/categoriaApi";
 import { useCart } from "../../../shared/contexts";
@@ -85,6 +85,10 @@ export const useCategoriaDetalle = () => {
   const [quantity, setQuantity] = useState(1);
   const [showSizeError, setShowSizeError] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  
+  // FILTROS
+  const [selectedColors, setSelectedColors] = useState([]);
+  const [selectedSizes, setSelectedSizes] = useState([]);
   const [loading, setLoading] = useState(() => {
     const cat = decodeURIComponent(nombreCategoria || '').toLowerCase();
     const persistent = getPersistentData(cat);
@@ -351,10 +355,68 @@ export const useCategoriaDetalle = () => {
     closeModal();
   };
 
+  const filteredProductos = useMemo(() => {
+    const hasFilters = selectedColors.length > 0 || selectedSizes.length > 0;
+    if (!hasFilters) return productos;
+
+    return productos.filter(p => {
+      const pColores = Array.isArray(p.colores) ? p.colores : [p.colores || 'Negro'];
+      const matchesColor = selectedColors.length === 0 || 
+        selectedColors.some(c => pColores.some(pc => String(pc).toLowerCase() === c.toLowerCase()));
+
+      const pTallas = normalizeSizes(p);
+      const matchesSize = selectedSizes.length === 0 || 
+        selectedSizes.some(s => pTallas.some(pt => String(pt).toLowerCase() === s.toLowerCase()));
+
+      return matchesColor && matchesSize;
+    });
+  }, [productos, selectedColors, selectedSizes]);
+
+  const allAvailableFilters = useMemo(() => {
+    const colors = new Set();
+    const sizes = new Set();
+
+    // 🔥 Usamos todos los productos cacheados para que siempre haya filtros visibles
+    const allProducts = getCachedProducts();
+    const source = allProducts.length > 0 ? allProducts : productos;
+
+    source.forEach(p => {
+      const pColores = Array.isArray(p.colores) ? p.colores : [p.colores || 'Negro'];
+      pColores.forEach(c => colors.add(c));
+      const pTallas = normalizeSizes(p);
+      pTallas.forEach(s => sizes.add(s));
+    });
+
+    return {
+      colors: Array.from(colors).sort(),
+      sizes: Array.from(sizes).sort()
+    };
+  }, [productos]);
+
+  const toggleFilter = (type, value) => {
+    const setters = {
+      color: [selectedColors, setSelectedColors],
+      size: [selectedSizes, setSelectedSizes]
+    };
+    if (!setters[type]) return;
+    const [current, set] = setters[type];
+    if (current.includes(value)) {
+      set(current.filter(v => v !== value));
+    } else {
+      set([...current, value]);
+    }
+  };
+
+  const clearFilters = () => {
+    setSelectedColors([]);
+    setSelectedSizes([]);
+  };
+
   return {
     nombreCategoria: decodeURIComponent(nombreCategoria),
     descripcionCategoria,
-    productos,
+    productos: filteredProductos,
+    initialProductos: productos,
     selectedProduct,
     selectedSize,
     quantity,
@@ -371,6 +433,12 @@ export const useCategoriaDetalle = () => {
     handleAddToCart,
     getRatingFromProduct,
     safeImg,
-    BULK_MIN_QTY
+    BULK_MIN_QTY,
+    // Filtros
+    selectedColors,
+    selectedSizes,
+    allAvailableFilters,
+    toggleFilter,
+    clearFilters
   };
 };

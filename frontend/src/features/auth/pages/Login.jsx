@@ -313,33 +313,13 @@ const Login = () => {
   // ═══════════════════════════════════════════════
   const handleRegister = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     resetMessages();
-    const requiredFields = [
-      { field: registerData.documentNumber, msg: "Número de documento" },
-      { field: registerData.fullName, msg: "Nombre completo" },
-      { field: registerData.correo, msg: "Correo" },
-      { field: registerData.clave, msg: "Contraseña" }
-    ];
-
-    for (const { field, msg } of requiredFields) {
-      if (!field?.trim()) {
-        setError(`Falta el campo: ${msg}`);
-        return;
-      }
-    }
-
-    if (registerData.clave.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres.");
-      return;
-    }
-
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(registerData.clave)) {
-      setError("La contraseña debe tener al menos un carácter especial (!@#...).");
-      return;
-    }
-
+    setIsSubmitting(true);
+    
     if (registerData.clave !== registerData.confirmarClave) {
       setError("Las contraseñas no coinciden.");
+      setIsSubmitting(false);
       return;
     }
 
@@ -370,6 +350,8 @@ const Login = () => {
 
     } catch {
       setError("Error de conexión al registrar.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -475,7 +457,7 @@ const Login = () => {
               </div>
 
               {activeTab === "login" ? (
-                <form onSubmit={handleLogin} noValidate onChange={resetMessages}>
+                <form onSubmit={handleLogin} onChange={resetMessages}>
                   <label style={styles.label}>Correo electrónico</label>
                   <input
                     style={styles.input}
@@ -489,7 +471,7 @@ const Login = () => {
                   <label style={styles.label}>Contraseña</label>
                   <div style={styles.inputWrap}>
                     <input
-                      style={styles.input}
+                      style={{ ...styles.input, paddingRight: '40px' }}
                       type={showLoginPass ? "text" : "password"}
                       placeholder="••••••••"
                       required
@@ -532,7 +514,7 @@ const Login = () => {
                   </div>
                 </form>
               ) : (
-                <form onSubmit={handleRegister} noValidate onChange={resetMessages}>
+                <form onSubmit={handleRegister} onChange={resetMessages}>
                   
                   <div className="login-input-row">
                     <div style={{ flex: 1.15 }}>
@@ -593,10 +575,11 @@ const Login = () => {
                       <label style={styles.label}>Contraseña</label>
                       <div style={styles.inputWrap}>
                         <input
-                          style={styles.input}
+                          style={{ ...styles.input, paddingRight: '40px' }}
                           type={showRegPass ? "text" : "password"}
                           placeholder="••••••••"
                           required
+                          minLength={6}
                           value={registerData.clave}
                           onChange={(e) => setRegisterData({ ...registerData, clave: e.target.value })}
                         />
@@ -609,10 +592,11 @@ const Login = () => {
                       <label style={styles.label}>Confirmar contraseña</label>
                       <div style={styles.inputWrap}>
                         <input
-                          style={styles.input}
+                          style={{ ...styles.input, paddingRight: '40px' }}
                           type={showRegConfirmPass ? "text" : "password"}
                           placeholder="••••••••"
                           required
+                          minLength={6}
                           value={registerData.confirmarClave}
                           onChange={(e) => setRegisterData({ ...registerData, confirmarClave: e.target.value })}
                         />
@@ -626,7 +610,9 @@ const Login = () => {
                   {error && <div style={styles.error}>{error}</div>}
                   {infoMsg && <div style={styles.info}>{infoMsg}</div>}
 
-                  <button type="submit" style={styles.mainBtn}>Crear Cuenta</button>
+                  <button type="submit" style={styles.mainBtn} disabled={isSubmitting}>
+                    {isSubmitting ? "Guardando..." : "Crear Cuenta"}
+                  </button>
                 </form>
               )}
             </>

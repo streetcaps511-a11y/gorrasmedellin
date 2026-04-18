@@ -17,11 +17,9 @@
 
 /* Contenedor principal del dashboard */
 .dashboard-container {
-  padding: 0rem 2rem;
+  padding: 0rem 1rem;
   background-color: transparent;
-  min-height: 100vh;
   color: #f3f4f6;
-  overflow: hidden; /* Forzar que no haya scroll en la página */
 }
 
 /* Headers */
@@ -56,16 +54,29 @@
   padding: 0.3rem 0.8rem;
   font-size: 0.75rem;
   appearance: none;
-  text-align: center;
-  width: 75px;
-}
-
-.slim-input-month {
-  width: 95px;
+  text-align: left;
+  width: auto;
+  min-width: 50px;
 }
 
 .slim-input-year {
-  width: 65px;
+  width: 60px;
+}
+
+/* Quitar flechitas de los inputs numéricos */
+.slim-input::-webkit-outer-spin-button,
+.slim-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.slim-input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.slim-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
 }
 
 /* Caja de búsqueda */

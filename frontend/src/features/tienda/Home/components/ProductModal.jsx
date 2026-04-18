@@ -305,11 +305,20 @@ const ProductModal = ({
                 {remaining} RESTANTES
               </span>
             )}
+            
+            <button
+              className={`gm-btn-add-mobile ${Number(product.stock) === 0 ? "gm-btn-disabled-agotado" : ""} ${showSizeError ? "gm-btn-error" : ""}`}
+              onClick={handleModalAddToCart}
+              disabled={(selectedSize && parseInt(quantity) > remaining) || Number(product.stock) === 0}
+              type="button"
+            >
+              Añadir
+            </button>
           </div>
 
           {/* 7. Add to Cart (full width) */}
           <button
-            className={`gm-btn-add-cart ${Number(product.stock) === 0 ? "gm-btn-disabled-agotado" : ""} ${showSizeError ? "gm-btn-error" : ""}`}
+            className={`gm-btn-add-cart gm-btn-desktop-only ${Number(product.stock) === 0 ? "gm-btn-disabled-agotado" : ""} ${showSizeError ? "gm-btn-error" : ""}`}
             onClick={handleModalAddToCart}
             disabled={(selectedSize && parseInt(quantity) > remaining)}
           >

@@ -142,6 +142,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Solo sincronizar si hay un token
     if (sessionStorage.getItem("token")) {
+      // ⚡ SILENCIOSO: Sincronizar en segundo plano sin bloquear el render inicial
       syncProfile();
     } else {
       setLoading(false);

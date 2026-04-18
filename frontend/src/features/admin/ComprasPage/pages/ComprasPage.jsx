@@ -121,8 +121,8 @@ const ComprasPage = () => {
           </div>
 
           {modoVista === "lista" && (
-            <div className="compras-search-bar">
-              <div className="compras-search-wrapper">
+            <div className="compras-search-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '5px' }}>
+              <div className="compras-search-wrapper" style={{ flex: 1, maxWidth: '500px' }}>
                 <SearchInput
                   value={searchTerm}
                   onChange={setSearchTerm}
@@ -131,32 +131,34 @@ const ComprasPage = () => {
                   fullWidth={true}
                 />
               </div>
-              <input
-                type="date"
-                value={filterDate}
-                onChange={(e) => setFilterDate(e.target.value)}
-                title="Filtrar por fecha"
-                style={{
-                  backgroundColor: '#1E293B',
-                  border: '1px solid #F5C81B',
-                  color: filterDate ? '#F5C81B' : '#9CA3AF',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                  cursor: 'pointer',
-                  height: '36px',
-                  padding: '0 12px',
-                  fontWeight: filterDate ? '600' : '400',
-                  outline: 'none',
-                  colorScheme: 'dark',
-                  width: '140px',
-                  flex: 'none'
-                }}
-              />
-              <StatusFilter 
-                filterStatus={filterStatus} 
-                onFilterSelect={setFilterStatus} 
-                statuses={availableStatuses}
-              />
+              <div className="compras-filters" style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                <input
+                  type="date"
+                  value={filterDate}
+                  onChange={(e) => setFilterDate(e.target.value)}
+                  title="Filtrar por fecha"
+                  style={{
+                    backgroundColor: '#1E293B',
+                    border: '1px solid #ffffff30',
+                    color: filterDate ? '#ffffff' : '#9CA3AF',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    height: '36px',
+                    padding: '0 12px',
+                    fontWeight: filterDate ? '600' : '400',
+                    outline: 'none',
+                    colorScheme: 'dark',
+                    width: '140px',
+                    flex: 'none'
+                  }}
+                />
+                <StatusFilter 
+                  filterStatus={filterStatus} 
+                  onFilterSelect={setFilterStatus} 
+                  statuses={availableStatuses}
+                />
+              </div>
             </div>
           )}
         </div>

@@ -230,62 +230,72 @@ const ProductModal = ({
             </div>
           )}
 
-          {/* 6. Quantity + Stock */}
-          <div className="gm-quantity-selector">
-            <span className="gm-quantity-label">Cantidad:</span>
-            <div className="gm-quantity-controls">
-              <button className="gm-qty-btn" onClick={decrementQuantity} disabled={parseInt(quantity) <= 0} type="button">
-                <FaMinus size={10} />
-              </button>
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                className="gm-qty-input-manual"
-                value={quantity}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, '');
-                  handleQuantityInput(val);
-                }}
-                onFocus={(e) => setTimeout(() => e.target.select(), 10)}
-                min="0"
-                max={remaining}
-              />
-              <button 
-                className="gm-qty-btn" 
-                onClick={incrementQuantity} 
-                disabled={(selectedSize && parseInt(quantity) >= remaining)}
+          {/* 6. Quantity + Add to Cart Row */}
+          <div className="gm-modal-actions-row">
+            <div className="gm-quantity-selector">
+              <span className="gm-quantity-label">Cantidad:</span>
+              <div className="gm-quantity-controls">
+                <button className="gm-qty-btn" onClick={decrementQuantity} disabled={parseInt(quantity) <= 0} type="button">
+                  <FaMinus size={10} />
+                </button>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  className="gm-qty-input-manual"
+                  value={quantity}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    handleQuantityInput(val);
+                  }}
+                  onFocus={(e) => setTimeout(() => e.target.select(), 10)}
+                  min="0"
+                  max={remaining}
+                />
+                <button 
+                  className="gm-qty-btn" 
+                  onClick={incrementQuantity} 
+                  disabled={(selectedSize && parseInt(quantity) >= remaining)}
+                  type="button"
+                >
+                  <FaPlus size={10} />
+                </button>
+              </div>
+              {selectedSize && (
+                <span
+                  className="gm-stock-badge"
+                  style={{
+                    color: getStockColor(remaining),
+                    borderColor: `${getStockColor(remaining)}44`,
+                    backgroundColor: `${getStockColor(remaining)}11`
+                  }}
+                >
+                  {remaining} RESTANTES
+                </span>
+              )}
+              <button
+                className={`gm-btn-add-mobile ${isAgotado ? "gm-btn-disabled-agotado" : ""} ${showSizeError ? "gm-btn-error" : ""}`}
+                onClick={handleModalAddToCart}
+                disabled={(selectedSize && parseInt(quantity) > remaining) || isAgotado}
                 type="button"
               >
-                <FaPlus size={10} />
+                Añadir
               </button>
             </div>
-            {selectedSize && (
-              <span
-                className="gm-stock-badge"
-                style={{
-                  color: getStockColor(remaining),
-                  borderColor: `${getStockColor(remaining)}44`,
-                  backgroundColor: `${getStockColor(remaining)}11`
-                }}
-              >
-                {remaining} RESTANTES
-              </span>
-            )}
-          </div>
 
-          {/* 7. Add to Cart (full width) */}
-          <button
-            className={`gm-btn-add-cart ${isAgotado ? "gm-btn-disabled-agotado" : ""} ${showSizeError ? "gm-btn-error" : ""}`}
-            onClick={handleModalAddToCart}
-            disabled={(selectedSize && parseInt(quantity) > remaining)}
-          >
-            {isAgotado ? (
-              <><FaBan size={18} /> AGOTADO</>
-            ) : (
-              <><FaShoppingCart size={18} /> Añadir al Carrito</>
-            )}
-          </button>
+            {/* 7. Add to Cart */}
+            <button
+              className={`gm-btn-add-cart gm-btn-desktop-only ${isAgotado ? "gm-btn-disabled-agotado" : ""} ${showSizeError ? "gm-btn-error" : ""}`}
+              onClick={handleModalAddToCart}
+              disabled={(selectedSize && parseInt(quantity) > remaining)}
+            >
+              {isAgotado ? (
+                <><FaBan size={18} /> AGOTADO</>
+              ) : (
+                <><FaShoppingCart size={18} /> <span className="gm-desktop-text">Añadir al Carrito</span><span className="gm-mobile-text">Añadir</span></>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

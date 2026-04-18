@@ -18,7 +18,7 @@ export const useRolesLogic = (initialAvailablePermissions = []) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('Todos');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 7;
 
   const [loading, setLoading] = useState(!rolesCache.isInitialized && rolesCache.roles.length === 0);
   const [alert, setAlert] = useState({ show: false, message: '', type: 'success' });

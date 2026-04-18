@@ -257,10 +257,18 @@ const ProductModal = ({
                 {remaining} RESTANTES
               </span>
             )}
+            <button
+              className={`gm-btn-add-mobile ${isAgotado ? "gm-btn-disabled-agotado" : ""} ${showSizeError ? "gm-btn-error" : ""}`}
+              onClick={handleModalAddToCart}
+              disabled={(selectedSize && parseInt(quantity) > remaining) || isAgotado}
+              type="button"
+            >
+              Añadir
+            </button>
           </div>
 
           <button
-            className={`gm-btn-add-cart ${isAgotado ? "gm-btn-disabled-agotado" : ""}`}
+            className={`gm-btn-add-cart gm-btn-desktop-only ${isAgotado ? "gm-btn-disabled-agotado" : ""}`}
             onClick={handleModalAddToCart}
             disabled={(selectedSize && parseInt(quantity) > remaining)}
           >

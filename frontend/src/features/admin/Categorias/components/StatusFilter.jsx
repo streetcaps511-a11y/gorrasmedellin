@@ -27,7 +27,7 @@ const StatusFilter = ({ filterStatus, onFilterChange }) => {
         <>
           <div className="modal-overlay" style={{ background: 'transparent' }} onClick={() => setOpen(false)} />
           <div className="status-filter__dropdown">
-            {['Todos', 'Activos', 'Inactivos'].map(status => (
+            {['Todos', 'Activo', 'Inactivo'].map(status => (
               <button
                 key={status}
                 className={`status-filter__option ${filterStatus === status ? 'status-filter__option--active' : ''}`}

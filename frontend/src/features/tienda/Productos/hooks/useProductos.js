@@ -133,12 +133,22 @@ export const useProductos = () => {
     fetchProductosData();
     window.scrollTo(0, 0);
 
-    // Sincronizar Stock cada 5 segundos para que los cambios de Admin se vean casi instantáneamente
-    const interval = setInterval(() => fetchProductosData(true), 5000);
+    // Sincronizar Stock cada 10 segundos (fallback) + Sync Instantáneo vía Broadcast
+    const interval = setInterval(() => fetchProductosData(true), 10000);
+
+    // 📡 ESCUCHAR ACTUALIZACIONES DESDE OTRAS PESTAÑAS (Sync Instantáneo)
+    const channel = new BroadcastChannel('app_sync');
+    channel.onmessage = (event) => {
+      if (event.data === 'productos_updated' || event.data === 'sync_all') {
+        NitroCache.clear('tienda_productos');
+        fetchProductosData();
+      }
+    };
     
     return () => {
       isMounted = false;
       clearInterval(interval);
+      channel.close();
     };
   }, []);
 

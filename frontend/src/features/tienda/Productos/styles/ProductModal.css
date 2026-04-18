@@ -361,14 +361,14 @@
 }
 
 .gm-qty-input-manual {
-  width: 48px;
+  width: 50px;
   height: 36px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #fff;
   text-align: center;
   font-weight: 900;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   outline: none;
   appearance: none;
   -moz-appearance: textfield;
@@ -398,7 +398,16 @@
   border: 1px solid;
 }
 
-/* === ADD TO CART BUTTON === */
+/* === ACTIONS ROW & BUTTONS === */
+.gm-modal-actions-row {
+  display: flex;
+  flex-direction: column;
+}
+
+.gm-mobile-text {
+  display: none;
+}
+
 .gm-btn-add-cart {
   width: 100%;
   height: 48px;
@@ -426,6 +435,35 @@
 }
 
 .gm-btn-add-cart:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.gm-btn-add-mobile {
+  display: none;
+  background: #F5C81B;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 900;
+  font-size: 0.95rem;
+  cursor: pointer;
+  margin-left: auto;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(245, 200, 27, 0.2);
+  transition: all 0.2s ease;
+}
+
+.gm-btn-add-mobile:hover:not(:disabled) {
+  background: #FFA000;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 160, 0, 0.3);
+}
+
+.gm-btn-add-mobile:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
@@ -494,6 +532,17 @@
   }
   .gm-modal-colors-inline {
     display: flex;
+  }
+  .gm-sizes-label, .gm-quantity-label {
+    font-weight: 900 !important;
+  }
+  .gm-btn-desktop-only {
+    display: none !important;
+  }
+  .gm-btn-add-mobile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
@@ -564,14 +613,35 @@
   .gm-btn-add-cart {
     height: 42px;
     font-size: 0.9rem;
+    margin-top: 0;
+    margin-left: 12px;
+    flex: 1;
+  }
+  .gm-desktop-text {
+    display: none;
+  }
+  .gm-mobile-text {
+    display: inline;
+  }
+  .gm-modal-actions-row {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+  .gm-quantity-selector {
+    margin: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
   }
   .gm-qty-btn {
     width: 32px;
     height: 32px;
   }
   .gm-qty-input-manual {
-    width: 40px;
+    width: 50px;
     height: 32px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
 }

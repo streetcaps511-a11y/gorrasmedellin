@@ -40,9 +40,9 @@
   align-items: center; 
   gap: 6px; 
   padding: 8px 12px;
-  background-color: transparent; 
-  border: 1px solid #F5C81B; 
-  color: #F5C81B;
+  background-color: #000000; 
+  border: 1px solid #FFC300; 
+  color: #FFC300;
   border-radius: 6px; 
   font-size: 13px;
   cursor: pointer; 
@@ -55,7 +55,7 @@
 }
 
 .status-filter-btn:hover {
-  background-color: #F5C81B; 
+  background-color: #FFC300; 
   color: #000;
 }
 
@@ -74,12 +74,12 @@
   right: 0; 
   margin-top: 4px; 
   background-color: #000;
-  border: 1px solid #F5C81B; 
+  border: 1px solid #FFC300; 
   border-radius: 6px; 
   padding: 6px 0; 
   min-width: 120px;
   z-index: 1000; 
-  box-shadow: 0 4px 12px rgba(245, 200, 27, 0.3);
+  box-shadow: 0 4px 12px rgba(255, 195, 0, 0.3);
 }
 
 .filter-option {

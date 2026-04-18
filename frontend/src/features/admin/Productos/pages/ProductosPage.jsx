@@ -7,6 +7,7 @@ import { Alert, EntityTable, SearchInput, ConfirmDeleteModal, AnularOperacionMod
 import CustomPagination from '../../../shared/components/admin/CustomPagination';
 
 import CategoryFilter from '../components/CategoryFilter';
+import StatusFilter from '../components/StatusFilter';
 import DetalleProductoView from '../components/DetalleProductoView';
 import ProductoForm from '../components/ProductoForm';
 
@@ -17,17 +18,17 @@ const columns = [
   {
     header: 'Producto',
     field: 'nombre',
-    width: '210px'
+    width: '250px'
   },
   {
     header: 'Categoría',
     field: 'categoria',
-    width: '200px'
+    width: '240px'
   },
   {
     header: 'Precio',
     field: 'precioVenta',
-    width: '110px',
+    width: '130px',
     render: (item) => <span className="price-text">${Number(item.precioVenta || 0).toLocaleString('es-CO')}</span>
   },
   {
@@ -79,12 +80,14 @@ const ProductosPage = () => {
     coloresProducto,
     errors,
     loading,
+    filterStatus,
     filteredProductos,
     paginatedProductos,
     totalPages,
     showingStart,
     endIndex,
     handleFilterSelect,
+    handleStatusSelect,
     agregarTalla,
     eliminarTalla,
     handleTallaChange,
@@ -185,20 +188,21 @@ const ProductosPage = () => {
 
           {modoVista === "lista" && (
             <div className="productos-search-bar">
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, marginRight: '20px' }}>
                 <SearchInput
                   value={searchTerm}
                   onChange={setSearchTerm}
-                  placeholder="Buscar..."
+                  placeholder="Buscar productos por nombre..."
                   onClear={() => setSearchTerm('')}
                   fullWidth={true}
                 />
               </div>
-              <CategoryFilter 
-                value={categoriaFiltro} 
-                onChange={handleFilterSelect} 
-                options={categoriasUnicas} 
-              />
+              <div className="productos-filter-container">
+                <StatusFilter 
+                  filterStatus={filterStatus}
+                  onFilterSelect={handleStatusSelect}
+                />
+              </div>
             </div>
           )}
         </div>
@@ -206,7 +210,7 @@ const ProductosPage = () => {
         {/* MAIN CONTENT */}
         {modoVista === "lista" ? (
           <div className="productos-main-content">
-            <div className="productos-table-wrapper yellow-scrollbar">
+            <div className="productos-table-wrapper">
               <EntityTable
                 entities={paginatedProductos}
                 columns={columns}

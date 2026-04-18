@@ -1,4 +1,11 @@
 /* Layout para RolesPage */
+.roles-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+}
+
 .roles-container {
   display: flex; 
   flex-direction: column;
@@ -8,22 +15,23 @@
 }
 
 .roles-header {
-  margin-bottom: 4px;
+  margin-bottom: 0px;
 }
 
 .roles-header-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
 
 .roles-title {
   color: #fff;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 800;
   margin: 0;
-  line-height: 1.2;
+  line-height: 1.1;
+  letter-spacing: -0.3px;
 }
 
 .roles-subtitle {
@@ -36,8 +44,8 @@
 .roles-btn-add {
   padding: 0 16px;
   background-color: transparent;
-  border: 1px solid #F5C81B;
-  color: #F5C81B;
+  border: 1px solid #FFC300;
+  color: #FFC300;
   border-radius: 6px;
   font-size: 13px;
   cursor: pointer;
@@ -49,7 +57,7 @@
 }
 
 .roles-btn-add:hover {
-  background-color: #F5C81B20;
+  background-color: #FFC30020;
 }
 
 .roles-controls {
@@ -63,12 +71,15 @@
   display: flex;
   flex-direction: column;
   border-radius: 8px;
-  border: 1px solid #F5C81B;
+  border: 1px solid #FFC300;
   overflow: hidden;
-  background-color: #000;
+  background-color: #000000;
+  margin-top: 5px;
+  min-height: 420px;
+  padding-bottom: 30px;
 }
 
 .roles-table-wrapper {
   flex: 1;
-  overflow: auto;
+  overflow: hidden; /* Cero scroll */
 }
