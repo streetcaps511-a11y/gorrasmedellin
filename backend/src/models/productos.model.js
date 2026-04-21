@@ -169,7 +169,11 @@ const Producto = sequelize.define('Producto', {
     }
 }, {
     tableName: 'Productos',
-    timestamps: false,
+    timestamps: true, // Habilitar timestamps para permitir paranoid
+    createdAt: false, // Deshabilitar createdAt porque no existe en la tabla física
+    updatedAt: false, // Deshabilitar updatedAt porque no existe en la tabla física
+    paranoid: true,   // Habilitar borrado lógico (Soft Delete)
+    deletedAt: 'DeletedAt', // Mapear a la columna que acabamos de crear
     charset: 'utf8mb4',
     collate: 'utf8mb4_unicode_ci',
     hooks: {

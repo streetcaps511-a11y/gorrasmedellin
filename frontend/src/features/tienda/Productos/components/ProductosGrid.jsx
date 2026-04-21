@@ -8,7 +8,7 @@ const COLOR_MAP = {
   'negro': '#000000',
   'blanco': '#FFFFFF',
   'rojo': '#FF0000',
-  'azul': '#0000FF',
+  'azul': '#2563eb',
   'verde': '#008000',
   'amarillo': '#FFFF00',
   'gris': '#808080',
@@ -113,7 +113,7 @@ const ProductosGrid = ({
                         className={`gm-color-circle-btn ${isActive ? 'active' : ''}`}
                         title={color}
                         onClick={() => toggleFilter('color', color)}
-                        style={{ backgroundColor: hex }}
+                        style={{ color: hex }}
                       >
                         {isActive && <div className="gm-color-check" />}
                       </button>
@@ -202,7 +202,7 @@ const ProductosGrid = ({
           {filteredProducts === null && (
             <div className="gm-products-grid">
               {(initialProducts || [])
-                .filter(p => (p.isActive !== false))
+                .filter(p => (p.isActive !== false && (p.stock > 0)))
                 .map((p) => (
                 <ProductCard 
                   key={p.id} 

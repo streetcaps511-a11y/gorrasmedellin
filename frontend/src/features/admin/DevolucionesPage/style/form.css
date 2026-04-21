@@ -8,6 +8,10 @@
   padding: 10px 20px 20px 0;
 }
 
+.devoluciones-premium-registration-grid.detail-view-grid {
+  grid-template-columns: 1.5fr 1fr;
+}
+
 .devoluciones-registration-column {
   display: flex;
   flex-direction: column;
@@ -437,7 +441,7 @@
 }
 
 .dev-preview-wrapper.detail-view {
-  height: 480px; /* Aumentado para visibilidad total */
+  height: 380px; /* Reducido para proporcionalidad */
   background-color: #000;
   border-radius: 12px;
   border: none; 

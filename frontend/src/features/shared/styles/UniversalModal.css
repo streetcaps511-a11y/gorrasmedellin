@@ -19,7 +19,7 @@
   min-height: auto;
   padding: 15px 12px; /* Más compacto lateralmente y arriba */
   position: relative;
-  border: 1px solid rgba(245, 200, 27, 0.4);
+  border: 1px solid rgba(245, 200, 27, 0.8);
   display: flex;
   flex-direction: column;
   animation: modal-scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -86,13 +86,13 @@
 }
 
 .btn-modal-base {
-  padding: 8px 16px;
-  font-size: 13px;
+  padding: 0 16px;
+  font-size: 12px;
   border-radius: 6px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
   transition: all 0.2s;
-  height: 38px;
+  height: 32px;
 }
 
 .btn-modal-cancel {
@@ -107,9 +107,9 @@
 
 .btn-modal-confirm {
   background: transparent;
-  border: 1px solid #F5C81B;
-  color: #F5C81B;
-  padding: 8px 32px;
+  border: 1px solid #FFC300;
+  color: #FFC300;
+  padding: 0 24px;
   text-transform: none;
 }
 
@@ -123,8 +123,8 @@
 .modal-content-scroll input,
 .modal-content-scroll textarea,
 .modal-content-scroll select {
-  background-color: #1e293b;
-  border: 1px solid #334155;
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 8px;
   padding: 6px 12px;
   color: #f1f5f9;
@@ -134,7 +134,7 @@
   margin-bottom: 2px;
   outline: none;
   transition: all 0.2s;
-  height: 32px;
+  height: 36px;
 }
 
 .modal-content-scroll textarea {

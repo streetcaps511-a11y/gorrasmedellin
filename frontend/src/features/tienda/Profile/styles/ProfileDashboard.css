@@ -23,7 +23,7 @@
 .gm-stat-card {
   background-color: #0f172a;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08); /* Marco blanco sutil */
+  border: 1.5px solid rgba(255, 255, 255, 0.2); 
   padding: 15px 18px;
   display: flex;
   align-items: center;
@@ -76,7 +76,7 @@
 .gm-summary-card {
   background-color: #0f172a;
   border-radius: 12px;
-  border: 1px solid rgba(255, 193, 7, 0.2);
+  border: 1.5px solid rgba(255, 193, 7, 0.6);
   padding: 20px;
 }
 
@@ -148,7 +148,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.05); /* Marco blanco delgado */
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
   background-color: rgba(255, 255, 255, 0.01);
 }
@@ -197,7 +197,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.05); /* Marco blanco delgado */
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
   background-color: rgba(255, 255, 255, 0.01);
 }

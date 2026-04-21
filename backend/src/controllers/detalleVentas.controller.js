@@ -29,7 +29,8 @@ const detalleVentaController = {
                     {
                         model: Producto,
                         as: 'Producto',
-                        attributes: ['IdProducto', 'Nombre', 'url', 'Descripcion', 'PrecioVenta']
+                        attributes: ['IdProducto', 'Nombre', 'url', 'Descripcion', 'PrecioVenta'],
+                        paranoid: false
                     },
                     {
                         model: Talla,
@@ -83,7 +84,8 @@ const detalleVentaController = {
                     {
                         model: Producto,
                         as: 'Producto',
-                        attributes: ['IdProducto', 'Nombre', 'url', 'Descripcion', 'PrecioVenta']
+                        attributes: ['IdProducto', 'Nombre', 'url', 'Descripcion', 'PrecioVenta'],
+                        paranoid: false
                     },
                     {
                         model: Talla,
@@ -160,7 +162,8 @@ const detalleVentaController = {
                     {
                         model: Producto,
                         as: 'Producto',
-                        attributes: ['IdProducto', 'Nombre', 'Descripcion', 'url', 'PrecioVenta']
+                        attributes: ['IdProducto', 'Nombre', 'Descripcion', 'url', 'PrecioVenta'],
+                        paranoid: false
                     },
                     {
                         model: Talla,

@@ -193,10 +193,8 @@ const Home = () => {
   // FETCH A POSTGRESQL (RENDER) - Solo si no tenemos caché
   useEffect(() => {
     const fetchProductos = async () => {
-      // Si ya hicimos fetch o tenemos datos, no hacer otra vez
-      if (hasFetchedRef.current || initialProducts.length > 0) {
-        return;
-      }
+      // 🚀 Siempre permitir el fetch inicial aunque haya caché, para sincronizar stock real
+      if (hasFetchedRef.current) return;
       hasFetchedRef.current = true;
 
       try {
@@ -252,7 +250,7 @@ const Home = () => {
   const ofertas = useMemo(
     () =>
       initialProducts
-        .filter((p) => (p.hasDiscount || p.oferta) && p.isActive !== false)
+        .filter((p) => (p.hasDiscount || p.oferta) && p.isActive !== false && (p.stock > 0))
         .slice(0, 8),
     [initialProducts]
   );
@@ -260,29 +258,29 @@ const Home = () => {
   const destacados = useMemo(
     () =>
       initialProducts
-        .filter((p) => (p.destacado || p.isFeatured) && p.isActive !== false)
+        .filter((p) => (p.destacado || p.isFeatured) && p.isActive !== false && (p.stock > 0))
         .slice(0, 8),
     [initialProducts]
   );
 
   const novedades = useMemo(
-    () => [...initialProducts].reverse().filter(p => p.isActive !== false).slice(0, 8),
+    () => [...initialProducts].reverse().filter(p => p.isActive !== false && (p.stock > 0)).slice(0, 8),
     [initialProducts]
   );
 
   const monastery = useMemo(
-    () => initialProducts.filter(p => p.categoria?.toUpperCase().includes('MONASTERY') && p.isActive !== false).slice(0, 8),
+    () => initialProducts.filter(p => p.categoria?.toUpperCase().includes('MONASTERY') && p.isActive !== false && (p.stock > 0)).slice(0, 8),
     [initialProducts]
   );
 
   const nike = useMemo(
-    () => initialProducts.filter(p => p.categoria?.toUpperCase().includes('NIKE') && p.isActive !== false).slice(0, 8),
+    () => initialProducts.filter(p => p.categoria?.toUpperCase().includes('NIKE') && p.isActive !== false && (p.stock > 0)).slice(0, 8),
     [initialProducts]
   );
 
   const masComprados = useMemo(
     () => [...initialProducts]
-      .filter(p => p.isActive !== false && (p.sales_count || 0) >= 1)
+      .filter(p => p.isActive !== false && (p.sales_count || 0) >= 1 && (p.stock > 0))
       .sort((a,b) => (b.sales_count || 0) - (a.sales_count || 0))
       .slice(0, 8),
     [initialProducts]
@@ -294,7 +292,7 @@ const Home = () => {
       (str || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     const query = normalize(searchTerm);
     return initialProducts.filter((p) => {
-      if (!p.isActive) return false;
+      if (!p.isActive || p.stock <= 0) return false;
       return (
         normalize(p.nombre).includes(query) ||
         normalize(p.categoria).includes(query) ||
@@ -721,7 +719,7 @@ const Home = () => {
     {
       id: "allProducts",
       title: "Todos nuestros productos",
-      data: initialProducts.filter((p) => p.isActive !== false),
+      data: initialProducts.filter((p) => p.isActive !== false && p.stock > 0),
       link: "/productos",
       showSeeAllCard: true,
     },

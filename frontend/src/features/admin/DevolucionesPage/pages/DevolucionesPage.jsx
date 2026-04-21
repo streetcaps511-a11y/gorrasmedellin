@@ -478,7 +478,7 @@ const DevolucionesPage = () => {
           </div>
         ) : (
           /* MODO VISTA: DETALLE (AESTHETIC UPGRADE) */
-          <div className="devoluciones-premium-registration-grid no-scrollbar">
+          <div className="devoluciones-premium-registration-grid detail-view-grid no-scrollbar">
             {/* COLUMNA IZQUIERDA: DATOS Y PRODUCTOS */}
             <div className="devoluciones-registration-column">
               {/* CARD 1: DATOS GENERALES */}

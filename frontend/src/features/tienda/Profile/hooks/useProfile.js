@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useAuth } from "../../../shared/contexts";
 import * as profileApi from "../services/profileApi";
+import { NitroCache } from "../../../shared/utils/NitroCache";
 
 export const useProfile = () => {
   const { user: authUser, logout: onLogout, isAdmin } = useAuth();
@@ -362,12 +363,21 @@ export const useProfile = () => {
     }
   };
 
-  const [allOrders, setAllOrders] = useState([]);
-  const [allReturns, setAllReturns] = useState([]);
-  const [isLoadingData, setIsLoadingData] = useState(false);
+  const CACHE_ORDERS = 'user_orders';
+  const CACHE_RETURNS = 'user_returns';
+
+  const [allOrders, setAllOrders] = useState(() => {
+    const cached = NitroCache.get(CACHE_ORDERS);
+    return Array.isArray(cached?.data) ? cached.data : [];
+  });
+  const [allReturns, setAllReturns] = useState(() => {
+    const cached = NitroCache.get(CACHE_RETURNS);
+    return Array.isArray(cached?.data) ? cached.data : [];
+  });
+  const [isLoadingData, setIsLoadingData] = useState(allOrders.length === 0);
 
   const loadProfileData = async (silent = false) => {
-    if (!silent) setIsLoadingData(true);
+    if (!silent && allOrders.length === 0) setIsLoadingData(true);
       try {
         const [orders, returns, perfil] = await Promise.all([
           profileApi.getMyOrders(),
@@ -506,6 +516,10 @@ export const useProfile = () => {
 
         setAllOrders(mappedOrders);
         setAllReturns(mappedReturns);
+        
+        // Actualizar caché para la próxima visita
+        NitroCache.set(CACHE_ORDERS, mappedOrders);
+        NitroCache.set(CACHE_RETURNS, mappedReturns);
       } catch (err) {
         console.error("Error loading profile data:", err);
       } finally {

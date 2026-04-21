@@ -52,11 +52,11 @@ const ProductoForm = React.memo(function ProductoForm({
   }
 
   return (
-    <div className="product-form-row" style={{ gridTemplateColumns: gridCols }}>
+    <div className="product-form-row" style={{ gridTemplateColumns: gridCols, paddingBottom: 0 }}>
       <SearchSelect 
         options={availableProducts}
         selectedItem={availableProducts.find(p => String(p.id) === String(producto.id))}
-        height="42px"
+        height="34px"
         onSelect={(sel) => {
           if (!sel) {
             onChange(index, 'id', '');
@@ -84,7 +84,7 @@ const ProductoForm = React.memo(function ProductoForm({
               style={{ width: '42px', height: '42px', borderRadius: '6px', objectFit: 'cover', border: '1px solid #ffffff10' }} 
             />
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-              <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px' }}>{p.nombre}</span>
+              <span style={{ fontWeight: 700, color: '#fff', fontSize: '14px' }}>{p.nombre} ({p.tallasStock?.map(ts=>ts.talla).join(', ') || p.tallas?.join(', ') || 'S/T'})</span>
               <span style={{ color: '#FFD700', fontWeight: 800, fontSize: '12px' }}>
                 ${Number(p.enOfertaVenta ? p.precioOferta : p.precioVenta).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
@@ -96,19 +96,20 @@ const ProductoForm = React.memo(function ProductoForm({
       <select 
         value={producto.talla || ''} 
         onChange={(e) => onChange(index, 'talla', e.target.value)} 
-        className={`product-input ${errors[`producto_talla_${index}`] ? 'has-error' : ''}`}
-        disabled={!producto.id}
+        className={`ventas-field-select ${errors[`producto_talla_${index}`] ? 'has-error' : ''}`}
       >
         <option value="" disabled hidden>Seleccionar...</option>
         {(() => {
-          if (!producto.id) return null;
-          const sel = availableProducts.find(p => p.id === parseInt(producto.id));
-          if (!sel) return null;
+          const sel = producto.id ? availableProducts.find(p => String(p.id) === String(producto.id)) : null;
           
-          const productSizes = sel.tallasStock?.map(ts => ts.talla) || sel.tallas || [];
+          // Lógica igual a productos: Siempre mostrar opciones.
+          // Si hay producto, sus tallas. Si no, las globales.
+          const sizesToDisplay = (sel && sel.tallasStock && sel.tallasStock.length > 0)
+            ? sel.tallasStock.map(ts => ts.talla)
+            : (sel && sel.tallas && sel.tallas.length > 0 ? sel.tallas : availableSizes);
           
-          return productSizes.map(t => (
-            <option key={t} value={t}>&nbsp;&nbsp;{t}</option>
+          return sizesToDisplay.map(t => (
+            <option key={t} value={t}>{t}</option>
           ));
         })()}
       </select>
@@ -163,11 +164,22 @@ const ProductoForm = React.memo(function ProductoForm({
       </div>
       
       <div className="product-action">
-        {!isFirst && (
-          <button onClick={() => onRemove(index)} className="btn-delete-row">
-            <FaTrash size={14} />
-          </button>
-        )}
+        <button 
+          onClick={() => {
+            if (index === 0) {
+              onChange(index, 'id', '');
+              onChange(index, 'nombre', '');
+              onChange(index, 'talla', '');
+              onChange(index, 'cantidad', 1);
+              onChange(index, 'precio', '');
+            } else {
+              onRemove(index);
+            }
+          }} 
+          className="btn-delete-row"
+        >
+          <FaTrash size={14} />
+        </button>
       </div>
     </div>
   );

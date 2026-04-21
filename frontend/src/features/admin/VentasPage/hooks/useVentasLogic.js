@@ -25,7 +25,7 @@ export const useVentasLogic = (initialAvailableProducts = [], initialAvailableCu
   const [ventas, setVentas] = useState(initialVentas);
   const [availableStatuses, setAvailableStatuses] = useState(['Pendiente', 'Completada', 'Rechazada', 'Anulada']);
   const [availablePaymentMethods, setAvailablePaymentMethods] = useState(getInitialSupportData('ventas_pay_methods'));
-  const [availableSizes, setAvailableSizes] = useState(getInitialSupportData('ventas_sizes'));
+  const [availableSizes, setAvailableSizes] = useState(getInitialSupportData('ventas_sizes', ['Ajustable', '7', '7/1/4', '7/1/8']));
   const [availableCustomers, setAvailableCustomers] = useState(getInitialSupportData('ventas_customers'));
   const [availableProducts, setAvailableProducts] = useState(getInitialSupportData('ventas_products'));
   const [searchTerm, setSearchTerm] = useState('');
@@ -80,19 +80,22 @@ export const useVentasLogic = (initialAvailableProducts = [], initialAvailableCu
         const customers = await ventasService.getCustomers();
         const products = await productosService.getProductos();
 
-        setAvailableStatuses(statuses.map(s => typeof s === 'string' ? s : (s.nombre || s.Nombre)));
-        setAvailablePaymentMethods(methods.map(m => typeof m === 'string' ? m : (m.nombre || m.Nombre)));
-        setAvailableSizes(sizes.map(s => ({
-            value: typeof s === 'string' ? s : (s.nombre || s.Nombre || s.talla || s.Talla),
-            label: typeof s === 'string' ? s : (s.nombre || s.Nombre || s.talla || s.Talla)
-        })));
-        setAvailableCustomers(customers);
-        setAvailableProducts(products.filter(p => p.isActive));
+        const mappedStatuses = statuses.map(s => typeof s === 'string' ? s : (s.nombre || s.Nombre));
+        const mappedMethods = methods.map(m => typeof m === 'string' ? m : (m.nombre || m.Nombre));
+        const mappedSizes = sizes.length > 0 ? sizes.map(s => typeof s === 'string' ? s : (s.nombre || s.Nombre || s.talla || s.Talla)) : ['Ajustable', '7', '7/1/4', '7/1/8'];
+        const activeProducts = products.filter(p => p.isActive);
 
-        NitroCache.set('ventas_pay_methods', availablePaymentMethods);
-        NitroCache.set('ventas_sizes', availableSizes);
-        NitroCache.set('ventas_customers', availableCustomers);
-        NitroCache.set('ventas_products', availableProducts);
+        setAvailableStatuses(mappedStatuses);
+        setAvailablePaymentMethods(mappedMethods);
+        setAvailableSizes(mappedSizes);
+        setAvailableCustomers(customers);
+        setAvailableProducts(activeProducts);
+
+        NitroCache.set('ventas_statuses', mappedStatuses);
+        NitroCache.set('ventas_pay_methods', mappedMethods);
+        NitroCache.set('ventas_sizes', mappedSizes);
+        NitroCache.set('ventas_customers', customers);
+        NitroCache.set('ventas_products', activeProducts);
       }
 
     } catch (error) {
@@ -112,16 +115,33 @@ export const useVentasLogic = (initialAvailableProducts = [], initialAvailableCu
     }
   }, [modoVista]);
 
+  const notifySync = () => {
+    const channel = new BroadcastChannel('app_sync');
+    channel.postMessage('ventas_updated');
+    channel.close();
+  };
+
   useEffect(() => {
     fetchData(); // Carga inicial de ventas
     
-    // Auto-refresco cada 25 segundos (más calmado) solo de ventas
+    // 📡 Listener de sincronización entre pestañas
+    const channel = new BroadcastChannel('app_sync');
+    channel.onmessage = (event) => {
+        if (event.data === 'ventas_updated') {
+            refreshData(); // Refrescar ventas en segundo plano
+        }
+    };
+
+    // Auto-refresco cada 45 segundos (más calmado) solo de ventas
     const interval = setInterval(() => {
         if (modoVista === 'lista') refreshData();
-    }, 25000);
+    }, 45000);
     
-    return () => clearInterval(interval);
-  }, []); // Sin dependencias para evitar el loop infinito
+    return () => {
+        clearInterval(interval);
+        channel.close();
+    };
+  }, [fetchData, refreshData, modoVista]);
 
   // ====== ALERTA ======
   const showAlert = useCallback((message, type = 'success') => {
@@ -276,9 +296,7 @@ export const useVentasLogic = (initialAvailableProducts = [], initialAvailableCu
       NitroCache.set('ventas', newVentas);
       showAlert('Venta registrada exitosamente');
       
-      // 🔥 Sincronizar stock inmediatamente después de vender
-      refreshData(); 
-      
+      notifySync();
       mostrarLista();
     } catch (error) {
       showAlert("Error registrando venta: " + error.message, "error");
@@ -307,6 +325,7 @@ export const useVentasLogic = (initialAvailableProducts = [], initialAvailableCu
       setApproveModal({ isOpen: false, venta: null });
       setRejectModal({ isOpen: false, venta: null });
       setPartialPaymentModal({ isOpen: false, venta: null, montoRecibido: '', montoNuevo: '', evidencia2: null });
+      notifySync();
       setRejectionReason('');
       setIsRejecting(false);
     } catch (error) {
@@ -350,6 +369,7 @@ export const useVentasLogic = (initialAvailableProducts = [], initialAvailableCu
       NitroCache.set('ventas', newVentas);
       if (ventaViendo?.id === updated.id) setVentaViendo(updated);
 
+      notifySync();
       showAlert(nuevoEstado === 'Completada' ? "Venta completada ✅" : "Pago incompleto registrado ⚠️");
       setPartialPaymentModal({ isOpen: false, venta: null, montoRecibido: '', montoNuevo: '', evidencia2: null });
     } catch (error) {
@@ -367,6 +387,7 @@ export const useVentasLogic = (initialAvailableProducts = [], initialAvailableCu
       const newVentas = ventas.map(v => v.id === updated.id ? updated : v);
       setVentas(newVentas);
       NitroCache.set('ventas', newVentas);
+      notifySync();
       showAlert('Venta anulada correctamente');
       setAnularModal({ isOpen: false, venta: null });
     } catch (error) {

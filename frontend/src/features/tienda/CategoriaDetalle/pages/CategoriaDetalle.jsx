@@ -47,7 +47,7 @@ const CategoriaDetalle = () => {
 
   // Mapeo de colores (mismo que ProductosGrid)
   const COLOR_MAP = {
-    'negro': '#000000', 'blanco': '#FFFFFF', 'rojo': '#FF0000', 'azul': '#0000FF',
+    'negro': '#000000', 'blanco': '#FFFFFF', 'rojo': '#FF0000', 'azul': '#2563eb',
     'verde': '#008000', 'amarillo': '#FFFF00', 'gris': '#808080', 'naranja': '#FFA500',
     'morado': '#800080', 'cafe': '#A52A2A', 'marrón': '#A52A2A', 'rosado': '#FFC0CB',
     'rosa': '#FFC0CB', 'beige': '#F5F5DC', 'crema': '#FFFDD0', 'dorado': '#FFD700',
@@ -112,7 +112,7 @@ const CategoriaDetalle = () => {
                           className={`gm-color-circle-btn ${isActive ? 'active' : ''}`}
                           title={color}
                           onClick={() => toggleFilter('color', color)}
-                          style={{ backgroundColor: hex }}
+                          style={{ color: hex }}
                         >
                           {isActive && <div className="gm-color-check" />}
                         </button>

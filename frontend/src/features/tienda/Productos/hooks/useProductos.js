@@ -161,7 +161,7 @@ export const useProductos = () => {
 
   // PRODUCTOS AGRUPADOS POR CATEGORIA
   const productsByCategory = useMemo(() => {
-    const activeProducts = (initialProducts || []).filter((p) => p.isActive);
+    const activeProducts = (initialProducts || []).filter((p) => p.isActive && p.stock > 0);
     const grouped = {};
     activeProducts.forEach((product) => {
       const cat = product.categoria || "Otros";
@@ -194,7 +194,7 @@ export const useProductos = () => {
     const query = normalize(searchTerm);
 
     return (initialProducts || []).filter((p) => {
-      if (!p.isActive) return false;
+      if (!p.isActive || p.stock <= 0) return false;
 
       // 1. Filtro de Búsqueda (Texto)
       const matchesSearch = !hasSearch || (
@@ -228,7 +228,7 @@ export const useProductos = () => {
     const sizes = new Set();
 
     (initialProducts || []).forEach(p => {
-      if (!p.isActive) return;
+      if (!p.isActive || p.stock <= 0) return;
       if (p.categoria) categories.add(p.categoria);
       
       const pColores = Array.isArray(p.colores) ? p.colores : [p.colores || 'Negro'];

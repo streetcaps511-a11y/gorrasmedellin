@@ -12,7 +12,7 @@ const CustomColorSelect = ({ value, onChange, options }) => {
       >
         <span className="color-select-label">{value || "Seleccionar"}</span>
         {selectedColorObj && (
-          <div className="color-select-circle" style={{ backgroundColor: selectedColorObj.hex }} />
+          <div className="color-select-circle" style={{ color: selectedColorObj.hex }} />
         )}
         <span className="color-select-arrow">▼</span>
       </div>

@@ -13,8 +13,8 @@ const ProductoItemForm = ({ producto, index, availableProducts = [], availableSi
   };
 
   const inputStyle = {
-    backgroundColor: '#000000',
-    border: '1px solid #334155',
+    backgroundColor: 'transparent',
+    border: '1px solid #ffffff30',
     borderRadius: '4px',
     color: '#ffffff',
     fontSize: '11px',
@@ -36,12 +36,12 @@ const ProductoItemForm = ({ producto, index, availableProducts = [], availableSi
   };
 
   const capStyle = { fontSize: '9px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.4px', marginTop: '2px', display: 'block' };
-  const readStyle = { backgroundColor: '#000000', border: '1px solid #334155', borderRadius: '4px', color: '#ffffff', fontSize: '11px', padding: '2px 6px', width: '100%', height: '28px', display: 'flex', alignItems: 'center', boxSizing: 'border-box', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
+  const readStyle = { backgroundColor: 'transparent', border: '1px solid #ffffff20', borderRadius: '4px', color: '#ffffff', fontSize: '11px', padding: '2px 6px', width: '100%', height: '28px', display: 'flex', alignItems: 'center', boxSizing: 'border-box', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
 
   // ===== MODO VISTA: misma fila que registrar pero solo lectura =====
   if (isViewMode) {
     return (
-      <div style={{ backgroundColor: '#000000', borderBottom: '1px solid #1e293b', padding: '8px 4px' }}>
+      <div style={{ backgroundColor: 'transparent', borderBottom: '1px solid #ffffff10', padding: '8px 4px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 90px 62px 1fr 1fr 90px 90px', gap: '6px', alignItems: 'start' }}>
           <div>
             <div style={{ ...readStyle, fontWeight: '600' }}>{producto.nombre || '-'}</div>
@@ -81,8 +81,8 @@ const ProductoItemForm = ({ producto, index, availableProducts = [], availableSi
 
   return (
     <div style={{
-      backgroundColor: '#000000',
-      borderBottom: '1px solid #1e293b',
+      backgroundColor: 'transparent',
+      borderBottom: '1px solid #ffffff10',
       padding: '8px 4px',
       position: 'relative',
     }}>

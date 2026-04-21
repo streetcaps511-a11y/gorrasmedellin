@@ -1,5 +1,5 @@
 .entity-table-container {
-  width: 98%;
+  width: 100%;
   overflow-x: hidden;
   border-radius: 0;
   border: none;
@@ -46,7 +46,7 @@
 
 /* Body Styles */
 .entity-table tbody tr {
-  border-bottom: 1px solid #1a1a1a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   transition: background-color 0.2s ease;
 }
 

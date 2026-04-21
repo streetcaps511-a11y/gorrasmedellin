@@ -152,10 +152,11 @@
 }
 
 .gm-color-circle-btn {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.1);
+  border: 2px solid currentColor; /* SE USARÁ EL COLOR DEL STYLE DINÁMICO */
+  background-color: transparent !important; /* 🚀 Sin relleno */
   cursor: pointer;
   padding: 0;
   display: flex;
@@ -163,26 +164,26 @@
   justify-content: center;
   transition: all 0.2s ease;
   position: relative;
+  box-shadow: none;
 }
 
 .gm-color-circle-btn:hover {
   transform: scale(1.15);
-  border-color: #FFC107;
+  box-shadow: 0 0 12px currentColor;
+  opacity: 0.8;
 }
 
 .gm-color-circle-btn.active {
-  border-color: #FFC107;
-  transform: scale(1.1);
-  box-shadow: 0 0 10px rgba(255,193,7,0.4);
+  transform: scale(1.2);
+  border-width: 3px;
+  border-color: #3B82F6; /* 🚀 Azul del nuevo azul */
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+  z-index: 2;
 }
 
+/* Se elimina el punto blanco interior para dejar la bolita limpia */
 .gm-color-check {
-  width: 8px;
-  height: 8px;
-  background: white;
-  border-radius: 50%;
-  box-shadow: 0 0 4px rgba(0,0,0,0.5);
-  mix-blend-mode: difference;
+  display: none;
 }
 
 .gm-products-main-content {

@@ -119,6 +119,9 @@ const VentasPage = () => {
   const [imgModal, setImgModal] = useState({ open: false, src: '' });
   const openImage = (src) => setImgModal({ open: true, src });
 
+  // local state for filtering products in detail view
+  const [detailSearch, setDetailSearch] = useState('');
+
   return (
     <div className="ventas-page-wrapper">
       {alert.show && (
@@ -384,7 +387,7 @@ const VentasPage = () => {
             </div>
           )}
         </div>
-
+        
         {/* CONTENIDO PRINCIPAL */}
         {modoVista === "lista" ? (
           <div className="ventas-table-container">
@@ -425,10 +428,10 @@ const VentasPage = () => {
             <div className="sales-top-row">
               {/* CARD 1: DATOS DE VENTA */}
               <div className="venta-form-card">
-                <div className="section-title"><FaUser size={14} /> DATOS DE VENTA</div>
+                <div className="section-title"><FaUser size={14} /> datos de venta</div>
                 <div className="form-data-grid">
                   <div className="form-field-group full-width" style={{ marginBottom: '8px' }}>
-                    <label className="form-label">CLIENTE <span className="required">*</span></label>
+                    <label className="form-label">cliente <span className="required">*</span></label>
                     <SearchSelect 
                       options={availableCustomers}
                       selectedItem={availableCustomers.find(c => String(c.id) === String(nuevaVenta.idCliente))}
@@ -460,45 +463,47 @@ const VentasPage = () => {
                     />
                   </div>
 
-                  <div className="form-field-group">
-                    <label className="form-label">MÉTODO DE PAGO <span className="required">*</span></label>
-                    <select 
-                      value={nuevaVenta.metodoPago || ''} 
-                      onChange={(e) => actualizarProducto(-1, 'metodoPago', e.target.value)}
-                      className={`form-input-main ${errors.metodoPago ? 'has-error' : ''}`}
-                    >
-                      <option value="" disabled hidden>Seleccionar...</option>
-                      {['Efectivo', 'Bancolombia', 'Nequi', 'Bold'].map(m => (
-                        <option key={m} value={m}>{m}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-field-group">
-                    <label className="form-label">MÉTODO DE ENTREGA <span className="required">*</span></label>
-                    <select 
-                      value={nuevaVenta.tipoEntrega || ''} 
-                      onChange={(e) => actualizarProducto(-1, 'tipoEntrega', e.target.value)}
-                      className={`form-input-main ${errors.tipoEntrega ? 'has-error' : ''}`}
-                    >
-                      <option value="" disabled hidden>Seleccionar...</option>
-                      <option value="envio">🚚 Envío a domicilio</option>
-                      <option value="recoger">🏪 Recoger en local</option>
-                    </select>
-                  </div>
-
-                  <div className={`form-field-group ${(nuevaVenta.tipoEntrega === 'recoger') ? 'full-width' : ''}`}>
-                    <label className="form-label">FECHA <span className="required">*</span></label>
-                    <DateInputWithCalendar 
-                      value={nuevaVenta.fecha} 
-                      onChange={(d) => actualizarProducto(-1, 'fecha', d)} 
-                      className={`ventas-date-input ${errors.fecha ? 'has-error' : ''}`}
-                    />
-                  </div>
-                  
-                  {nuevaVenta.tipoEntrega === 'envio' && (
+                  <div className="form-data-grid three-columns">
                     <div className="form-field-group">
-                      <label className="form-label">DIRECCIÓN DE ENVÍO <span className="required">*</span></label>
+                      <label className="form-label">método de pago <span className="required">*</span></label>
+                      <select 
+                        value={nuevaVenta.metodoPago || ''} 
+                        onChange={(e) => actualizarProducto(-1, 'metodoPago', e.target.value)}
+                        className={`form-input-main ${errors.metodoPago ? 'has-error' : ''}`}
+                      >
+                        <option value="" disabled hidden>Seleccionar...</option>
+                        {['Efectivo', 'Bancolombia', 'Nequi', 'Bold'].map(m => (
+                          <option key={m} value={m}>{m}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="form-field-group">
+                      <label className="form-label">método de entrega <span className="required">*</span></label>
+                      <select 
+                        value={nuevaVenta.tipoEntrega || ''} 
+                        onChange={(e) => actualizarProducto(-1, 'tipoEntrega', e.target.value)}
+                        className={`form-input-main ${errors.tipoEntrega ? 'has-error' : ''}`}
+                      >
+                        <option value="" disabled hidden>Seleccionar...</option>
+                        <option value="envio">🚚 Envío a domicilio</option>
+                        <option value="recoger">🏪 Recoger en local</option>
+                      </select>
+                    </div>
+
+                    <div className="form-field-group">
+                      <label className="form-label">fecha <span className="required">*</span></label>
+                      <DateInputWithCalendar 
+                        value={nuevaVenta.fecha} 
+                        onChange={(d) => actualizarProducto(-1, 'fecha', d)} 
+                        className={`ventas-date-input ${errors.fecha ? 'has-error' : ''}`}
+                      />
+                    </div>
+                  </div>
+
+                  {nuevaVenta.tipoEntrega === 'envio' && (
+                    <div className="form-field-group full-width">
+                      <label className="form-label">dirección de envío <span className="required">*</span></label>
                       <input 
                         type="text" 
                         value={nuevaVenta.direccionEnvio || ''} 
@@ -511,10 +516,10 @@ const VentasPage = () => {
                 </div>
               </div>
 
-              {/* CARD 2: COMPROBANTE DE PAGO */}
+              {/* CARD 2: comprobante de pago */}
               <div className="venta-form-card">
                 <div className="section-title">
-                  <FaCamera size={14} /> COMPROBANTE DE PAGO
+                  <FaCamera size={14} /> comprobante de pago
                   {requiresReceipt(nuevaVenta.metodoPago) && <span className="required"> *</span>}
                 </div>
                 <div className={`evidence-dropzone ${errors.evidencia ? 'has-error' : ''}`}>
@@ -577,7 +582,7 @@ const VentasPage = () => {
               
               <div className="totals-separator">
                 <div className="total-summary">
-                  <span className="total-label">TOTAL A COBRAR:</span>
+                  <span className="total-label">total a cobrar:</span>
                   <span className="total-value">${calcularTotal().toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               </div>
@@ -685,7 +690,23 @@ const VentasPage = () => {
             </div>
 
             {/* Fila inferior: PRODUCTOS (Detalle) */}
-            <div className="venta-form-card full-width-card">
+            <div className="venta-form-card full-width-card" style={{ marginTop: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>ESTADO:</span>
+                  <StatusPill status={ventaViendo?.estado} />
+                </div>
+                
+                <div style={{ width: '250px' }}>
+                  <SearchInput 
+                    value={detailSearch} 
+                    onChange={setDetailSearch} 
+                    placeholder="Buscar producto..." 
+                    onClear={() => setDetailSearch('')}
+                  />
+                </div>
+              </div>
+
               <div className="section-title"><FaBoxOpen size={14} /> PRODUCTOS ADQUIRIDOS</div>
               <div className="products-table-header products-table-header-view">
                 <span className="header-label">PRODUCTO</span>
@@ -695,16 +716,14 @@ const VentasPage = () => {
                 <span className="header-label important">SUBTOTAL</span>
               </div>
               <div className="products-list-scroll">
-                {ventaViendo?.productos?.map((p, i) => (
-                  <ProductoForm key={i} producto={p} isViewMode={true} />
-                ))}
+                {(ventaViendo?.productos || [])
+                  .filter(p => p.nombre?.toLowerCase().includes(detailSearch.toLowerCase()))
+                  .map((p, i) => (
+                    <ProductoForm key={i} producto={p} isViewMode={true} />
+                  ))}
               </div>
 
-              <div className="detail-footer-actions">
-                <div className={`status-block-header-v ${ventaViendo?.estado?.toLowerCase().includes('rechaz') ? 'rejected' : 'approved'}`}>
-                  <span className="status-block-label">ESTADO DE LA VENTA:</span>
-                  <span className="status-block-value">{ventaViendo?.estado?.toUpperCase()}</span>
-                </div>
+              <div className="detail-footer-actions" style={{ marginTop: '10px', borderTop: 'none' }}>
 
                 {/* Motivo de Rechazo (si ya está rechazada) */}
                 {(ventaViendo?.estado === availableStatuses[2] || ventaViendo?.estado?.toLowerCase().includes('rechaz')) && (

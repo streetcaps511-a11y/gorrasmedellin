@@ -124,6 +124,7 @@ export const useCategoriasLogic = () => {
     handleFilterSelect: (s) => { setFilterStatus(s); setCurrentPage(1); },
     clearSearch: () => { setSearchTerm(''); setCurrentPage(1); },
     openModal: (mode = 'create', cat = null) => {
+      setErrors({}); // 🚀 Limpiar errores previos al abrir el modal
       if (cat) setFormData({ nombre: cat.nombre, descripcion: cat.descripcion, imagenUrl: cat.imagenUrl, isActive: cat.isActive });
       else setFormData({ nombre: '', descripcion: '', imagenUrl: '', isActive: true });
       setModalState({ isOpen: true, mode, category: cat });

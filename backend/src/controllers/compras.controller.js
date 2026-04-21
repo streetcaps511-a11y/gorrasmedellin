@@ -91,7 +91,7 @@ const compraController = {
                     { 
                         model: DetalleCompra, 
                         as: 'detalles',
-                        include: [{ model: Producto, as: 'producto' }]
+                        include: [{ model: Producto, as: 'producto', paranoid: false }]
                     }
                 ],
                 order: [

@@ -44,7 +44,7 @@ const ventaController = {
             const { count, rows } = await Venta.findAndCountAll({
                 include: [
                     { model: Cliente, as: 'clienteData', attributes: ['id', 'nombreCompleto'] },
-                    { model: DetalleVenta, as: 'detalles', include: [{ model: Producto, as: 'producto', attributes: ['id', 'nombre', 'precioVenta'] }] }
+                    { model: DetalleVenta, as: 'detalles', include: [{ model: Producto, as: 'producto', attributes: ['id', 'nombre', 'precioVenta'], paranoid: false }] }
                 ],
                 limit: parseInt(limit),
                 offset: parseInt(offset),
@@ -60,7 +60,7 @@ const ventaController = {
     getVentaById: async (req, res) => {
         try {
             const venta = await Venta.findByPk(req.params.id, { 
-                include: ['clienteData', { model: DetalleVenta, as: 'detalles', include: [{ model: Producto, as: 'producto' }] }] 
+                include: ['clienteData', { model: DetalleVenta, as: 'detalles', include: [{ model: Producto, as: 'producto', paranoid: false }] }] 
             });
             if (!venta) return res.status(404).json({ success: false, message: 'Venta no encontrada' });
             res.json({ success: true, data: venta });
@@ -89,7 +89,7 @@ const ventaController = {
                     { 
                         model: DetalleVenta, 
                         as: 'detalles', 
-                        include: [{ model: Producto, as: 'producto' }] 
+                        include: [{ model: Producto, as: 'producto', paranoid: false }] 
                     }
                 ],
                 order: [['fecha', 'DESC']]
@@ -267,7 +267,7 @@ const ventaController = {
             const ventaCompleta = await Venta.findByPk(nuevaVentaObj.id, {
                 include: [
                     { association: 'clienteData', attributes: ['Nombre'] },
-                    { association: 'detalles', include: [{ model: Producto, as: 'producto' }] }
+                    { association: 'detalles', include: [{ model: Producto, as: 'producto', paranoid: false }] }
                 ]
             });
 
@@ -348,7 +348,7 @@ const ventaController = {
             const data = await Venta.findAll({
                 where: { idCliente: cliente.id },
                 include: [
-                    { model: DetalleVenta, as: 'detalles', include: [{ model: Producto, as: 'producto', attributes: ['id', 'nombre', 'precioVenta', 'imagenes'] }] }
+                    { model: DetalleVenta, as: 'detalles', include: [{ model: Producto, as: 'producto', attributes: ['id', 'nombre', 'precioVenta', 'imagenes'], paranoid: false }] }
                 ],
                 order: [['fecha', 'DESC']]
             });
@@ -480,7 +480,7 @@ const ventaController = {
             const ventaFinal = await Venta.findByPk(ventaId, {
                 include: [
                     { model: Cliente, as: 'clienteData' },
-                    { model: DetalleVenta, as: 'detalles', include: [{ model: Producto, as: 'producto' }] }
+                    { model: DetalleVenta, as: 'detalles', include: [{ model: Producto, as: 'producto', paranoid: false }] }
                 ]
             });
 

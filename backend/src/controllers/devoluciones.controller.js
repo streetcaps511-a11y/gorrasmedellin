@@ -103,7 +103,8 @@ const devolucionController = {
                         model: Producto,
                         as: 'productoInfo',
                         attributes: ['id', 'nombre'],
-                        required: false
+                        required: false,
+                        paranoid: false
                     }
                 ]
             });
@@ -116,7 +117,9 @@ const devolucionController = {
 
     getDevolucionById: async (req, res) => {
         try {
-            const data = await Devolucion.findByPk(req.params.id);
+            const data = await Devolucion.findByPk(req.params.id, {
+                include: [{ model: Producto, as: 'productoInfo', paranoid: false }]
+            });
             if (!data) return res.status(404).json({ success: false, message: 'No encontrada' });
             res.json({ success: true, data });
         } catch (error) {
@@ -381,7 +384,8 @@ const devolucionController = {
                     {
                         model: Producto,
                         as: 'productoInfo',
-                        attributes: ['id', 'nombre', 'imagenes']
+                        attributes: ['id', 'nombre', 'imagenes'],
+                        paranoid: false
                     }
                 ],
                 order: [['fecha', 'DESC']]

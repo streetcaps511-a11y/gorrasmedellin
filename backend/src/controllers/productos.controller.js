@@ -66,8 +66,9 @@ const productoController = {
             if (!isTodos) {
                 queryOptions.limit = parseInt(limit);
                 queryOptions.offset = parseInt(offset);
-                // Asegurar que solo vemos productos activos en la tienda
+                // Asegurar que solo vemos productos activos y con stock en la tienda
                 whereClause.isActive = { [Op.ne]: false }; 
+                whereClause.stock = { [Op.gt]: 0 }; // 🚀 Solo productos con inventario real
             }
 
             const { count, rows } = await Producto.findAndCountAll(queryOptions);
@@ -401,43 +402,34 @@ const productoController = {
                 return res.status(404).json({ success: false, message: 'Producto no encontrado' });
             }
 
-            // 🔍 VALIDACIÓN DE INTEGRIDAD REFERENCIAL (Evitar 500 por Foreign Key)
-            const { DetalleVenta, CompraDetalle, Devolucion } = sequelize.models;
-            
-            const hasVentas = await DetalleVenta?.findOne({ where: { idProducto: id }, transaction });
-            if (hasVentas) {
+            // 🔍 VALIDACIÓN DE STOCK ROBUSTA
+            // Calculamos el stock actual real desde las tallas por si la columna 'stock' está desincronizada
+            let actualStock = 0;
+            try {
+                const tallas = (typeof producto.tallasStock === 'string') 
+                    ? JSON.parse(producto.tallasStock) 
+                    : (producto.tallasStock || []);
+                actualStock = tallas.reduce((acc, curr) => acc + (Number(curr.cantidad) || 0), 0);
+            } catch (e) {
+                actualStock = Number(producto.stock) || 0;
+            }
+
+            if (actualStock > 0) {
                 await transaction.rollback();
                 return res.status(400).json({ 
                     success: false, 
-                    message: 'No se puede eliminar el producto porque tiene ventas asociadas. Considere desactivarlo.' 
+                    message: `No se puede borrar: tiene ${actualStock} unidades en stock.` 
                 });
             }
 
-            const hasCompras = await CompraDetalle?.findOne({ where: { idProducto: id }, transaction });
-            if (hasCompras) {
-                await transaction.rollback();
-                return res.status(400).json({ 
-                    success: false, 
-                    message: 'No se puede eliminar el producto porque tiene registros de compra asociados (Stock histórico).' 
-                });
-            }
-
-            const hasDevoluciones = await Devolucion?.findOne({ where: { idProducto: id }, transaction });
-            if (hasDevoluciones) {
-                await transaction.rollback();
-                return res.status(400).json({ 
-                    success: false, 
-                    message: 'No se puede eliminar el producto porque tiene devoluciones pendientes o registradas.' 
-                });
-            }
-
-            // Si pasa las validaciones, procedemos al borrado físico
+            // Si el stock es 0, procedemos al borrado lógico (Soft Delete)
+            // Esto permite que el producto desaparezca del catálogo activo pero se mantenga en el historial de ventas/compras.
             await producto.destroy({ transaction });
             await transaction.commit();
 
             res.status(200).json({
                 success: true,
-                message: 'Producto eliminado permanentemente del sistema'
+                message: 'Producto eliminado exitosamente (se mantiene en el historial histórico de transacciones)'
             });
         } catch (error) {
             if (transaction) await transaction.rollback();

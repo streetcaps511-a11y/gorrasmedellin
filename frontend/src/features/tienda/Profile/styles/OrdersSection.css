@@ -630,10 +630,10 @@
 }
 
 .gm-item-change-btn {
-  background-color: transparent;
+  background-color: transparent; 
   color: #ef4444; 
-  border: 1.5px solid #ef4444; /* Borde más definido como el screenshot */
-  padding: 8px 24px; /* Más ancho/estirado */
+  border: 1.5px solid #ef4444 !important;
+  padding: 8px 24px; 
   font-size: 0.75rem; 
   font-weight: 900;
   border-radius: 6px;
@@ -808,9 +808,9 @@
 }
 
 .gm-bulk-return-btn-premium {
-  background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%);
-  color: #fff;
-  border: none;
+  background: transparent;
+  color: #ef4444;
+  border: 1.5px solid #ef4444 !important;
   padding: 8px 18px;
   border-radius: 10px;
   font-family: 'Montserrat', sans-serif;
@@ -823,7 +823,7 @@
   gap: 8px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+  box-shadow: none;
 }
 
 .gm-bulk-return-btn-premium:hover {

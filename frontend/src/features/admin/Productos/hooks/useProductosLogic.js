@@ -68,7 +68,16 @@ export const useProductosLogic = () => {
 
   useEffect(() => {
     fetchInitialData(productos.length === 0);
-  }, [fetchInitialData]); // 👈 Remover productos.length para evitar re-fetch prematuro al borrar
+    
+    // 📡 Listener de sincronización entre pestañas
+    const channel = new BroadcastChannel('app_sync');
+    channel.onmessage = (event) => {
+      if (event.data === 'productos_updated') {
+        fetchInitialData(false); // Refrescar en segundo plano
+      }
+    };
+    return () => channel.close();
+  }, [fetchInitialData]);
 
   const filteredProductos = useMemo(() => {
     let filtrados = productos;
@@ -103,12 +112,21 @@ export const useProductosLogic = () => {
     channel.close();
   };
 
+  const closeDeleteModal = () => setDeleteModal({ isOpen: false, producto: null, customMessage: '' });
+  const closeToggleModal = () => setToggleModal({ isOpen: false, producto: null, targetStatus: true });
+
   const validateForm = () => {
     const newErrors = {};
     if (!formData.nombre || !formData.nombre.trim()) newErrors.nombre = "El nombre es obligatorio";
-    if (!formData.idCategoria) newErrors.idCategoria = "La categoría es obligatoria";
-    if (parseFloat(formData.precioCompra) <= 0) newErrors.precioCompra = "El precio de compra debe ser mayor a 0";
+    if (formData.idCategoria === "" || formData.idCategoria === null || formData.idCategoria === undefined) {
+      newErrors.idCategoria = "La categoría es obligatoria";
+    }
     if (parseFloat(formData.precioVenta) <= 0) newErrors.precioVenta = "El precio de venta debe ser mayor a 0";
+    
+    // Solo validar precio de oferta si el switch está activo
+    if (formData.enOfertaVenta && parseFloat(formData.precioOferta) <= 0) {
+      newErrors.precioOferta = "El precio de oferta debe ser mayor a 0 si está activo";
+    }
     
     const tallasValidas = tallasStock.filter(t => t.talla?.trim() !== '');
     if (tallasValidas.length === 0) {
@@ -127,30 +145,60 @@ export const useProductosLogic = () => {
       return;
     }
 
-    setLoading(true);
-    try {
-      const payload = {
-        ...formData,
-        idCategoria: parseInt(formData.idCategoria),
-        tallasStock: tallasStock.filter(t => t.talla?.trim() !== ''),
-        colores: coloresProducto.filter(c => c.trim() !== ''),
-        imagenes: urlsImagenes.filter(url => url.trim() !== '')
-      };
+    // Preparar payload
+    const payload = {
+      ...formData,
+      idCategoria: parseInt(formData.idCategoria),
+      tallasStock: tallasStock.filter(t => t.talla?.trim() !== ''),
+      colores: coloresProducto.filter(c => c.trim() !== ''),
+      imagenes: urlsImagenes.filter(url => url.trim() !== ''),
+      // Mapeo de campos extra para coincidir con lo que espera el estado global
+      categoria: categoriasRaw.find(c => String(c.id) === String(formData.idCategoria))?.nombre || "Sin Categoría"
+    };
 
+    const previousProductos = [...productos];
+
+    try {
       if (productoEditando) {
-        await productosService.updateProducto(productoEditando.id, payload);
+        // 🚀 Optimista para EDITAR
+        setProductos(prev => prev.map(p => p.id === productoEditando.id ? { ...p, ...payload } : p));
+        setModoVista("lista");
         showAlert(`Actualizado correctamente ✅`);
+        
+        const response = await productosService.updateProducto(productoEditando.id, payload);
+        
+        // Actualizar con data real del server por si acaso
+        if (response?.data) {
+          const updatedProd = response.data;
+          const finalProductos = previousProductos.map(p => p.id === productoEditando.id ? updatedProd : p);
+          setProductos(finalProductos);
+          NitroCache.set(CACHE_KEY, finalProductos);
+        } else {
+          const finalProductos = previousProductos.map(p => p.id === productoEditando.id ? { ...p, ...payload } : p);
+          setProductos(finalProductos);
+          NitroCache.set(CACHE_KEY, finalProductos);
+        }
       } else {
-        await productosService.createProducto(payload);
+        // Para CREAR, no podemos ser 100% optimistas sin ID, pero podemos evitar el loading global
+        setLoading(true);
+        const response = await productosService.createProducto(payload);
+        const newProd = response?.data || response; // Depende de la estructura del API
+        
+        const finalProductos = [newProd, ...productos];
+        setProductos(finalProductos);
+        setModoVista("lista");
         showAlert(`Registrado correctamente ✅`);
+        
+        notifySync();
+        NitroCache.set(CACHE_KEY, finalProductos);
       }
-      notifySync();
-      await fetchInitialData(true);
-      setModoVista("lista");
     } catch (error) {
-      const msg = error?.response?.data?.message || error?.message || "Error al guardar";
+      setProductos(previousProductos);
+      const msg = error?.response?.data?.message || error?.message || "Error al ahorrar";
       showAlert(msg, "error");
-    } finally { setLoading(false); }
+    } finally { 
+      setLoading(false); 
+    }
   };
 
   const confirmToggleStatus = async () => {
@@ -173,12 +221,9 @@ export const useProductosLogic = () => {
       await productosService.updateProducto(producto.id, { ...producto, isActive: targetStatus });
       
       // Actualizar caché local
-      const currentData = NitroCache.get(CACHE_KEY);
-      if (currentData) {
-        currentData.data = currentData.data.map(p => p.id === producto.id ? 
-          { ...p, isActive: targetStatus, estado: targetStatus ? "Activo" : "Inactivo" } : p);
-        NitroCache.set(CACHE_KEY, currentData.data);
-      }
+      const finalProductos = productos.map(p => p.id === producto.id ? 
+        { ...p, isActive: targetStatus, estado: targetStatus ? "Activo" : "Inactivo" } : p);
+      NitroCache.set(CACHE_KEY, finalProductos);
     } catch (error) {
       await fetchInitialData(); // Revertir solo si falla
       showAlert("Error al cambiar estado", "error");
@@ -189,29 +234,28 @@ export const useProductosLogic = () => {
     const producto = deleteModal.producto;
     if (!producto) return;
 
-    setLoading(true);
+    // 🚀 Actualización OPTIMISTA (Solo visual)
+    const previousProductos = [...productos];
+    setProductos(prev => prev.filter(p => p.id !== producto.id));
+    closeDeleteModal();
+
+    // Sincronizar instantáneamente con otras pestañas
+    const channel = new BroadcastChannel('app_sync');
+    channel.postMessage('productos_updated');
+    channel.close();
+
     try {
+      showAlert('Eliminado exitosamente ✅'); 
       await productosService.deleteProducto(producto.id);
       
-      // Sincronizar estado local
-      setProductos(prev => prev.filter(p => p.id !== producto.id));
-      showAlert('Eliminado permanentemente 🗑️');
-      
-      // Sincronizar caché
-      const updated = productos.filter(p => p.id !== producto.id);
+      // Actualizar caché
+      const updated = previousProductos.filter(p => p.id !== producto.id);
       NitroCache.set(CACHE_KEY, updated);
-
-      // Notar éxito a otras pestañas
-      const channel = new BroadcastChannel('app_sync');
-      channel.postMessage('productos_updated');
-      channel.close();
-      
-      closeDeleteModal();
     } catch (error) {
-      const msg = error?.response?.data?.message || "Error al eliminar";
+      // 🔄 Revertir si hay error (ej: si tiene stock)
+      setProductos(previousProductos);
+      const msg = error?.response?.data?.message || "No se pudo eliminar";
       showAlert(msg, "error");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -262,9 +306,9 @@ export const useProductosLogic = () => {
     handleDesactivar: (p) => setToggleModal({ isOpen: true, producto: p, targetStatus: false }),
     handleReactivar: (p) => setToggleModal({ isOpen: true, producto: p, targetStatus: true }),
     openDeleteModal: (p) => setDeleteModal({ isOpen: true, producto: p, customMessage: `¿Eliminar permanentemente "${p.nombre}"?` }),
-    closeDeleteModal: () => setDeleteModal({ isOpen: false, producto: null, customMessage: '' }),
+    closeDeleteModal,
     handleDelete,
-    toggleModal, confirmToggleStatus, closeToggleModal: () => setToggleModal({ isOpen: false, producto: null, targetStatus: true }),
+    toggleModal, confirmToggleStatus, closeToggleModal,
     handleInputChange: (e) => { 
       const { name, value, type, checked } = e.target; 
       const finalValue = type === 'checkbox' ? checked : value;

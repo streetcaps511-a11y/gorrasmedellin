@@ -2,7 +2,7 @@ export const COMMON_COLORS = [
   { name: 'Negro', hex: '#000000' },
   { name: 'Blanco', hex: '#FFFFFF' },
   { name: 'Rojo', hex: '#EF4444' },
-  { name: 'Azul', hex: '#3B82F6' },
+  { name: 'Azul', hex: '#2563eb' },
   { name: 'Verde', hex: '#10B981' },
   { name: 'Amarillo', hex: '#F5C81B' },
   { name: 'Gris', hex: '#6B7280' },

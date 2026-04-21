@@ -165,13 +165,13 @@ const SearchSelect = ({
         }
 
         .search-select-header {
-          background-color: #1a1f26; 
-          border: 1px solid #ffffff15; 
+          background-color: transparent; 
+          border: 1px solid rgba(255, 255, 255, 0.45); 
           border-radius: 8px; 
-          padding: 0 16px; 
+          padding: 0 12px; 
           color: #fff; 
-          height: 48px; 
-          font-size: 14px;
+          height: 34px; 
+          font-size: 12px;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -261,10 +261,11 @@ const SearchSelect = ({
         }
 
         .option-item {
-          padding: 12px 16px;
+          padding: 10px 14px;
           cursor: pointer;
           transition: all 0.2s ease;
-          border-bottom: 1px solid #ffffff05;
+          border-bottom: 1px solid #ffffff10;
+          color: #ffffff; /* Brighter */
         }
 
         .option-item:last-child {
@@ -281,10 +282,16 @@ const SearchSelect = ({
         }
 
         .no-results {
-          padding: 20px;
+          padding: 16px;
           text-align: center;
           color: #94a3b8;
           font-size: 13px;
+        }
+
+        /* Fix for native selects in dark mode */
+        select option {
+          background-color: #0c0f14 !important;
+          color: #ffffff !important;
         }
 
         /* Scrollbar styling */
