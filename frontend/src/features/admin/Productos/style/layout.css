@@ -113,28 +113,27 @@
   justify-content: space-between;
   align-items: center;
   padding: 0;
-  margin-top: 5px;
+  margin-top: 0px;
   width: 100%;
 }
 
 .productos-main-content {
-  flex: 1;
   display: flex;
+  flex: 1;
   flex-direction: column;
   border-radius: 12px;
   border: 1px solid #FFC300;
   overflow: hidden;
   background-color: #000000;
-  margin-top: 5px; 
-  min-height: 440px; /* Ajustado para 7 filas sin espacios sobrantes */
-  box-shadow: none;
-  padding-bottom: 0; 
+  margin-top: 10px;
+  padding-bottom: 0;
+  min-height: 420px;
 }
 
 .productos-table-wrapper {
   flex: 1;
-  overflow-y: auto; /* Permitir scroll si es necesario */
-  padding-bottom: 80px; /* Aumentado para mayor espacio */
+  overflow: hidden;
+  padding-bottom: 0px;
 }
 
 .productos-entity-table {

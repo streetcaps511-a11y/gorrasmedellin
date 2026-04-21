@@ -33,26 +33,31 @@
 
 .detalle-field {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.3);
+  padding-bottom: 6px;
 }
 
 .detalle-label {
-  font-size: 10px;
+  font-size: 11px;
   color: #9CA3AF;
-  font-weight: 500;
-  margin-bottom: 2px;
+  font-weight: 600;
+  margin-bottom: 0px;
   display: block;
   text-transform: uppercase;
+  min-width: 120px; /* Ancho fijo para alinear los dos puntos */
 }
 
 .detalle-display {
-  background-color: #1e293b;
-  border: 1px solid #334155;
-  border-radius: 4px;
-  padding: 6px 10px;
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
   color: #fff;
-  font-size: 12px;
-  min-height: 34px;
+  font-size: 13px;
+  min-height: auto;
   display: flex;
   align-items: center;
 }

@@ -42,6 +42,7 @@ export const useProductosLogic = () => {
   const [urlsImagenes, setUrlsImagenes] = useState(['']);
   const [coloresProducto, setColoresProducto] = useState(['']);
   const [loading, setLoading] = useState(getInitialCache().length === 0);
+  const [errors, setErrors] = useState({});
 
   const fetchInitialData = useCallback(async (showLoading = false) => {
     if (showLoading) setLoading(true);
@@ -67,7 +68,7 @@ export const useProductosLogic = () => {
 
   useEffect(() => {
     fetchInitialData(productos.length === 0);
-  }, [fetchInitialData, productos.length]);
+  }, [fetchInitialData]); // 👈 Remover productos.length para evitar re-fetch prematuro al borrar
 
   const filteredProductos = useMemo(() => {
     let filtrados = productos;
@@ -102,8 +103,30 @@ export const useProductosLogic = () => {
     channel.close();
   };
 
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.nombre || !formData.nombre.trim()) newErrors.nombre = "El nombre es obligatorio";
+    if (!formData.idCategoria) newErrors.idCategoria = "La categoría es obligatoria";
+    if (parseFloat(formData.precioCompra) <= 0) newErrors.precioCompra = "El precio de compra debe ser mayor a 0";
+    if (parseFloat(formData.precioVenta) <= 0) newErrors.precioVenta = "El precio de venta debe ser mayor a 0";
+    
+    const tallasValidas = tallasStock.filter(t => t.talla?.trim() !== '');
+    if (tallasValidas.length === 0) {
+      newErrors._general = "Debe agregar al menos una talla con stock";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    
+    if (!validateForm()) {
+      showAlert("Complete los campos obligatorios", "error");
+      return;
+    }
+
     setLoading(true);
     try {
       const payload = {
@@ -122,10 +145,11 @@ export const useProductosLogic = () => {
         showAlert(`Registrado correctamente ✅`);
       }
       notifySync();
-      await fetchInitialData();
+      await fetchInitialData(true);
       setModoVista("lista");
     } catch (error) {
-      showAlert("Error al guardar", "error");
+      const msg = error?.response?.data?.message || error?.message || "Error al guardar";
+      showAlert(msg, "error");
     } finally { setLoading(false); }
   };
 
@@ -162,22 +186,32 @@ export const useProductosLogic = () => {
   };
 
   const handleDelete = async () => {
-    const id = deleteModal.producto.id;
-    setProductos(prev => prev.filter(p => p.id !== id));
-    setDeleteModal({ isOpen: false, producto: null, customMessage: '' });
+    const producto = deleteModal.producto;
+    if (!producto) return;
 
-    // Notar de inmediato a otras pestañas
-    const channel = new BroadcastChannel('app_sync');
-    channel.postMessage('productos_updated');
-    channel.close();
-
+    setLoading(true);
     try {
+      await productosService.deleteProducto(producto.id);
+      
+      // Sincronizar estado local
+      setProductos(prev => prev.filter(p => p.id !== producto.id));
       showAlert('Eliminado permanentemente 🗑️');
-      await productosService.deleteProducto(id);
-      fetchInitialData();
+      
+      // Sincronizar caché
+      const updated = productos.filter(p => p.id !== producto.id);
+      NitroCache.set(CACHE_KEY, updated);
+
+      // Notar éxito a otras pestañas
+      const channel = new BroadcastChannel('app_sync');
+      channel.postMessage('productos_updated');
+      channel.close();
+      
+      closeDeleteModal();
     } catch (error) {
-      fetchInitialData();
-      showAlert("Error al eliminar", "error");
+      const msg = error?.response?.data?.message || "Error al eliminar";
+      showAlert(msg, "error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -187,7 +221,7 @@ export const useProductosLogic = () => {
     filterStatus, setFilterStatus,
     currentPage, setCurrentPage, alert, setAlert, deleteModal,
     formData, tallasStock, categoriasRaw, categoriasUnicas,
-    availableTallas, urlsImagenes, coloresProducto, errors: {},
+    availableTallas, urlsImagenes, coloresProducto, errors,
     loading, filteredProductos, paginatedProductos, totalPages,
     showingStart: filteredProductos.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0,
     endIndex: Math.min(currentPage * itemsPerPage, filteredProductos.length),
@@ -205,8 +239,9 @@ export const useProductosLogic = () => {
     agregarColor: () => coloresProducto.length < 2 && setColoresProducto(prev => [...prev, '']),
     eliminarColor: (idx) => coloresProducto.length > 1 && setColoresProducto(prev => prev.filter((_, i) => i !== idx)),
     actualizarColor: (idx, val) => { const n = [...coloresProducto]; n[idx] = val; setColoresProducto(n); },
-    mostrarLista: () => setModoVista("lista"),
+    mostrarLista: () => { setModoVista("lista"); setErrors({}); },
     mostrarFormulario: (p = null) => {
+      setErrors({});
       if (p) {
         setFormData({ ...p, idCategoria: p.idCategoria || "" });
         setTallasStock(p.tallasStock || [{ talla: "", cantidad: 0 }]);
@@ -222,7 +257,7 @@ export const useProductosLogic = () => {
       }
       setModoVista("formulario");
     },
-    mostrarDetalle: (p) => { setProductoViendo(p); setModoVista("detalle"); },
+    mostrarDetalle: (p) => { setProductoViendo(p); setModoVista("detalle"); setErrors({}); },
     handleSubmit,
     handleDesactivar: (p) => setToggleModal({ isOpen: true, producto: p, targetStatus: false }),
     handleReactivar: (p) => setToggleModal({ isOpen: true, producto: p, targetStatus: true }),
@@ -230,7 +265,18 @@ export const useProductosLogic = () => {
     closeDeleteModal: () => setDeleteModal({ isOpen: false, producto: null, customMessage: '' }),
     handleDelete,
     toggleModal, confirmToggleStatus, closeToggleModal: () => setToggleModal({ isOpen: false, producto: null, targetStatus: true }),
-    handleInputChange: (e) => { const { name, value, type, checked } = e.target; setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value })); },
+    handleInputChange: (e) => { 
+      const { name, value, type, checked } = e.target; 
+      const finalValue = type === 'checkbox' ? checked : value;
+      setFormData(prev => ({ ...prev, [name]: finalValue })); 
+      if (errors[name]) {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+      }
+    },
     handleVerDetalle: (p) => { setProductoViendo(p); setModoVista("detalle"); },
     handleEditarProducto: (p) => { 
         setProductoEditando(p);

@@ -4,7 +4,8 @@ import {
   getProveedores,
   getMetodosPago,
   getTallas,
-  getEstados
+  getEstados,
+  getProductos
 } from '../../../shared/services/adminApi';
 import api from "../../../shared/services/api";
 
@@ -124,4 +125,10 @@ export const getPaymentMethods = async () => {
 export const getSizes = async () => {
   const res = await getTallas();
   return res.data?.data || res.data || [];
+};
+
+export const fetchAllProductos = async () => {
+  const res = await getProductos();
+  const data = res.data?.data || res.data;
+  return Array.isArray(data) ? data : [];
 };

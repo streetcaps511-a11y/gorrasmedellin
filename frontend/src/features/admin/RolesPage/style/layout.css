@@ -74,9 +74,8 @@
   border: 1px solid #FFC300;
   overflow: hidden;
   background-color: #000000;
-  margin-top: 5px;
+  margin-top: 10px;
   min-height: 420px;
-  padding-bottom: 30px;
 }
 
 .roles-table-wrapper {

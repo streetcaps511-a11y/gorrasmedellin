@@ -39,9 +39,6 @@ export const ClienteFormFields = ({ modalState, formData, handleInputChange, err
           <div className="clientes-form-col">{renderField('Ciudad', cliente?.ciudad)}</div>
         </div>
         
-        <div className="modal-actions-container" style={{ marginTop: '10px' }}>
-          <button onClick={closeModal} className="modal-btn-save" style={{ minWidth: '100px' }}>Cerrar</button>
-        </div>
       </div>
     );
   }
@@ -115,12 +112,6 @@ export const ClienteFormFields = ({ modalState, formData, handleInputChange, err
         <div className="clientes-form-col">{renderEditableField('Ciudad', 'city', 'select')}</div>
       </div>
 
-      <div className="modal-actions-container">
-        <button onClick={closeModal} className="modal-btn-cancel">Cancelar</button>
-        <button onClick={handleSave} className="modal-btn-save">
-          {isEdit ? 'Guardar Cambios' : 'Guardar'}
-        </button>
-      </div>
     </div>
   );
 };

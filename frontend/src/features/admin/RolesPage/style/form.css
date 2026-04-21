@@ -2,19 +2,19 @@
 .role-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
 }
 
 .form-body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
 }
 
 .form-field {
   display: flex;
   flex-direction: column;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .form-label {
@@ -66,11 +66,11 @@
 .permissions-grid {
   display: grid; 
   grid-template-columns: repeat(2, 1fr); 
-  gap: 8px;
-  padding: 12px;
-  background-color: #0d1117; /* Fondo oscuro consistente */
+  gap: 2px; /* Menos separación entre filas para evitar scroll */
+  padding: 4px 8px; 
+  background-color: transparent; 
   border-radius: 8px; 
-  border: 1px solid #30363d;
+  border: 1px solid #334155; 
 }
 
 .permission-item {

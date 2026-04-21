@@ -44,6 +44,19 @@ const ProductCard = ({ product, badge, badgeType, openModal }) => {
   return (
     <div className="gm-card">
       <div className="gm-img-wrapper">
+        {/* BADGES EN LAS ESQUINAS */}
+        {isAgotado && (
+          <div className="gm-img-badge-corner agotado">
+            AGOTADO
+          </div>
+        )}
+        
+        {((product.hasDiscount || product.has_discount || product.oferta) && product.precioOferta) && (
+          <div className="gm-img-badge-corner oferta">
+            OFERTA
+          </div>
+        )}
+
         <div className="gm-img-scroller">
           <img
             src={currentImage}
@@ -75,16 +88,7 @@ const ProductCard = ({ product, badge, badgeType, openModal }) => {
           <RatingStars value={rating} />
         </div>
         <div className="gm-badge-container">
-          {isAgotado && (
-            <span className="gm-badge-inline gm-badge--agotado">
-              Agotado
-            </span>
-          )}
-          {badge && (
-            <span className={`gm-badge-inline gm-badge--${badgeType || "default"}`}>
-              {badge}
-            </span>
-          )}
+          {/* Eliminados de aquí para moverlos a la esquina de la imagen, pero manteniendo el contenedor para espaciado */}
         </div>
         <div className="gm-actions-row">
           <div className="gm-price-actions">

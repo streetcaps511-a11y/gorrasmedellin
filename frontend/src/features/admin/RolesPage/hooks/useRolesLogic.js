@@ -72,7 +72,7 @@ export const useRolesLogic = (initialAvailablePermissions = []) => {
     } finally {
       setLoading(false);
     }
-  }, [roles.length]);
+  }, []); // 👈 Remover roles.length para evitar re-fetch prematuro al borrar
 
   useEffect(() => {
     fetchData();
@@ -208,15 +208,25 @@ export const useRolesLogic = (initialAvailablePermissions = []) => {
   const closeDeleteModal = () => setDeleteModal({ isOpen: false, role: null });
 
   const handleDelete = async () => {
-    if (!deleteModal.role) return;
+    const roleToDelete = deleteModal.role;
+    if (!roleToDelete) return;
+
     setLoading(true);
     try {
-      await rolesService.deleteRole(deleteModal.role.id);
-      setRoles(prev => prev.filter(r => r.id !== deleteModal.role.id));
-      showAlert(`Rol "${deleteModal.role.name}" eliminado correctamente`, "delete");
+      await rolesService.deleteRole(roleToDelete.id);
+      
+      // Sincronizar estado local
+      setRoles(prev => prev.filter(r => r.id !== roleToDelete.id));
+      showAlert(`Rol "${roleToDelete.name}" eliminado correctamente`, "delete");
+      
+      // Sincronizar caché
+      const updated = roles.filter(r => r.id !== roleToDelete.id);
+      NitroCache.set('roles_admin', updated);
+      
       closeDeleteModal();
     } catch (error) {
-      showAlert("Error al eliminar", "error");
+      const msg = error.response?.data?.message || "Error al eliminar";
+      showAlert(msg, "error");
     } finally {
       setLoading(false);
     }

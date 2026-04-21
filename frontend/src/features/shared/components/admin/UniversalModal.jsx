@@ -26,12 +26,18 @@ const UniversalModal = ({
   useEffect(() => {
     if (!isOpen) return;
 
+    // Lock body scroll
+    document.body.style.overflow = 'hidden';
+
     const handleEsc = (e) => {
       if (e.key === "Escape") onClose?.();
     };
 
     document.addEventListener("keydown", handleEsc);
-    return () => document.removeEventListener("keydown", handleEsc);
+    return () => {
+      document.removeEventListener("keydown", handleEsc);
+      document.body.style.overflow = '';
+    };
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
@@ -74,22 +80,43 @@ const UniversalModal = ({
           )}
         </div>
 
-        {/* CONTENIDO (Incluyendo las acciones) */}
-  <div className="modal-content-scroll" style={{ overflowY: 'auto', flex: 1, position: 'relative' }}>
-          {children}
+        {/* FORM CONTAINER WITH STICKY FOOTER */}
+        <form
+          className="modal-form-wrapper"
+          style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (showActions || actions.length > 0) {
+              const primaryAction = actions.find(a => a.variant !== 'secondary') || { onClick: onSave || onConfirm };
+              if (primaryAction.onClick && !loading) {
+                primaryAction.onClick();
+              }
+            } else if (onSave || onConfirm) {
+              if (!loading) {
+                (onSave || onConfirm)();
+              }
+            }
+          }}
+        >
+          {/* SCROLLABLE CONTENT */}
+          <div className="modal-content-scroll" style={{ overflowY: 'auto', flex: 1, paddingRight: '4px' }}>
+            {children}
+          </div>
 
-          {/* FOOTER - Actions dentro del scroll para mayor integración */}
+          {/* STICKY FOOTER */}
           {(showActions || actions.length > 0) && (
             <div className="modal-footer-actions">
-              {/* Renderizar acciones por el nuevo formato o el antiguo */}
               {actions.length > 0 ? (
                 actions.map((action, idx) => (
                   <button
                     key={idx}
-                    onClick={() => {
-                      if (loading) return;
-                      action.onClick?.();
-                      if (action.closeOnClick !== false) onClose();
+                    type={action.variant === 'secondary' ? 'button' : 'submit'}
+                    onClick={(e) => {
+                      if (action.variant === 'secondary') {
+                         if (loading) return;
+                         action.onClick?.();
+                         if (action.closeOnClick !== false) onClose();
+                      }
                     }}
                     className={`btn-modal-base ${action.variant === 'secondary' ? 'btn-modal-cancel' : 'btn-modal-confirm'} ${loading ? 'loading' : ''}`}
                     disabled={loading || action.disabled}
@@ -109,18 +136,17 @@ const UniversalModal = ({
                   </button>
 
                   <button
-                    type="button"
-                    onClick={handleConfirm}
+                    type="submit"
                     className={`btn-modal-base btn-modal-confirm ${loading ? 'loading' : ''}`}
                     disabled={loading}
                   >
-                    {loading ? (loadingText || "Cargando...") : (actionLabel || confirmText)}
+                    {actionLabel || confirmText}
                   </button>
                 </>
               )}
             </div>
           )}
-        </div>
+        </form>
       </div>
     </div>
   );

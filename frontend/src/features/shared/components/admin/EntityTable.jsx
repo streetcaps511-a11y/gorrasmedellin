@@ -84,7 +84,11 @@ const EntityTable = ({
         <thead>
           <tr>
             {columns.map((col, i) => (
-              <th key={i} className="entity-table-header-cell">
+              <th 
+                key={i} 
+                className="entity-table-header-cell"
+                style={{ width: col.width || 'auto' }}
+              >
                 {col.header}
               </th>
             ))}
@@ -202,18 +206,15 @@ const EntityTable = ({
                             />
                           )}
 
-                          {onApprove && (
+                           {onApprove && (
                             <FaCheckCircle
                               size={18}
                               className="action-icon action-approve"
                               onClick={row.estado === 'Pendiente' ? () => onApprove(row) : undefined}
-                              title={row.estado === 'Pendiente' ? "Aprobar" : (row.estado.toLowerCase().includes('completad') || row.estado.toLowerCase().includes('aprob') ? 'Aprobada' : '')}
+                              title="Aprobar"
                               style={{ 
                                 color: '#10b981', 
-                                opacity: row.estado === 'Pendiente' ? 1 : (row.estado.toLowerCase().includes('completad') || row.estado.toLowerCase().includes('aprob') ? 0.3 : 0),
-                                cursor: row.estado === 'Pendiente' ? 'pointer' : 'default',
-                                pointerEvents: row.estado === 'Pendiente' ? 'auto' : 'none',
-                                display: (row.estado === 'Pendiente' || row.estado.toLowerCase().includes('completad') || row.estado.toLowerCase().includes('aprob')) ? 'block' : 'none'
+                                display: row.estado === 'Pendiente' ? 'block' : 'none'
                               }}
                             />
                           )}
@@ -223,13 +224,10 @@ const EntityTable = ({
                               size={18}
                               className="action-icon action-reject"
                               onClick={row.estado === 'Pendiente' ? () => onReject(row) : undefined}
-                              title={row.estado === 'Pendiente' ? "Rechazar" : (row.estado.toLowerCase().includes('rechaz') ? 'Rechazada' : '')}
+                              title="Rechazar"
                               style={{ 
                                 color: '#ef4444', 
-                                opacity: row.estado === 'Pendiente' ? 1 : (row.estado.toLowerCase().includes('rechaz') ? 0.3 : 0),
-                                cursor: row.estado === 'Pendiente' ? 'pointer' : 'default',
-                                pointerEvents: row.estado === 'Pendiente' ? 'auto' : 'none',
-                                display: (row.estado === 'Pendiente' || row.estado.toLowerCase().includes('rechaz')) ? 'block' : 'none'
+                                display: row.estado === 'Pendiente' ? 'block' : 'none'
                               }}
                             />
                           )}
@@ -268,16 +266,14 @@ const EntityTable = ({
                             />
                           )}
 
-                          {onAnular && (moduleType === 'ventas' || moduleType === 'compras') && (
+                           {onAnular && (moduleType === 'ventas' || moduleType === 'compras') && (
                             <FaBan
                               size={18}
                               className="action-icon"
                               onClick={() => onAnular(row)}
                               title="Anular"
                               style={{ 
-                                opacity: (row.estado === 'Anulada' || row.estado === 'Completada') ? 0.4 : 1,
-                                cursor: (row.estado === 'Anulada' || row.estado === 'Completada') ? 'default' : 'pointer',
-                                pointerEvents: (row.estado === 'Anulada' || row.estado === 'Completada') ? 'none' : 'auto'
+                                display: (row.estado === 'Anulada' || row.estado === 'Completada') ? 'none' : 'block'
                               }}
                             />
                           )}

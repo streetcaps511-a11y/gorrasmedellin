@@ -18,17 +18,23 @@
     "seed:prod": "NODE_ENV=production node src/scripts/seed.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["api", "tienda", "streetcaps", "ventas"],
+  "keywords": [
+    "api",
+    "tienda",
+    "streetcaps",
+    "ventas"
+  ],
   "author": "STREETCAPS",
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@getbrevo/brevo": "^2.0.0-beta.4",
     "bcryptjs": "^2.4.3",
+    "compression": "^1.8.1",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^4.22.1",
     "firebase": "^12.10.0",
-    "@getbrevo/brevo": "^2.0.0-beta.4",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.1",
     "pg": "^8.19.0",

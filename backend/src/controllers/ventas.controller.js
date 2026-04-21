@@ -248,7 +248,12 @@ const ventaController = {
                         const indexTalla = tallasStockRaw.findIndex(ts => ts.talla === d.talla);
                         if (indexTalla !== -1) {
                             tallasStockRaw[indexTalla].cantidad -= d.cantidad;
+                            
+                            // 🔥 RECALCULAR STOCK GLOBAL PARA EVITAR DESFASES
+                            const nuevoStockGlobal = tallasStockRaw.reduce((sum, s) => sum + (parseInt(s.cantidad) || 0), 0);
+                            
                             p.tallasStock = tallasStockRaw;
+                            p.stock = nuevoStockGlobal; // 🚀 Sincronización crítica
                             await p.save({ transaction });
                         }
                     }
@@ -414,11 +419,16 @@ const ventaController = {
                                 throw new Error(`Stock insuficiente para ${producto.nombre} en talla ${d.talla}. Disponible: ${cantidadDisponible}`);
                             }
                             tallasStock[idx].cantidad = cantidadDisponible - cantidadNecesaria;
+                            
+                            // 🔥 RECALCULAR STOCK GLOBAL PARA EVITAR DESFASES EN EL HOME
+                            const nuevoStockGlobal = tallasStock.reduce((total, s) => total + (parseInt(s.cantidad) || 0), 0);
+                            
                             // Forzar que Sequelize detecte el cambio marcándolo explícitamente
                             producto.tallasStock = tallasStock;
+                            producto.stock = nuevoStockGlobal; // 🚀 Sincronización crítica
                             producto.changed('tallasStock', true);
                             await producto.save({ transaction });
-                            console.log(`✅ TallasStock actualizado para ${producto.nombre}:`, JSON.stringify(tallasStock));
+                            console.log(`✅ Stock actualizado para ${producto.nombre}: Talla=${d.talla} (Nuev:${tallasStock[idx].cantidad}) | Global:${nuevoStockGlobal}`);
                         } else {
                             console.warn(`⚠️ Talla "${d.talla}" no encontrada en ${producto.nombre}`);
                         }

@@ -117,6 +117,7 @@ const Profile = () => {
               formData={profile.formData}
               selectedOrder={profile.selectedOrder}
               isBulkReturn={profile.isBulkReturn}
+              setActiveTab={profile.setActiveTab}
             />
           )}
         </main>

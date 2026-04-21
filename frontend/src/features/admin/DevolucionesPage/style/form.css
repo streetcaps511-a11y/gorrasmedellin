@@ -69,7 +69,7 @@
 }
 
 .dev-form-row .dev-form-group.client {
-  flex: 0 0 calc(60% - 7.5px);
+  flex: 1; /* Mitad y mitad */
 }
 
 .dev-form-row .dev-form-group.sale {
@@ -335,11 +335,18 @@
 
 /* RE-DISEÑO DEL BOTÓN DE GUARDAR EN EL HEADER */
 .devoluciones-btn-submit {
-  background-color: #F5C81B !important;
-  color: #000 !important;
+  background-color: transparent !important;
+  color: #F5C81B !important;
+  border: 1px solid #F5C81B !important;
   padding: 8px 20px !important;
   font-weight: 800 !important;
   font-size: 12px !important;
+  border-radius: 6px !important;
+  transition: all 0.2s ease !important;
+}
+
+.devoluciones-btn-submit:hover {
+  background-color: rgba(245, 200, 27, 0.1) !important;
 }
 
 /* 🟢 ESTILOS PARA EL MODO DETALLE (SOLO LECTURA) */
@@ -425,17 +432,22 @@
 }
 
 .dev-evidence-dropzone.detail-mode {
-  border-style: solid;
-  border-color: #1e293b;
-  background-color: #020617;
+  border: none;
+  background-color: transparent;
 }
 
 .dev-preview-wrapper.detail-view {
-  height: 420px;
+  height: 480px; /* Aumentado para visibilidad total */
   background-color: #000;
   border-radius: 12px;
-  border: 1px solid #1e293b;
-  padding: 5px;
+  border: none; 
+  padding: 0;
+}
+
+.dev-preview-wrapper.detail-view img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Mantiene la proporción pero en tamaño grande */
 }
 
 .dev-viewer-label {

@@ -67,15 +67,16 @@
 }
 
 .users-table-container {
-  flex: 1;
   display: flex;
   flex-direction: column;
+  flex: 1;
   border-radius: 8px;
   border: 1px solid #FFC300;
   overflow: hidden;
   background-color: #000000;
-  margin-top: 5px;
+  margin-top: 10px;
   min-height: 420px;
+  padding-bottom: 0px;
 }
 
 .users-table-wrapper {

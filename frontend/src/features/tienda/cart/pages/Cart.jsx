@@ -319,28 +319,38 @@ const Cart = () => {
                       {/* Nombre + badges */}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <h3 
-                          style={{ margin: '0 0 4px 0', color: '#fff', fontSize: '13px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                          style={{ margin: '0 0 4px 0', color: '#fff', fontSize: '15px', fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
                           onClick={() => setSelectedDetailProduct(item)}
                         >
                           {productName}
                         </h3>
                         <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.18)', padding: '1px 7px', borderRadius: '20px' }}>
+                          <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.22)', padding: '2px 8px', borderRadius: '20px' }}>
                             {getProductCategory(item)}
                           </span>
                           {item.talla && (
-                            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.18)', padding: '1px 7px', borderRadius: '20px' }}>
+                            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.22)', padding: '2px 8px', borderRadius: '20px' }}>
                               Talla: {item.talla}
+                            </span>
+                          )}
+                          {getStockForSize(item) === 0 && (
+                            <span style={{ fontSize: '10px', color: '#ef4444', fontWeight: '800', backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: '2px 8px', borderRadius: '4px', border: '1px solid #ef4444' }}>
+                              AGOTADO
+                            </span>
+                          )}
+                          {getStockForSize(item) > 0 && item.quantity > getStockForSize(item) && (
+                            <span style={{ fontSize: '10px', color: '#FFC107', fontWeight: '800', backgroundColor: 'rgba(255, 193, 7, 0.1)', padding: '2px 8px', borderRadius: '4px', border: '1px solid #FFC107' }}>
+                              SOLO {getStockForSize(item)} DISP.
                             </span>
                           )}
                         </div>
                       </div>
 
                       {/* Selector de cantidad - pill redondeado más delgado */}
-                      <div style={{ display: 'flex', alignItems: 'center', border: '1px solid rgba(245,200,27,0.4)', borderRadius: '999px', padding: '1px', background: 'rgba(0,0,0,0.3)', flexShrink: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', border: '1px solid rgba(245,200,27,0.4)', borderRadius: '6px', padding: '1px', background: 'rgba(0,0,0,0.3)', flexShrink: 0 }}>
                         <button 
                           onClick={() => updateQuantity(item.id, item.talla, -1)} 
-                          style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'transparent', border: 'none', color: '#F5C81B', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'transparent', border: 'none', color: '#F5C81B', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         >
                           <FaMinus size={7} />
                         </button>
@@ -348,12 +358,12 @@ const Cart = () => {
                           type="number"
                           value={item.quantity || 1}
                           onChange={(e) => handleManualQuantity(item.id, item.talla, e.target.value)}
-                          style={{ width: '22px', border: 'none', background: 'transparent', color: '#fff', textAlign: 'center', fontSize: '11px', fontWeight: '600', outline: 'none' }}
+                          style={{ width: '38px', border: 'none', background: 'transparent', color: '#fff', textAlign: 'center', fontSize: '11px', fontWeight: '600', outline: 'none' }}
                         />
                         <button 
                           onClick={() => updateQuantity(item.id, item.talla, 1)} 
                           disabled={item.quantity >= getStockForSize(item)}
-                          style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'transparent', border: 'none', color: item.quantity >= getStockForSize(item) ? '#333' : '#F5C81B', cursor: item.quantity >= getStockForSize(item) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'transparent', border: 'none', color: item.quantity >= getStockForSize(item) ? '#333' : '#F5C81B', cursor: item.quantity >= getStockForSize(item) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         >
                           <FaPlus size={7} />
                         </button>

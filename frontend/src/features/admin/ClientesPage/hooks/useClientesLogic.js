@@ -343,29 +343,31 @@ export const useClientesLogic = () => {
   };
 
   const handleDelete = async () => {
-    if (!deleteModal.cliente) return;
+    const cliente = deleteModal.cliente;
+    if (!cliente) return;
     
-    const clientName = deleteModal.cliente.nombreCompleto;
-    const clientId = deleteModal.cliente.id;
-
+    setLoading(true);
     try {
-      // Optimistic UI update
+      await deleteExistingCliente(cliente.id);
+      
+      // Sincronizar estado local
       setClientes(prev => {
-        const next = prev.filter(c => c.id !== clientId);
+        const next = prev.filter(c => c.id !== cliente.id);
         clientesCache.clientes = next;
         return next;
       });
       
-      closeDeleteModal();
-      await deleteExistingCliente(clientId);
-      // ✅ Sincronizar Caché Manualmente tras eliminar
+      // Notificar éxito y actualizar caché
+      showAlert(cliente.nombreCompleto, 'delete');
       const updatedData = await fetchAllClientes();
       NitroCache.set('clientes', updatedData);
 
-      showAlert(clientName, 'delete');
+      closeDeleteModal();
     } catch (err) {
-      showAlert('Error al eliminar cliente', 'error');
-      loadClientes(); // Re-sync in case of error
+      const msg = err?.response?.data?.message || 'Error al eliminar cliente';
+      showAlert(msg, 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -435,6 +437,7 @@ export const useClientesLogic = () => {
     modalState, setModalState,
     formData, setFormData,
     errors, setErrors,
+    loading,
     deleteModal, setDeleteModal,
     firstInputRef,
     filtered,

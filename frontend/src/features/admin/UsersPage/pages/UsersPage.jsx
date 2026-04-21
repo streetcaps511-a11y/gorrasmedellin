@@ -105,6 +105,7 @@ const UsersPage = () => {
           onConfirm={handleDelete}
           entityName="usuario"
           entityData={userToDelete}
+          loading={loading}
         />
 
         <AnularOperacionModal
@@ -190,6 +191,11 @@ const UsersPage = () => {
         onClose={closeModal}
         title={editingUser?.id ? 'Editar usuario' : 'Registrar usuario'}
         size="medium"
+        onSave={handleSave}
+        actions={[
+          { label: 'Cancelar', variant: 'secondary', onClick: closeModal },
+          { label: editingUser?.id ? 'Guardar Cambios' : 'Guardar', variant: 'primary', onClick: handleSave }
+        ]}
       >
         <div className="users-form-wrapper yellow-scrollbar">
           <UserFormFields 
@@ -198,8 +204,6 @@ const UsersPage = () => {
             handleInputChange={handleInputChange}
             errors={errors}
             users={users}
-            closeModal={closeModal}
-            handleSave={handleSave}
             isAdministrador={isAdministrador}
             availableRoles={availableRoles}
           />
@@ -212,6 +216,9 @@ const UsersPage = () => {
         onClose={closeDetails}
         title="Detalles del usuario"
         size="medium"
+        actions={[
+          { label: 'Cerrar', variant: 'primary', onClick: closeDetails }
+        ]}
       >
         <div className="users-form-wrapper yellow-scrollbar">
           <UserFormFields 
@@ -230,8 +237,6 @@ const UsersPage = () => {
             handleInputChange={() => {}}
             errors={{}}
             users={users}
-            closeModal={closeDetails}
-            handleSave={() => {}}
             isAdministrador={isAdministrador}
             availableRoles={availableRoles}
             isReadOnly={true}

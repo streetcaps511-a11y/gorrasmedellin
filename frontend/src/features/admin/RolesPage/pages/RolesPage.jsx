@@ -96,6 +96,7 @@ const RolesPage = () => {
           onConfirm={handleDelete}
           entityName="rol"
           entityData={deleteModal.role}
+          loading={loading}
         />
 
         <AnularOperacionModal

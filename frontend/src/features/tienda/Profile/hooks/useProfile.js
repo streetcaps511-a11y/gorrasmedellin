@@ -32,7 +32,8 @@ export const useProfile = () => {
     replacementProductId: "",
     mismoModelo: false,
     evidence: null,
-    reason: ""
+    reason: "",
+    cantidad: 1
   });
   const [returnErrors, setReturnErrors] = useState({});
   const [showReturnForm, setShowReturnForm] = useState(false);
@@ -205,8 +206,8 @@ export const useProfile = () => {
 
   const handleReturnClick = (product, order) => {
     setIsBulkReturn(false);
-    setSelectedProduct({ ...product, orderId: order.id });
-    setReturnFormData({ replacementProductId: "", mismoModelo: false, evidence: null, reason: "" });
+    setSelectedProduct({ ...product, orderId: order.id, maxQty: product.qty || 1 });
+    setReturnFormData({ replacementProductId: "", mismoModelo: false, evidence: null, reason: "", cantidad: 1 });
     setReturnErrors({});
     setShowPolicyModal(true);
     setActiveTab('returns');
@@ -287,6 +288,7 @@ export const useProfile = () => {
             idVenta: Number(String(selectedProduct.orderId).replace('PED-', '')),
             motivo: returnFormData.reason,
             evidencia: returnFormData.evidence,
+            cantidad: isBulkReturn ? undefined : Number(returnFormData.cantidad || 1)
           };
 
           if (isBulkReturn) {
@@ -317,7 +319,7 @@ export const useProfile = () => {
               idProductoCambio: returnFormData.mismoModelo ? Number(selectedProduct.id) : Number(returnFormData.replacementProductId),
               mismoModelo: returnFormData.mismoModelo,
               pedidoCompleto: false,
-              cantidad: 1,
+              cantidad: Number(returnFormData.cantidad || 1),
               precioUnitario: getPriceNum(selectedProduct.price),
               talla: selectedProduct.size,
             });
@@ -364,8 +366,8 @@ export const useProfile = () => {
   const [allReturns, setAllReturns] = useState([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
 
-  const loadProfileData = async () => {
-    setIsLoadingData(true);
+  const loadProfileData = async (silent = false) => {
+    if (!silent) setIsLoadingData(true);
       try {
         const [orders, returns, perfil] = await Promise.all([
           profileApi.getMyOrders(),
@@ -512,7 +514,16 @@ export const useProfile = () => {
   };
 
   useEffect(() => {
-    if (authUser) loadProfileData();
+    if (authUser) {
+      loadProfileData();
+      
+      // 🔄 Auto-refresco del perfil cada 25 segundos para ver actualizaciones de Admin
+      const interval = setInterval(() => {
+        loadProfileData(true);
+      }, 25000);
+      
+      return () => clearInterval(interval);
+    }
   }, [authUser]);
 
   const filteredOrders = useMemo(() => {

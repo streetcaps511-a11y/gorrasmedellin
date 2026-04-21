@@ -298,6 +298,13 @@
   min-height: 180px; 
 }
 
+.evidence-dropzone.mini {
+  min-height: 80px;
+  height: 80px;
+  aspect-ratio: auto;
+  padding: 5px;
+}
+
 .evidence-dropzone:hover {
   border-color: #FFD700;
   background-color: #0c0f14;
@@ -321,6 +328,12 @@
 .btn-select-evidence:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+.btn-select-evidence.mini {
+  margin-top: 0;
+  padding: 6px 16px;
+  font-size: 11px;
 }
 
 /* Totales Separator */
@@ -601,3 +614,5 @@
   font-size: 14px;
   line-height: 1.6;
 }
+
+/* CSS Refresh */

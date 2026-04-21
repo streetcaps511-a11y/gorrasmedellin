@@ -4,7 +4,8 @@ import { Link, useLocation, Outlet, useNavigate } from "react-router-dom";
 import {
   FaUser, FaHome, FaBox, FaUsers, FaShoppingCart, FaChartBar,
   FaExchangeAlt, FaShieldAlt, FaTag, FaTruck, FaSignOutAlt,
-  FaUserTie, FaUserCircle, FaCalendarAlt, FaChevronDown
+  FaUserTie, FaUserCircle, FaCalendarAlt, FaChevronDown,
+  FaBars, FaTimes
 } from "react-icons/fa";
 import { useAuth } from "../../shared/contexts/AuthContext";
 import LogoutModal from "../../shared/components/admin/LogoutModal";
@@ -104,6 +105,11 @@ const AdminLayoutClean = () => {
   const [sidebarItems, setSidebarItems] = useState([]);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState({});
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!user) return;
@@ -208,9 +214,18 @@ const AdminLayoutClean = () => {
 
   const UserIcon = getUserTypeIcon();
   const isBaseAdminRoute = location.pathname === '/admin' || location.pathname === '/admin/';
-
   return (
-    <div className="al-root">
+    <div className={`al-root ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+      {/* Botón Hamburguesa (Móvil) */}
+      <header className="al-mobile-header">
+        <button className="al-menu-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+          {isSidebarOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
+        </button>
+        <span className="al-mobile-title">StreetCaps</span>
+      </header>
+
+      {/* Overlay para móvil */}
+      {isSidebarOpen && <div className="al-sidebar-overlay" onClick={() => setIsSidebarOpen(false)} />}
 
       {/* Modal de confirmación de salida */}
       <LogoutModal 
@@ -220,7 +235,7 @@ const AdminLayoutClean = () => {
       />
 
       {/* ===== SIDEBAR ===== */}
-      <aside className="al-sidebar">
+      <aside className={`al-sidebar ${isSidebarOpen ? 'mobile-show' : ''}`}>
         {/* Encabezado - Información del Rol */}
         <div className="al-sidebar-header">
           {user && (

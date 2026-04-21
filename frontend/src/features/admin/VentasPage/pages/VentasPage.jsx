@@ -156,16 +156,17 @@ const VentasPage = () => {
         title="Informar Pago Incompleto"
         width="450px"
         loading={loading}
+        onSave={() => handlePartialPayment(partialPaymentModal.montoRecibido, partialPaymentModal.montoNuevo)}
       >
-        <div style={{ padding: '20px' }}>
-          <p style={{ color: '#fff', marginBottom: '15px', fontSize: '14px', textAlign: 'center' }}>
+        <div style={{ padding: '0 8px 15px' }}>
+          <p style={{ color: '#fff', marginBottom: '14px', fontSize: '13px', textAlign: 'center', lineHeight: '1.4' }}>
             La venta <strong>#{partialPaymentModal.venta?.id}</strong> es por un total de <strong>${Number(partialPaymentModal.venta?.total || 0).toLocaleString('es-CO')}</strong>.
             <br/>Ingrese cuánto dinero recibió realmente en el comprobante.
           </p>
           
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
             <div>
-              <label style={{ display: 'block', color: '#f59e0b', fontSize: '11px', fontWeight: 'bold', marginBottom: '5px' }}>1RA CONSIGNACIÓN <span style={{ color: '#ef4444' }}>*</span></label>
+              <label style={{ display: 'block', color: '#94a3b8', fontSize: '11px', fontWeight: 'bold', marginBottom: '5px' }}>1RA CONSIGNACIÓN <span style={{ color: '#ef4444' }}>*</span></label>
               <input 
                 type="number"
                 step="0.01"
@@ -177,7 +178,7 @@ const VentasPage = () => {
               />
             </div>
             <div>
-              <label style={{ display: 'block', color: '#f59e0b', fontSize: '11px', fontWeight: 'bold', marginBottom: '5px' }}>2DA CONSIGNACIÓN</label>
+              <label style={{ display: 'block', color: '#94a3b8', fontSize: '11px', fontWeight: 'bold', marginBottom: '5px' }}>2DA CONSIGNACIÓN</label>
               <input 
                 type="number"
                 step="0.01"
@@ -190,7 +191,7 @@ const VentasPage = () => {
             </div>
           </div>
 
-          <div style={{ background: 'rgba(30, 41, 59, 0.5)', padding: '12px', borderRadius: '8px', marginBottom: '20px', border: '1px dashed #334155' }}>
+          <div style={{ background: '#111827', padding: '12px', borderRadius: '8px', marginBottom: '12px', border: '1px solid #1f2937' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                 <span style={{ fontSize: '12px', color: '#94a3b8' }}>Total Recibido:</span>
                 <span style={{ fontSize: '14px', color: '#fff', fontWeight: 'bold' }}>
@@ -209,8 +210,8 @@ const VentasPage = () => {
             </div>
           </div>
 
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', color: '#f59e0b', fontSize: '12px', fontWeight: 'bold', marginBottom: '8px' }}>SEGUNDO COMPROBANTE (OPCIONAL)</label>
+          <div style={{ marginBottom: '12px' }}>
+            <label style={{ display: 'block', color: '#94a3b8', fontSize: '11px', fontWeight: 'bold', marginBottom: '6px' }}>SEGUNDO COMPROBANTE (OPCIONAL)</label>
             <div className="evidence-dropzone mini">
                 {partialPaymentModal.evidencia2 ? (
                     <div style={{ position: 'relative' }}>
@@ -218,7 +219,7 @@ const VentasPage = () => {
                         <button onClick={() => setPartialPaymentModal(p => ({ ...p, evidencia2: null }))} className="btn-remove-evidence mini"><FaTrash size={10} /></button>
                     </div>
                 ) : (
-                    <label className="btn-select-evidence mini">
+                    <label className="btn-select-evidence mini" style={{ backgroundColor: 'transparent', border: '1px solid #94a3b8', color: '#94a3b8' }}>
                         SUBIR SEGUNDO PAGO
                         <input type="file" accept="image/*" onChange={handleImage2Upload} className="display-none" />
                     </label>
@@ -226,7 +227,7 @@ const VentasPage = () => {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '20px' }}>
             <button 
               onClick={() => setPartialPaymentModal({ isOpen: false, venta: null, montoRecibido: '', evidencia2: null })}
               disabled={loading}
@@ -259,6 +260,13 @@ const VentasPage = () => {
         title="Rechazar Venta"
         width="450px"
         loading={loading}
+        onSave={() => {
+          if (!rejectionReason.trim()) {
+            setAlert({ show: true, message: "El motivo de rechazo es obligatorio", type: "error" });
+            return;
+          }
+          updateVentaStatus(availableStatuses[2], rejectionReason);
+        }}
       >
         <div style={{ padding: '20px' }}>
           <p style={{ color: '#fff', marginBottom: '15px', fontSize: '14px', textAlign: 'center' }}>

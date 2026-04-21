@@ -22,31 +22,31 @@ const InvoiceModal = ({ isOpen, onClose, invoiceData }) => {
   const handleDownloadPDF = () => {
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-    // Fondo oscuro premium para el PDF
-    doc.setFillColor(15, 23, 42); // #0f172a
+    // Fondo blanco estándar para el PDF
+    doc.setFillColor(255, 255, 255);
     doc.rect(0, 0, 210, 297, 'F');
     
     // Título Principal
-    doc.setTextColor(255, 193, 7); // #FFC107
+    doc.setTextColor(30, 41, 59); // Un gris muy oscuro (slate-800)
     doc.setFontSize(24);
     doc.setFont('helvetica', 'bold');
     doc.text("GORRAS MEDELLÍN", 105, 25, { align: 'center' });
     
-    doc.setTextColor(200, 200, 200);
+    doc.setTextColor(100, 116, 139); // Gris medio
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.text(`No. INV-${invoiceNumber || ''}`, 105, 33, { align: 'center' });
     doc.text(`Fecha: ${date || ''}`, 105, 38, { align: 'center' });
 
     // Datos del cliente
-    doc.setTextColor(255, 193, 7);
+    doc.setTextColor(30, 41, 59);
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.text("DATOS DEL CLIENTE:", 20, 55);
     
     const phoneValue = customerPhone && customerPhone !== 'No especificado' ? customerPhone : 'No especificado';
     
-    doc.setTextColor(230, 230, 230);
+    doc.setTextColor(51, 65, 85);
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.text(`Nombre: ${customerName}`, 20, 62);
@@ -57,12 +57,12 @@ const InvoiceModal = ({ isOpen, onClose, invoiceData }) => {
     // Caja SOLO para productos
     const tableTop = 103;
     const boxHeight = (items.length * 7) + 15;
-    doc.setDrawColor(255, 193, 7);
+    doc.setDrawColor(203, 213, 225); // Borde gris claro
     doc.setLineWidth(0.5);
     doc.rect(15, tableTop, 180, boxHeight);
 
     let yPosHead = 110;
-    doc.setTextColor(255, 193, 7);
+    doc.setTextColor(30, 41, 59);
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
     doc.text("Producto", 20, yPosHead);
@@ -70,13 +70,13 @@ const InvoiceModal = ({ isOpen, onClose, invoiceData }) => {
     doc.text("Precio", 110, yPosHead);
     doc.text("Total", 140, yPosHead);
     
-    doc.setDrawColor(255, 193, 7);
+    doc.setDrawColor(203, 213, 225);
     doc.setLineWidth(0.1);
     doc.line(15, 113, 195, 113);
 
     let yPosItems = 120;
     items.forEach(item => {
-      doc.setTextColor(255, 255, 255);
+      doc.setTextColor(51, 65, 85);
       doc.setFont('helvetica', 'normal');
       doc.text(item.name.length > 30 ? item.name.substring(0, 30) + "..." : item.name, 20, yPosItems);
       doc.text(String(item.quantity), 90, yPosItems);
@@ -88,7 +88,7 @@ const InvoiceModal = ({ isOpen, onClose, invoiceData }) => {
     // Totales fuera de la caja
     let yPosTotals = yPosItems + 15;
 
-    doc.setTextColor(200, 200, 200);
+    doc.setTextColor(100, 116, 139);
     doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
     
@@ -96,17 +96,17 @@ const InvoiceModal = ({ isOpen, onClose, invoiceData }) => {
     doc.text(shipping || 'N/A', 150, yPosTotals);
     
     yPosTotals += 10;
-    doc.setTextColor(255, 193, 7);
+    doc.setTextColor(0, 0, 0);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.text("TOTAL:", 120, yPosTotals);
     doc.setFontSize(16);
     doc.text(`$${total.toLocaleString()}`, 150, yPosTotals);
 
-    doc.setTextColor(150, 150, 150);
+    doc.setTextColor(148, 163, 184);
     doc.setFontSize(9);
     doc.setFont('helvetica', 'italic');
-    doc.text("Gracias por elegir Gorras Medellín. Tu pedido está siendo procesado.", 20, yPosTotals + 20);
+    doc.text("Gracias por elegir Gorras Medellín. Tu pedido está siendo procesador.", 20, yPosTotals + 20);
 
     doc.save(`Comprobante_GMCAPS_${invoiceNumber}.pdf`);
   };

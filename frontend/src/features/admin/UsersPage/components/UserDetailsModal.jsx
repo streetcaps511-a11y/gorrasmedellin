@@ -5,7 +5,7 @@ const UserDetailsModal = ({ user, onClose }) => {
 
   const renderDetailField = (label, value, extraClass = '') => (
     <div className="detalle-field">
-      <label className="detalle-label">{label}</label>
+      <label className="detalle-label">{label}:</label>
       <div className={`detalle-display ${extraClass}`}>
         {value || 'N/A'}
       </div>

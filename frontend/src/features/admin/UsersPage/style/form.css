@@ -8,12 +8,12 @@
 .form-body {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 16px; /* Más separado para mejor estilo */
 }
 
 .form-row {
   display: flex;
-  gap: 12px;
+  gap: 12px; /* Espacio horizontal original */
 }
 
 .col { flex: 1; }
@@ -145,11 +145,19 @@
   background-color: rgba(245, 200, 27, 0.1);
   border: 1px solid rgba(245, 200, 27, 0.3);
   color: #F5C81B;
-  padding: 6px 12px;
+  padding: 2px 10px; /* Reducido para compactar */
   border-radius: 6px;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 11px; /* Un poco más pequeño para que quepa mejor */
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  white-space: nowrap; /* Forzar un solo renglón */
+  height: 24px;
+}
+
+.form-field-horizontal {
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 12px;
 }

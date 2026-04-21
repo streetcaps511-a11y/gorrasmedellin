@@ -222,6 +222,22 @@ export const useCartPage = () => {
       console.warn("No se pudo sincronizar el stock antes de pagar:", e);
     }
 
+    // ⚠️ VALIDACIÓN DE STOCK REAL ANTES DE PASAR AL CHECKOUT
+    const outOfStockItems = cartItems.filter(item => {
+      const stockAvailable = getStockForSize(item);
+      return item.quantity > stockAvailable;
+    });
+
+    if (outOfStockItems.length > 0) {
+      setIsProcessing(false);
+      const names = outOfStockItems.map(i => getProductName(i)).join(', ');
+      setCenterAlert({ 
+        visible: true, 
+        message: `⚠️ Stock insuficiente para: ${names}. Hay productos que se han agotado o tienen menos unidades disponibles de las solicitadas. Por favor, revisa tu carrito.` 
+      });
+      return;
+    }
+
     if (!user) {
       setIsProcessing(false); 
       navigate('/login');

@@ -73,7 +73,8 @@ export const useProductos = () => {
       try {
         // Cache-buster para asegurar que no nos devuelvan datos viejos del navegador
         const timestamp = new Date().getTime();
-        const res = await getProductos(`?t=${timestamp}`);
+        // 🚀 Solicitamos un límite alto (999) para asegurar que se carguen todos los productos en Categorías
+        const res = await getProductos(`?limit=999&t=${timestamp}`);
         
         if (!isMounted) return;
 
@@ -133,8 +134,8 @@ export const useProductos = () => {
     fetchProductosData();
     window.scrollTo(0, 0);
 
-    // Sincronizar Stock cada 10 segundos (fallback) + Sync Instantáneo vía Broadcast
-    const interval = setInterval(() => fetchProductosData(true), 10000);
+    // Sincronizar Stock cada 5 segundos (antes 10) para mayor precisión
+    const interval = setInterval(() => fetchProductosData(true), 5000);
 
     // 📡 ESCUCHAR ACTUALIZACIONES DESDE OTRAS PESTAÑAS (Sync Instantáneo)
     const channel = new BroadcastChannel('app_sync');

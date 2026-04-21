@@ -120,30 +120,44 @@ export const validateProveedor = async (data, id = null) => {
         errors.push('El nombre de empresa debe tener al menos 3 caracteres');
     }
 
+    const validationPromises = [];
+
+    // Validar Documento
     if (documentNumber !== undefined) {
         if (documentNumber && !isNumeric(documentNumber)) {
             errors.push('El número de documento debe contener solo números');
         } else {
-            const existing = await Proveedor.findOne({ where: { 
-                documentNumber: documentNumber.toString().trim(),
-                ...(id && { id: { [Op.ne]: id } })
-            }});
-            if (existing) errors.push('Ya existe un proveedor con ese documento');
+            validationPromises.push(
+                Proveedor.findOne({ where: { 
+                    documentNumber: documentNumber.toString().trim(),
+                    ...(id && { id: { [Op.ne]: id } })
+                }}).then(existing => {
+                    if (existing) errors.push('Ya existe un proveedor con ese documento');
+                })
+            );
         }
+    }
+
+    // Validar Email
+    if (email !== undefined) {
+        validationPromises.push(
+            Proveedor.findOne({ where: { 
+                email: email.toLowerCase().trim(),
+                ...(id && { id: { [Op.ne]: id } })
+            }}).then(existing => {
+                if (existing) errors.push('Ya existe un proveedor con ese email');
+            })
+        );
+    }
+
+    if (validationPromises.length > 0) {
+        await Promise.all(validationPromises);
     }
 
     if (phone !== undefined && phone) {
         const cleanPhone = phone.toString().replace(/\D/g, '');
         if (!isNumeric(cleanPhone)) errors.push('El teléfono debe contener solo números');
         else if (cleanPhone.length !== 10) errors.push('El teléfono debe tener exactamente 10 dígitos');
-    }
-
-    if (email !== undefined) {
-        const existing = await Proveedor.findOne({ where: { 
-            email: email.toLowerCase().trim(),
-            ...(id && { id: { [Op.ne]: id } })
-        }});
-        if (existing) errors.push('Ya existe un proveedor con ese email');
     }
 
     return errors;

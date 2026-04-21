@@ -483,23 +483,24 @@ const DevolucionesPage = () => {
             <div className="devoluciones-registration-column">
               {/* CARD 1: DATOS GENERALES */}
               <div className="devoluciones-registration-card">
-                <h3 className="devoluciones-card-title">
-                  <FaUser className="card-icon" /> DATOS GENERALES DE LA SOLICITUD
+                <h3 className="devoluciones-card-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <FaUser className="card-icon" /> DATOS GENERALES DE LA SOLICITUD
+                  </div>
+                  <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: 600 }}>
+                    FECHA: {devolucionViendo?.fecha}
+                  </span>
                 </h3>
                 <div className="dev-card-body">
                   <div className="dev-form-row">
-                    <div className="dev-form-group client">
+                    <div className="dev-form-group client" style={{ flex: 1 }}>
                       <label className="dev-field-label">CLIENTE</label>
                       <div className="form-field-display">{devolucionViendo?.cliente}</div>
                     </div>
-                    <div className="dev-form-group sale">
+                    <div className="dev-form-group sale" style={{ flex: 1 }}>
                       <label className="dev-field-label">VENTA / RECIBO</label>
                       <div className="form-field-display id">ORDEN #{devolucionViendo?.idVenta || devolucionViendo?.id || 'N/A'}</div>
                     </div>
-                  </div>
-                  <div className="dev-form-group">
-                    <label className="dev-field-label">FECHA DE SOLICITUD</label>
-                    <div className="form-field-display">{devolucionViendo?.fecha}</div>
                   </div>
                   <div className="dev-form-group">
                     <label className="dev-field-label">MOTIVO DE DEVOLUCIÓN</label>

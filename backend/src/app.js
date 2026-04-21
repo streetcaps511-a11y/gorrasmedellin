@@ -2,6 +2,7 @@ import './models/index.js';
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import compression from 'compression';
 
 // Importar rutas
 import productosRoutes from './routes/productos.routes.js';
@@ -33,6 +34,7 @@ const app = express();
 // Middlewares globales
 app.use(cors());
 app.use(morgan('dev'));
+app.use(compression());
 
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ limit: '20mb', extended: true }));

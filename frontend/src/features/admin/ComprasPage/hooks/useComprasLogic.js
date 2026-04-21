@@ -10,7 +10,8 @@ import {
   getStatuses, 
   getPaymentMethods, 
   getSizes,
-  updateCompraStatus
+  updateCompraStatus,
+  fetchAllProductos
 } from '../services/comprasApi';
 
 // // 🧠 MEMORIA GLOBAL (Caché Nitro)
@@ -51,6 +52,8 @@ export const useComprasLogic = (location) => {
   const [compraEditando, setCompraEditando] = useState(null);
   const [anularModal, setAnularModal] = useState({ isOpen: false, compra: null });
   const [completarModal, setCompletarModal] = useState({ isOpen: false, compra: null });
+  const [productos, setProductos] = useState([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   
   // ⚡ Solo mostramos cargando si NO tenemos nada en memoria
   const [loading, setLoading] = useState(getInitialCompras().length === 0);
@@ -130,8 +133,22 @@ export const useComprasLogic = (location) => {
     setProductoPage(1);
   }, []);
 
-  const mostrarFormulario = useCallback((compra = null) => {
+  const mostrarFormulario = useCallback(async (compra = null) => {
     setProductoPage(1);
+
+    // ⚡ Carga lazy de productos solo al abrir el formulario
+    if (productos.length === 0 && fetchAllProductos) {
+      setIsLoadingProducts(true);
+      try {
+        const prData = await fetchAllProductos();
+        setProductos(Array.isArray(prData) ? prData : []);
+      } catch (e) {
+        console.error('Error cargando productos:', e);
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    }
+
     if (compra) {
       if (compra.estado === 'Anulada') {
         showAlert('Las compras anuladas no se pueden editar', 'error');
@@ -169,7 +186,7 @@ export const useComprasLogic = (location) => {
     }
     setErrors({});
     setModoVista("formulario");
-  }, [showAlert]);
+  }, [showAlert, productos.length]);
 
   const mostrarDetalle = useCallback((compra) => {
     setCompraViendo(compra);
@@ -362,8 +379,9 @@ export const useComprasLogic = (location) => {
     handleCompletarCompra,
     confirmCompletarCompra,
     filtered,
-    loading,
     actionLoading,
-    actionLoadingText
+    actionLoadingText,
+    availableProducts: productos,
+    isLoadingProducts
   };
 };

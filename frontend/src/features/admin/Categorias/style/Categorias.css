@@ -37,7 +37,7 @@
 
 .categorias-page__subtitle {
   color: #9CA3AF;
-  font-size: 14px;
+  font-size: 15px;
   margin: 0;
   line-height: 1.3;
 }
@@ -53,20 +53,21 @@
    ======================================== */
 
 .btn-primary {
-  padding: 6px 12px;
+  padding: 0 16px;
   background-color: transparent;
   border: 1px solid #FFC300;
   color: #FFC300;
-  border-radius: 4px;
-  font-size: 11px;
+  border-radius: 6px;
+  font-size: 13px;
   cursor: pointer;
   white-space: nowrap;
-  min-width: 100px;
+  min-width: 120px;
   font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 3px;
-  height: 32px;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
   transition: all 0.2s ease;
 }
 
@@ -173,9 +174,9 @@
 }
 
 .btn-modal-save {
-  background-color: #F5C81B;
-  border: none;
-  color: #000;
+  background-color: transparent;
+  border: 1px solid #F5C81B;
+  color: #F5C81B;
   padding: 8px 16px;
   border-radius: 6px;
   font-size: 13px;
@@ -183,11 +184,11 @@
   cursor: pointer;
   min-width: 100px;
   height: 36px;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .btn-modal-save:hover {
-  background-color: #d4af37;
+  background-color: rgba(245, 200, 27, 0.1);
 }
 
 /* ========================================
@@ -384,34 +385,24 @@
 .categories-container {
   display: flex;
   flex-direction: column;
+  flex: 1; /* Crecer para ocupar el espacio */
   width: 100%;
-  flex: 1; /* Para que crezca y use el min-height del EntityTable */
   background-color: #000000;
   border-radius: 8px;
   border: 1px solid #FFC300;
   overflow: hidden;
-  margin-top: 5px;
-  min-height: 420px;
-  padding-bottom: 30px;
+  margin-top: 10px;
+  padding-bottom: 0px;
+  min-height: 420px; /* Asegurar que no sea muy pequeña */
 }
 
-/* El table wrapper debe ocupar el espacio restante */
+/* El table wrapper ocupa el espacio y empuja la paginación al fondo */
 .categories-table-wrapper {
   flex: 1;
   overflow: hidden;
 }
 
 .pagination {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 16px;
-  background-color: #000000;
-  border-top: none; /* Quitamos la linea si ya terminó los datos */
-  font-size: 12px;
-  color: #FFC300;
-  height: 48px;
-  flex-shrink: 0;
   margin-top: auto; 
 }
 

@@ -51,12 +51,12 @@ const clienteController = {
             });
 
             const clientesFormateados = await Promise.all(rows.map(async (cliente) => {
-                const totalCompras = await Venta.sum('Total', {
-                    where: { IdCliente: cliente.id }
+                const totalCompras = await Venta.sum('total', {
+                    where: { idCliente: cliente.id }
                 }) || 0;
                 
                 const cantidadCompras = await Venta.count({
-                    where: { IdCliente: cliente.id }
+                    where: { idCliente: cliente.id }
                 });
 
                 return {
@@ -120,14 +120,14 @@ const clienteController = {
             }
 
             const compras = await Venta.findAll({
-                where: { IdCliente: id },
-                order: [['Fecha', 'DESC']],
+                where: { idCliente: id },
+                order: [['fecha', 'DESC']],
                 limit: 10,
                 include: ['Detalles']
             });
 
-            const totalCompras = await Venta.sum('Total', { where: { IdCliente: id } }) || 0;
-            const cantidadCompras = await Venta.count({ where: { IdCliente: id } });
+            const totalCompras = await Venta.sum('total', { where: { idCliente: id } }) || 0;
+            const cantidadCompras = await Venta.count({ where: { idCliente: id } });
 
             res.status(200).json({
                 success: true,
@@ -275,7 +275,7 @@ const clienteController = {
                 return res.status(404).json({ success: false, message: 'Cliente no encontrado' });
             }
 
-            const ventasAsociadas = await Venta.count({ where: { IdCliente: id } });
+            const ventasAsociadas = await Venta.count({ where: { idCliente: id } });
             if (ventasAsociadas > 0) {
                 await transaction.rollback();
                 return res.status(400).json({ 

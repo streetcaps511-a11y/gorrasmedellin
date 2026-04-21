@@ -58,7 +58,7 @@ export const useCategoriasLogic = () => {
 
   useEffect(() => {
     fetchData(categorias.length === 0);
-  }, [fetchData, categorias.length]);
+  }, [fetchData]); // 👈 Remover categorias.length para evitar re-fetch prematuro al borrar
 
   const filteredCategories = useMemo(() => {
     return categorias.filter(cat => {
@@ -116,6 +116,10 @@ export const useCategoriasLogic = () => {
     endItem: Math.min(currentPage * ITEMS_PER_PAGE, filteredCategories.length),
     modalState, setModalState, deleteModalState, setDeleteModalState, anularModalState,
     formData, setFormData, errors, setErrors,
+    handleInputChange: (field, value) => {
+      setFormData(prev => ({ ...prev, [field]: value }));
+      if (errors[field]) setErrors(prev => ({ ...prev, [field]: undefined }));
+    },
     handlePageChange: (p) => setCurrentPage(p),
     handleFilterSelect: (s) => { setFilterStatus(s); setCurrentPage(1); },
     clearSearch: () => { setSearchTerm(''); setCurrentPage(1); },
@@ -126,6 +130,18 @@ export const useCategoriasLogic = () => {
     },
     closeModal: () => setModalState({ isOpen: false, mode: 'view', category: null }),
     handleSave: async () => {
+      // Validación de campos
+      const newErrors = {};
+      if (!formData.nombre || !formData.nombre.trim()) newErrors.nombre = 'El nombre es obligatorio';
+      if (!formData.descripcion || !formData.descripcion.trim()) newErrors.descripcion = 'La descripción es obligatoria';
+      if (!formData.imagenUrl || !formData.imagenUrl.trim()) newErrors.imagenUrl = 'La URL de imagen es obligatoria';
+
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        showAlert("Complete los campos obligatorios", "error");
+        return;
+      }
+      setErrors({});
       setLoading(true);
       try {
         if (modalState.mode === 'edit') {
@@ -140,26 +156,39 @@ export const useCategoriasLogic = () => {
         channel.close();
         fetchData();
       } catch (error) {
-        showAlert("Error al guardar", "error");
+        const msg = error?.response?.data?.message || error?.message || "Error al guardar";
+        showAlert(msg, "error");
       } finally { setLoading(false); }
     },
     handleToggleStatus, handleConfirmToggle, closeAnularModal,
     openDeleteModal: (cat) => setDeleteModalState({ isOpen: true, category: cat }),
     closeDeleteModal: () => setDeleteModalState({ isOpen: false, category: null }),
     handleDelete: async () => {
-      const id = deleteModalState.category.id;
-      setCategorias(prev => prev.filter(c => c.id !== id));
-      setDeleteModalState({ isOpen: false, category: null });
+      const category = deleteModalState.category;
+      if (!category) return;
+
+      setLoading(true);
       try {
-        await categoriasApi.delete(id);
+        await categoriasApi.delete(category.id);
+        
+        // Sincronizar estado local
+        setCategorias(prev => prev.filter(c => c.id !== category.id));
         showAlert("Eliminado correctamente 🗑️");
+        
         const channel = new BroadcastChannel('app_sync');
         channel.postMessage('categorias_updated');
         channel.close();
-        fetchData();
+        
+        // Actualizar caché
+        const updated = categorias.filter(c => c.id !== category.id);
+        NitroCache.set(CACHE_KEY, updated);
+
+        setDeleteModalState({ isOpen: false, category: null });
       } catch (error) {
-        fetchData();
-        showAlert("Error al eliminar", "error");
+        const msg = error?.response?.data?.message || "Error al eliminar";
+        showAlert(msg, "error");
+      } finally {
+        setLoading(false);
       }
     }
   };

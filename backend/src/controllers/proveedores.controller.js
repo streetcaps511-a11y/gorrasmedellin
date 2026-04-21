@@ -115,12 +115,12 @@ const proveedorController = {
             }
 
             // Obtener estadísticas de compras
-            const totalCompras = await Compra.sum('Total', {
-                where: { IdProveedor: id }
+            const totalCompras = await Compra.sum('total', {
+                where: { idProveedor: id }
             }) || 0;
 
             const cantidadCompras = await Compra.count({
-                where: { IdProveedor: id }
+                where: { idProveedor: id }
             });
 
             res.status(200).json({
@@ -357,12 +357,13 @@ const proveedorController = {
                 });
             }
 
-            await proveedor.update({ isActive: false }, { transaction });
+            // Eliminar permanentemente si no tiene compras
+            await proveedor.destroy({ transaction });
             await transaction.commit();
 
             res.status(200).json({
                 success: true,
-                message: 'Proveedor desactivado exitosamente'
+                message: 'Proveedor eliminado permanentemente'
             });
 
         } catch (error) {
@@ -469,12 +470,12 @@ const proveedorController = {
     getEstadisticas: async (req, res) => {
         try {
             const totalProveedores = await Proveedor.count();
-            const activos = await Proveedor.count({ where: { Estado: true } });
-            const inactivos = await Proveedor.count({ where: { Estado: false } });
+            const activos = await Proveedor.count({ where: { isActive: true } });
+            const inactivos = await Proveedor.count({ where: { isActive: false } });
             
             const porTipoDocumento = await Proveedor.findAll({
                 attributes: [
-                    'TipoDocumento',
+                    'documentType',
                     [sequelize.fn('COUNT', sequelize.col('TipoDocumento')), 'cantidad']
                 ],
                 group: ['TipoDocumento']
@@ -482,8 +483,8 @@ const proveedorController = {
 
             // Proveedores con más compras
             const proveedoresTop = await Proveedor.findAll({
-                where: { Estado: true },
-                attributes: ['IdProveedor', 'Nombre'],
+                where: { isActive: true },
+                attributes: ['id', 'companyName'],
                 include: [{
                     model: Compra,
                     as: 'Compras',
@@ -526,8 +527,8 @@ const proveedorController = {
 
             const proveedor = await Proveedor.findOne({
                 where: { 
-                    NumeroDocumento: nit,
-                    TipoDocumento: 'NIT'
+                    documentNumber: nit,
+                    documentType: 'NIT'
                 }
             });
 
@@ -561,10 +562,10 @@ const proveedorController = {
     getProveedoresPublicos: async (req, res) => {
         try {
             const proveedores = await Proveedor.findAll({
-                where: { Estado: true },
-                attributes: ['IdProveedor', 'Nombre', 'TipoDocumento', 'NumeroDocumento', 'Email', 'Telefono'],
+                where: { isActive: true },
+                attributes: ['id', 'companyName', 'documentType', 'documentNumber', 'email', 'phone'],
                 limit: 50,
-                order: [['Nombre', 'ASC']]
+                order: [['companyName', 'ASC']]
             });
 
             res.status(200).json({
@@ -598,8 +599,8 @@ const proveedorController = {
             }
 
             const proveedor = await Proveedor.findOne({
-                where: { IdProveedor: id, Estado: true },
-                attributes: ['IdProveedor', 'Nombre', 'TipoDocumento', 'NumeroDocumento', 'Email', 'Telefono', 'Direccion']
+                where: { id: id, isActive: true },
+                attributes: ['id', 'companyName', 'documentType', 'documentNumber', 'email', 'phone', 'address']
             });
 
             if (!proveedor) {
@@ -648,8 +649,8 @@ const proveedorController = {
             }
 
             const compras = await Compra.findAll({
-                where: { IdProveedor: id },
-                order: [['FechaCompra', 'DESC']],
+                where: { idProveedor: id },
+                order: [['fecha', 'DESC']],
                 limit: 20
             });
 
@@ -693,15 +694,15 @@ const proveedorController = {
             const proveedores = await Proveedor.findAll({
                 where: {
                     [Op.or]: [
-                        { Nombre: { [Op.iLike]: `%${q}%` } },
-                        { NumeroDocumento: { [Op.iLike]: `%${q}%` } },
-                        { Email: { [Op.iLike]: `%${q}%` } }
+                        { companyName: { [Op.iLike]: `%${q}%` } },
+                        { documentNumber: { [Op.iLike]: `%${q}%` } },
+                        { email: { [Op.iLike]: `%${q}%` } }
                     ],
-                    Estado: true
+                    isActive: true
                 },
-                attributes: ['IdProveedor', 'Nombre', 'TipoDocumento', 'NumeroDocumento', 'Email'],
+                attributes: ['id', 'companyName', 'documentType', 'documentNumber', 'email'],
                 limit: 10,
-                order: [['Nombre', 'ASC']]
+                order: [['companyName', 'ASC']]
             });
 
             res.status(200).json({

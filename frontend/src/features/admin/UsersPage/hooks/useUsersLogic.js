@@ -86,7 +86,7 @@ export const useUsersLogic = () => {
     } finally {
       setLoading(false);
     }
-  }, [users.length]);
+  }, []); // 👈 Remover users.length para evitar re-fetch prematuro al borrar
 
   useEffect(() => {
     fetchData();
@@ -290,10 +290,10 @@ export const useUsersLogic = () => {
         showAlert(`Usuario "${created.nombre}" creado correctamente`);
       }
       closeModal();
-    } catch (error) {
-      showAlert(error.message, 'error');
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'Error al guardar usuario';
+      showAlert(msg, 'error');
+      fetchData(); // Re-sync in case of error
     }
   };
 
@@ -349,15 +349,25 @@ export const useUsersLogic = () => {
   };
 
   const handleDelete = async () => {
-    if (!userToDelete) return;
+    const user = userToDelete;
+    if (!user) return;
+
     setLoading(true);
     try {
-      await usersService.deleteUser(userToDelete.id);
-      setUsers(prev => prev.filter(u => u.id !== userToDelete.id));
-      showAlert("Usuario eliminado correctamente");
+      await usersService.deleteUser(user.id);
+      
+      // Sincronizar estado local
+      setUsers(prev => prev.filter(u => u.id !== user.id));
+      showAlert(`Usuario "${user.nombre}" eliminado correctamente`, "delete");
+      
+      // Sincronizar caché
+      const updated = users.filter(u => u.id !== user.id);
+      NitroCache.set('users_admin', updated);
+      
       closeDeleteModal();
     } catch (error) {
-      showAlert("Error al eliminar", "error");
+      const msg = error.response?.data?.message || "Error al eliminar";
+      showAlert(msg, "error");
     } finally {
       setLoading(false);
     }

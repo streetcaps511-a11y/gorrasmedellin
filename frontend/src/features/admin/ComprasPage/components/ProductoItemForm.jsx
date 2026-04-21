@@ -1,6 +1,7 @@
 import { FaTrash } from 'react-icons/fa';
+import { SearchSelect } from '../../../shared/services';
 
-const ProductoItemForm = ({ producto, index, availableSizes = [], onChange, onRemove, isViewMode = false, isFirst = false, errors = {} }) => {
+const ProductoItemForm = ({ producto, index, availableProducts = [], availableSizes = [], onChange, onRemove, isViewMode = false, isFirst = false, errors = {}, isLoadingProducts = false }) => {
   const subtotal = (producto.cantidad || 0) * (parseFloat(producto.precioCompra || 0));
   
   const formatNumber = (num) => {
@@ -12,116 +13,114 @@ const ProductoItemForm = ({ producto, index, availableSizes = [], onChange, onRe
   };
 
   const inputStyle = {
-    backgroundColor: '#0f172a',
+    backgroundColor: '#000000',
     border: '1px solid #334155',
-    borderRadius: '6px',
+    borderRadius: '4px',
     color: '#ffffff',
-    fontSize: '13px',
-    padding: '8px 10px',
+    fontSize: '11px',
+    padding: '2px 6px',
     width: '100%',
-    height: '38px',
+    height: '28px',
     outline: 'none',
     boxSizing: 'border-box'
   };
 
   const labelStyle = {
     display: 'block',
-    fontSize: '11px',
-    color: '#9CA3AF',
-    marginBottom: '4px',
-    fontWeight: '500'
+    fontSize: '10px',
+    color: '#FFFFFF',
+    marginBottom: '2px',
+    fontWeight: '500',
+    textTransform: 'uppercase',
+    letterSpacing: '0.3px'
   };
 
+  const capStyle = { fontSize: '9px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.4px', marginTop: '2px', display: 'block' };
+  const readStyle = { backgroundColor: '#000000', border: '1px solid #334155', borderRadius: '4px', color: '#ffffff', fontSize: '11px', padding: '2px 6px', width: '100%', height: '28px', display: 'flex', alignItems: 'center', boxSizing: 'border-box', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
+
+  // ===== MODO VISTA: misma fila que registrar pero solo lectura =====
   if (isViewMode) {
     return (
-      <div style={{
-        backgroundColor: '#111827',
-        border: '1px solid #334155',
-        borderRadius: '8px',
-        padding: '12px',
-        marginBottom: '10px'
-      }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '15px', marginBottom: '10px' }}>
+      <div style={{ backgroundColor: '#000000', borderBottom: '1px solid #1e293b', padding: '8px 4px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 90px 62px 1fr 1fr 90px 90px', gap: '6px', alignItems: 'start' }}>
           <div>
-            <span style={labelStyle}>Producto</span>
-            <div style={{ color: '#fff', fontWeight: '600' }}>{producto.nombre || '-'}</div>
+            <div style={{ ...readStyle, fontWeight: '600' }}>{producto.nombre || '-'}</div>
+            <span style={capStyle}>Producto</span>
           </div>
           <div>
-            <span style={labelStyle}>Talla</span>
-            <div style={{ color: '#F5C81B', fontWeight: '500' }}>{producto.talla || 'N/A'}</div>
+            <div style={{ ...readStyle, color: '#F5C81B', justifyContent: 'center' }}>{producto.talla || 'N/A'}</div>
+            <span style={capStyle}>Talla</span>
           </div>
           <div>
-            <span style={labelStyle}>Cantidad</span>
-            <div style={{ color: '#fff' }}>{producto.cantidad || 0} unid.</div>
-          </div>
-        </div>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', borderTop: '1px solid #2d3748', paddingTop: '10px' }}>
-          <div>
-            <span style={labelStyle}>Compra</span>
-            <div style={{ color: '#10B981', fontWeight: '600' }}>${formatNumber(producto.precioCompra)}</div>
+            <div style={{ ...readStyle, justifyContent: 'center', color: '#94a3b8' }}>{producto.cantidad || 0}</div>
+            <span style={capStyle}>Cant.</span>
           </div>
           <div>
-            <span style={labelStyle}>Venta</span>
-            <div style={{ color: '#F5C81B', fontWeight: '600' }}>${formatNumber(producto.precioVenta)}</div>
+            <div style={{ ...readStyle, color: '#10B981', fontWeight: '700' }}>${formatNumber(producto.precioCompra)}</div>
+            <span style={{ ...capStyle, color: '#10B981' }}>P. Compra</span>
           </div>
           <div>
-            <span style={labelStyle}>May. +6</span>
-            <div style={{ color: '#fff', fontSize: '12px' }}>${formatNumber(producto.precioMayorista6)}</div>
+            <div style={{ ...readStyle, color: '#F5C81B', fontWeight: '700' }}>${formatNumber(producto.precioVenta)}</div>
+            <span style={{ ...capStyle, color: '#F5C81B' }}>P. Venta</span>
           </div>
           <div>
-            <span style={labelStyle}>May. +80</span>
-            <div style={{ color: '#fff', fontSize: '12px' }}>${formatNumber(producto.precioMayorista80)}</div>
+            <div style={{ ...readStyle, color: '#cbd5e1' }}>${formatNumber(producto.precioMayorista6)}</div>
+            <span style={capStyle}>Mayor. +6</span>
+          </div>
+          <div>
+            <div style={{ ...readStyle, color: '#cbd5e1' }}>${formatNumber(producto.precioMayorista80)}</div>
+            <span style={capStyle}>Mayor. +80</span>
           </div>
         </div>
-
+        <div style={{ textAlign: 'right', fontSize: '10px', color: '#6b7280', marginTop: '2px' }}>
+          Subtotal: <span style={{ color: '#F5C81B', fontWeight: '700' }}>${formatNumber(subtotal)}</span>
+        </div>
       </div>
     );
   }
 
   return (
     <div style={{
-      backgroundColor: '#111827',
-      border: '1px solid #334155',
-      borderRadius: '8px',
-      padding: '16px',
-      marginBottom: '16px',
+      backgroundColor: '#000000',
+      borderBottom: '1px solid #1e293b',
+      padding: '8px 4px',
       position: 'relative',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
     }}>
-      {!isFirst && (
-        <button
-          type="button"
-          onClick={() => onRemove(index)}
-          style={{
-            position: 'absolute',
-            top: '12px',
-            right: '12px',
-            backgroundColor: 'transparent',
-            border: 'none',
-            color: '#ef4444',
-            cursor: 'pointer',
-            padding: '4px'
-          }}
-        >
-          <FaTrash size={14} />
-        </button>
-      )}
-
-      {/* FILA 1: Selección de Producto, Talla, Cantidad */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+      {/* FILA ÚNICA */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 90px 62px 1fr 1fr 90px 90px 30px', gap: '6px', alignItems: 'start' }}>
+        {/* Producto */}
         <div>
-          <label style={labelStyle}>Nombre del producto <span style={{ color: '#ef4444' }}>*</span></label>
-          <input
-            type="text"
-            value={producto.nombre || ''}
-            onChange={(e) => onChange(index, 'nombre', e.target.value)}
-            style={{ ...inputStyle, border: errors[`prod_${index}`] ? '1px solid #ef4444' : '1px solid #334155' }}
-            placeholder="Ej: Gorra Yankees"
+          <SearchSelect 
+            options={availableProducts}
+            selectedItem={availableProducts.find(p => p.nombre === producto.nombre || p.Nombre === producto.nombre)}
+            onSelect={(selected) => {
+              if (selected) {
+                onChange(index, 'id', selected.id || selected.IdProducto);
+                onChange(index, 'nombre', selected.nombre || selected.Nombre);
+                onChange(index, 'talla', selected.talla || selected.Talla || '');
+                onChange(index, 'precioCompra', selected.precioCompra || selected.PrecioCompra || '');
+                onChange(index, 'precioVenta', selected.precioVenta || selected.PrecioVenta || '');
+              }
+            }}
+            placeholder="Buscar producto..."
+            loadingText={isLoadingProducts ? "Cargando..." : null}
+            error={errors[`prod_${index}`]}
+            filterFn={(p, term) => {
+              const t = term.toLowerCase();
+              return (p.nombre || p.Nombre || '').toLowerCase().includes(t);
+            }}
+            renderOption={(p) => (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                <span style={{ fontWeight: 700, color: '#fff', fontSize: '13px' }}>{p.nombre || p.Nombre}</span>
+                <span style={{ fontSize: '10px', color: '#94a3b8' }}>Ref: {p.id || p.IdProducto} • Talla: {p.talla || p.Talla || 'N/A'}</span>
+              </div>
+            )}
+            height="28px"
           />
+          <span style={capStyle}>Producto *</span>
         </div>
+        {/* Talla */}
         <div>
-          <label style={labelStyle}>Talla <span style={{ color: '#ef4444' }}>*</span></label>
           <select
             value={producto.talla || ''}
             onChange={(e) => onChange(index, 'talla', e.target.value)}
@@ -132,31 +131,26 @@ const ProductoItemForm = ({ producto, index, availableSizes = [], onChange, onRe
               <option key={s.value || s} value={s.value || s}>{s.label || s}</option>
             ))}
           </select>
+          <span style={capStyle}>Talla *</span>
         </div>
+        {/* Cantidad */}
         <div>
-          <label style={labelStyle}>Cantidad <span style={{ color: '#ef4444' }}>*</span></label>
           <input
-            type="number"
-            min="1"
+            type="number" min="1"
             value={producto.cantidad || ''}
             onChange={(e) => onChange(index, 'cantidad', parseInt(e.target.value) || 0)}
-            style={{ ...inputStyle, border: errors[`qty_${index}`] ? '1px solid #ef4444' : '1px solid #334155' }}
+            style={{ ...inputStyle, border: errors[`qty_${index}`] ? '1px solid #ef4444' : '1px solid #334155', textAlign: 'center' }}
             placeholder="0"
           />
+          <span style={capStyle}>Cant. *</span>
         </div>
-      </div>
-
-      {/* FILA 2: Precios */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', backgroundColor: '#00000020', padding: '12px', borderRadius: '6px', border: '1px dashed #475569' }}>
+        {/* Precio Compra */}
         <div>
-          <label style={{ ...labelStyle, color: '#10B981' }}>Precio compra <span style={{ color: '#ef4444' }}>*</span></label>
           <input
             type="text"
             value={formatNumber(producto.precioCompra)}
             onChange={(e) => {
-              let val = e.target.value.replace(/\./g, '');
-              val = val.replace(/,/g, '.');
-              val = val.replace(/[^0-9.]/g, '');
+              let val = e.target.value.replace(/\./g, '').replace(/,/g, '.').replace(/[^0-9.]/g, '');
               const parts = val.split('.');
               if (parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
               onChange(index, 'precioCompra', val);
@@ -164,16 +158,15 @@ const ProductoItemForm = ({ producto, index, availableSizes = [], onChange, onRe
             style={{ ...inputStyle, color: '#10B981', fontWeight: '700', border: errors[`price_${index}`] ? '1px solid #ef4444' : '1px solid #334155' }}
             placeholder="0"
           />
+          <span style={{ ...capStyle, color: '#10B981' }}>P. Compra *</span>
         </div>
+        {/* Precio Venta */}
         <div>
-          <label style={{ ...labelStyle, color: '#F5C81B' }}>Precio venta <span style={{ color: '#ef4444' }}>*</span></label>
           <input
             type="text"
             value={formatNumber(producto.precioVenta)}
             onChange={(e) => {
-              let val = e.target.value.replace(/\./g, '');
-              val = val.replace(/,/g, '.');
-              val = val.replace(/[^0-9.]/g, '');
+              let val = e.target.value.replace(/\./g, '').replace(/,/g, '.').replace(/[^0-9.]/g, '');
               const parts = val.split('.');
               if (parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
               onChange(index, 'precioVenta', val);
@@ -181,16 +174,15 @@ const ProductoItemForm = ({ producto, index, availableSizes = [], onChange, onRe
             style={{ ...inputStyle, color: '#F5C81B', fontWeight: '700', border: errors[`sell_${index}`] ? '1px solid #ef4444' : '1px solid #334155' }}
             placeholder="0"
           />
+          <span style={{ ...capStyle, color: '#F5C81B' }}>P. Venta *</span>
         </div>
+        {/* Precio +6 */}
         <div>
-          <label style={labelStyle}>Precio +6</label>
           <input
             type="text"
             value={formatNumber(producto.precioMayorista6)}
             onChange={(e) => {
-              let val = e.target.value.replace(/\./g, '');
-              val = val.replace(/,/g, '.');
-              val = val.replace(/[^0-9.]/g, '');
+              let val = e.target.value.replace(/\./g, '').replace(/,/g, '.').replace(/[^0-9.]/g, '');
               const parts = val.split('.');
               if (parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
               onChange(index, 'precioMayorista6', val);
@@ -198,16 +190,15 @@ const ProductoItemForm = ({ producto, index, availableSizes = [], onChange, onRe
             style={inputStyle}
             placeholder="0"
           />
+          <span style={capStyle}>Mayor. +6</span>
         </div>
+        {/* Precio +80 */}
         <div>
-          <label style={labelStyle}>Precio +80</label>
           <input
             type="text"
             value={formatNumber(producto.precioMayorista80)}
             onChange={(e) => {
-              let val = e.target.value.replace(/\./g, '');
-              val = val.replace(/,/g, '.');
-              val = val.replace(/[^0-9.]/g, '');
+              let val = e.target.value.replace(/\./g, '').replace(/,/g, '.').replace(/[^0-9.]/g, '');
               const parts = val.split('.');
               if (parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
               onChange(index, 'precioMayorista80', val);
@@ -215,14 +206,38 @@ const ProductoItemForm = ({ producto, index, availableSizes = [], onChange, onRe
             style={inputStyle}
             placeholder="0"
           />
+          <span style={capStyle}>Mayor. +80</span>
+        </div>
+        {/* Eliminar */}
+        <div style={{ display: 'flex', alignItems: 'center', paddingTop: '0px' }}>
+          {!isFirst && (
+            <button
+              type="button"
+              onClick={() => onRemove(index)}
+              style={{
+                backgroundColor: 'transparent',
+                border: 'none',
+                color: '#ef4444',
+                cursor: 'pointer',
+                padding: '4px',
+                height: '28px',
+                display: 'flex',
+                alignItems: 'center'
+              }}
+            >
+              <FaTrash size={13} />
+            </button>
+          )}
         </div>
       </div>
-      
-      <div style={{ marginTop: '10px', textAlign: 'right', fontSize: '13px', color: '#9CA3AF' }}>
-        Subtotal item: <span style={{ color: '#F5C81B', fontWeight: '700' }}>${formatNumber(subtotal)}</span>
+
+      {/* Subtotal */}
+      <div style={{ textAlign: 'right', fontSize: '10px', color: '#6b7280', marginTop: '2px' }}>
+        Subtotal: <span style={{ color: '#F5C81B', fontWeight: '700' }}>${formatNumber(subtotal)}</span>
       </div>
     </div>
   );
+
 };
 
 export default ProductoItemForm;

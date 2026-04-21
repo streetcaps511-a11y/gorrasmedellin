@@ -127,12 +127,8 @@ const ProveedorFormFields = ({
   };
   
   return (
-    <form 
-      id="registrar-proveedor-form"
-      name="registrar-proveedor-form"
+    <div 
       className={`proveedor-form ${isViewMode ? 'view-mode' : ''}`}
-      onSubmit={(e) => e.preventDefault()}
-      autoComplete="on"
     >
       <div className="form-body">
         {isJuridica ? (
@@ -177,10 +173,10 @@ const ProveedorFormFields = ({
               options={["Persona jurídica", "Persona natural"]}
             />
             <div className="form-row">
-              <div className="col-4">
+              <div className="col" style={{ flex: '0 0 45%' }}>
                 <RenderField
                   {...commonFieldProps}
-                  label="Tipo de documento"
+                  label="Tipo"
                   fieldName="documentType"
                   type="select"
                   required={true}
@@ -195,10 +191,10 @@ const ProveedorFormFields = ({
                   ]}
                 />
               </div>
-              <div className="col-6">
+              <div className="col" style={{ flex: '1' }}>
                 <RenderField
                   {...commonFieldProps}
-                  label="Número de documento"
+                  label="Documento"
                   fieldName="documentNumber"
                   type="text"
                   required={true}
@@ -320,7 +316,7 @@ const ProveedorFormFields = ({
           autoComplete="street-address"
         />
       </div>
-    </form>
+    </div>
   );
 };
 

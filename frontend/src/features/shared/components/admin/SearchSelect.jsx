@@ -9,6 +9,7 @@ const SearchSelect = ({
   renderOption = null,
   filterFn = null,
   noResultsText = "No se encontraron resultados",
+  loadingText = null,
   className = "",
   error = false,
   height = "48px"
@@ -69,6 +70,8 @@ const SearchSelect = ({
   };
 
   const handleToggle = () => {
+    // No abrir si está cargando
+    if (loadingText) return;
     setIsOpen(!isOpen);
     if (!isOpen) {
       setTimeout(() => inputRef.current?.focus(), 0);
@@ -79,7 +82,9 @@ const SearchSelect = ({
     <div className={`search-select-container ${className} ${error ? 'has-error' : ''}`} ref={containerRef}>
       <div className="search-select-header" onClick={handleToggle} style={{ height }}>
         <div className="search-select-selected">
-          {isOpen ? (
+          {loadingText ? (
+            <span className="placeholder-text" style={{ opacity: 0.6 }}>⏳ {loadingText}</span>
+          ) : isOpen ? (
             <input
               ref={inputRef}
               type="text"
@@ -129,10 +134,12 @@ const SearchSelect = ({
             zIndex: 9999
           }}
         >
-          {/* Search input removed from here as it is now in the header */}
-          
           <div className="options-list yellow-scrollbar">
-            {filteredOptions.length > 0 ? (
+            {loadingText ? (
+              <div className="no-results" style={{ color: '#F5C81B', opacity: 0.7 }}>
+                ⏳ {loadingText}
+              </div>
+            ) : filteredOptions.length > 0 ? (
               filteredOptions.map((option, index) => (
                 <div 
                   key={option.id || index} 

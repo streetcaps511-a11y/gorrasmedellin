@@ -92,7 +92,7 @@ export const useProveedoresLogic = () => {
     } finally {
       setLoading(false);
     }
-  }, [proveedores.length]);
+  }, []); // 👈 Solo en montaje o manual, remover proveedores.length para evitar re-fetch infinito al borrar
 
   useEffect(() => {
     fetchData();
@@ -238,43 +238,45 @@ export const useProveedoresLogic = () => {
   };
 
   const handleSave = async () => {
-    if (!validate()) {
-      showAlert('Por favor completa todos los campos obligatorios', 'error');
-      return;
+    if (!validate()) return;
+
+    const isEdit = modalState.mode === 'edit';
+    const payload = { ...formData };
+    
+    // Para Persona natural, el Nombre (companyName) es el mismo Contacto (contactName)
+    if (payload.supplierType === 'Persona natural') {
+      payload.companyName = payload.contactName;
     }
 
-    setActionLoadingText(modalState.mode === 'edit' ? 'Actualizando...' : 'Guardando...');
-    setActionLoading(true);
-    try {
-      const payload = { ...formData };
-      
-      // Para Persona natural, el Nombre (companyName) es el mismo Contacto (contactName)
-      if (payload.supplierType === 'Persona natural') {
-        payload.companyName = payload.contactName;
-      }
+    // 🚀 ACTUALIZACIÓN OPTIMISTA
+    const oldProveedores = [...proveedores];
+    
+    if (isEdit) {
+      setProveedores(prev => prev.map(p => p.id === payload.id ? { ...p, ...payload } : p));
+      showAlert('Proveedor actualizado correctamente ✅');
+    } else {
+      const tempId = Date.now();
+      const tempItem = { ...payload, id: tempId, isOptimistic: true };
+      setProveedores(prev => [tempItem, ...prev]);
+      showAlert('Proveedor creado correctamente ✅');
+    }
 
-      if (modalState.mode === 'edit') {
-        const updated = await proveedoresService.updateProveedor(payload.id, payload);
-        setProveedores(prev => prev.map(p => p.id === updated.id ? updated : p));
-        showAlert('Proveedor actualizado correctamente');
+    closeModal();
+
+    try {
+      if (isEdit) {
+        await proveedoresService.updateProveedor(payload.id, payload);
       } else {
-        const created = await proveedoresService.createProveedor(payload);
-        setProveedores(prev => [created, ...prev]);
-        showAlert('Proveedor creado correctamente');
+        await proveedoresService.createProveedor(payload);
       }
-      closeModal();
     } catch (error) {
+      setProveedores(oldProveedores);
       const resp = error.response?.data;
       let errorMsg = resp?.message || error.message;
-      
-      // Si hay errores específicos de validación (array del backend), mostrar el primero
       if (resp?.errors && Array.isArray(resp.errors) && resp.errors.length > 0) {
         errorMsg = resp.errors[0];
       }
-      
-      showAlert('Error: ' + errorMsg, 'error');
-    } finally {
-      setActionLoading(false);
+      showAlert('Error al procesar: ' + errorMsg, 'error');
     }
   };
 
@@ -318,22 +320,29 @@ export const useProveedoresLogic = () => {
   const closeDeleteModal = () => setDeleteModal({ isOpen: false, proveedor: null });
 
   const handleDelete = async () => {
-    if (!deleteModal.proveedor) return;
-    
-    const id = deleteModal.proveedor.id;
-    
-    // 🚀 Optimistic Update
-    setProveedores(prev => prev.filter(p => p.id !== id));
-    showAlert('Proveedor eliminado permanentemente 🗑️');
-    closeDeleteModal();
+    const proveedor = deleteModal.proveedor;
+    if (!proveedor) return;
 
+    setActionLoadingText('Eliminando...');
+    setActionLoading(true);
     try {
-      await proveedoresService.deleteProveedor(id);
-      fetchData();
+      await proveedoresService.deleteProveedor(proveedor.id);
+      
+      // Sincronizar estado local
+      setProveedores(prev => prev.filter(p => p.id !== proveedor.id));
+      showAlert('Proveedor eliminado permanentemente 🗑️');
+      
+      // ✅ Sincronizar Caché Manualmente tras eliminar
+      const updatedData = proveedores.filter(p => p.id !== proveedor.id);
+      NitroCache.set('proveedores_admin', updatedData);
+      
+      closeDeleteModal();
     } catch (error) {
-      fetchData(); // Revert
       const errorMsg = error.response?.data?.message || 'Error al eliminar proveedor';
       showAlert(errorMsg, 'error');
+    } finally {
+      setActionLoading(false);
+      setActionLoadingText('Procesando...');
     }
   };
 

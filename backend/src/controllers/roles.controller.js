@@ -241,10 +241,46 @@ const rolesController = {
     },
 
     deleteRol: async (req, res) => {
+        const { id } = req.params;
+        const transaction = await sequelize.transaction();
+        
         try {
-            await Rol.destroy({ where: { id: req.params.id } });
-            res.json({ success: true, message: 'Rol eliminado' });
+            const rol = await Rol.findByPk(id);
+            if (!rol) {
+                await transaction.rollback();
+                return res.status(404).json({ success: false, message: 'Rol no encontrado' });
+            }
+
+            // 1. Proteger rol de Administrador
+            if (rol.nombre.toLowerCase() === 'administrador') {
+                await transaction.rollback();
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'El rol "Administrador" es vital para el sistema y no puede ser eliminado.' 
+                });
+            }
+
+            // 2. Verificar si existen usuarios con este rol
+            const usuariosAsociados = await Usuario.count({ where: { idRol: id } });
+            if (usuariosAsociados > 0) {
+                await transaction.rollback();
+                return res.status(400).json({ 
+                    success: false, 
+                    message: `No se puede eliminar el rol "${rol.nombre}" porque hay ${usuariosAsociados} usuario(s) asignado(s) a él. Cambie el rol de estos usuarios antes de eliminarlo.` 
+                });
+            }
+
+            // 3. Limpiar permisos asociados primero (DetallePermiso)
+            await DetallePermiso.destroy({ where: { idRol: id }, transaction });
+
+            // 4. Eliminar el rol
+            await rol.destroy({ transaction });
+
+            await transaction.commit();
+            res.json({ success: true, message: `Rol "${rol.nombre}" eliminado exitosamente.` });
         } catch (error) {
+            if (transaction) await transaction.rollback();
+            console.error('❌ Error en deleteRol:', error);
             res.status(400).json({ success: false, message: error.message });
         }
     }

@@ -28,7 +28,7 @@ const ReturnsSection = ({
   setReturnsPage, totalReturnPages, selectedReturn, setSelectedReturn, 
   handleReturnSubmit, returnFormData, setReturnFormData, returnErrors,
   selectedProduct, initialProducts, getPriceNum, handleReturnImageUpload,
-  formData, isBulkReturn, selectedOrder
+  formData, isBulkReturn, selectedOrder, setActiveTab
 }) => {
   const [showBulkItems, setShowBulkItems] = React.useState(false);
   const [detailProdsPage, setDetailProdsPage] = React.useState(1);
@@ -300,16 +300,36 @@ const ReturnsSection = ({
   // FORMULARIO DE SOLICITUD
   return (
     <div className="gm-return-form">
-      <div className="gm-section-header" style={{ marginBottom: '55px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "25px" }}>
-          <button onClick={() => setReturnView('list')} className="gm-back-btn">
-            <FaArrowLeft /> CANCELAR
-          </button>
-          <h3 className="gm-section-title" style={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 400, fontSize: '1.4rem', color: '#fff' }}>
+      <div className="gm-section-header" style={{ marginBottom: '45px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
+          <div 
+            onClick={() => {
+              if (selectedProduct?.orderId) {
+                // Si venía de un pedido, volvemos a la lista de pedidos
+                setActiveTab('orders');
+                setReturnView('list');
+              } else {
+                setReturnView('list');
+              }
+            }} 
+            className="gm-back-arrow-btn"
+            title="Volver"
+            style={{ 
+              cursor: 'pointer', 
+              color: '#FFC107', 
+              fontSize: '1.4rem', 
+              display: 'flex', 
+              alignItems: 'center', 
+              transition: 'transform 0.2s' 
+            }}
+          >
+            <FaArrowLeft />
+          </div>
+          <h3 className="gm-section-title" style={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 400, fontSize: '1.4rem', color: '#fff', margin: 0 }}>
             {isBulkReturn ? "Solicitud de cambio del pedido" : "Solicitud de Cambio"}
           </h3>
         </div>
-        <button onClick={handleReturnSubmit} className="gm-form-submit-btn-outline" style={{ fontWeight: 400, fontFamily: '"Montserrat", sans-serif', fontSize: '0.9rem', border: '1px solid #FFC107', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '10px', background: 'transparent', color: '#FFC107', padding: '10px 22px', marginLeft: '50px' }}>
+        <button onClick={handleReturnSubmit} className="gm-form-submit-btn-outline" style={{ fontWeight: 400, fontFamily: '"Montserrat", sans-serif', fontSize: '0.9rem', border: '1px solid #FFC107', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '10px', background: 'transparent', color: '#FFC107', padding: '10px 22px' }}>
           <FaCheckCircle /> ENVIAR SOLICITUD
         </button>
       </div>
@@ -370,15 +390,51 @@ const ReturnsSection = ({
                   )}
                 </>
               ) : (
-                <div style={{ padding: '10px 18px', display: 'flex', alignItems: 'center', gap: '15px' }}>
-                  <img src={selectedProduct.image} style={{ width: '38px', height: '38px', borderRadius: '8px', objectFit: 'cover' }} alt={selectedProduct.name} />
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ fontSize: '0.72rem', color: '#fff', fontWeight: 400, letterSpacing: '0.5px', opacity: 0.8 }}>DEVOLVIENDO:</span>
-                    <span style={{ fontSize: '0.85rem', color: '#fff', fontWeight: '400', fontFamily: '"Montserrat", sans-serif' }}>
-                      {selectedProduct.name.charAt(0).toUpperCase() + selectedProduct.name.slice(1).toLowerCase()}
-                    </span>
-                    <span style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 400 }}>{selectedProduct.price}</span>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', gap: '15px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <img src={selectedProduct.image} style={{ width: '38px', height: '38px', borderRadius: '8px', objectFit: 'cover' }} alt={selectedProduct.name} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontSize: '0.72rem', color: '#fff', fontWeight: 400, letterSpacing: '0.5px', opacity: 0.8 }}>DEVOLVIENDO:</span>
+                      <span style={{ fontSize: '0.85rem', color: '#fff', fontWeight: '400', fontFamily: '"Montserrat", sans-serif' }}>
+                        {selectedProduct.name.charAt(0).toUpperCase() + selectedProduct.name.slice(1).toLowerCase()}
+                      </span>
+                      <span style={{ color: '#FFC107', fontSize: '0.85rem', fontWeight: 700 }}>{selectedProduct.price}</span>
+                    </div>
                   </div>
+                  
+                  {/* Selector de Cantidad */}
+                  <div style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,193,7,0.02)' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>CANTIDAD A DEVOLVER:</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                      <div className="gm-qty-selector-minimal">
+                        <button 
+                          onClick={() => setReturnFormData({...returnFormData, cantidad: Math.max(1, returnFormData.cantidad - 1)})}
+                          className="gm-qty-btn"
+                          type="button"
+                        >
+                          -
+                        </button>
+                        <span className="gm-qty-number">{returnFormData.cantidad}</span>
+                        <button 
+                          onClick={() => setReturnFormData({...returnFormData, cantidad: Math.min(selectedProduct.maxQty, returnFormData.cantidad + 1)})}
+                          className="gm-qty-btn"
+                          type="button"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <span style={{ fontSize: '0.75rem', color: '#64748b' }}>de {selectedProduct.maxQty} compradas</span>
+                    </div>
+                  </div>
+                  
+                  {/* Total Dinámico */}
+                  {returnFormData.cantidad > 1 && (
+                    <div style={{ padding: '8px 18px', display: 'flex', justifyContent: 'flex-end', background: 'rgba(0,255,136,0.05)', borderTop: '1px solid rgba(0,255,136,0.1)' }}>
+                      <span style={{ fontSize: '0.75rem', color: '#00ff88', fontWeight: 600 }}>
+                        VALOR TOTAL DEL CAMBIO: ${ (getPriceNum(selectedProduct.price) * returnFormData.cantidad).toLocaleString('es-CO') }
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

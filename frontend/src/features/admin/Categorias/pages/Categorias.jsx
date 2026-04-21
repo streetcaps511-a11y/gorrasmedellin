@@ -26,7 +26,7 @@ const CategoriasPage = () => {
 
   const renderField = (label, fieldName, type = 'text') => {
     const isReadOnly = modalState.mode === 'view';
-    const isError = errors[fieldName] || false;
+    const isError = isReadOnly ? false : (errors[fieldName] || false);
     const value = isReadOnly ? (modalState.category?.[fieldName] || 'N/A') : (formData[fieldName] || '');
 
     return (
@@ -154,30 +154,19 @@ const CategoriasPage = () => {
         onClose={closeModal}
         title={modalState.mode === 'create' ? 'Registrar categoría' : modalState.mode === 'edit' ? 'Editar categoría' : 'Detalles de la categoría'}
         subtitle={modalState.mode === 'create' ? 'Complete la información para registrar una nueva categoría' : modalState.mode === 'edit' ? 'Modifique la información de la categoría' : 'Información detallada de la categoría'}
-        showActions={false}
         size="medium"
-        contentStyle={{ padding: 0 }}
         loading={loading}
+        actions={modalState.mode === 'view' ? [
+          { label: 'Cerrar', variant: 'primary', onClick: closeModal }
+        ] : [
+          { label: 'Cancelar', variant: 'secondary', onClick: closeModal },
+          { label: modalState.mode === 'create' ? 'Guardar' : 'Guardar Cambios', variant: 'primary', onClick: handleSave }
+        ]}
       >
-        <div className="modal-content">
-          <div className="modal-content__body">
-            {renderField('Nombre', 'nombre')}
-            {renderField('Descripción', 'descripcion', 'textarea')}
-            {renderField('URL de Imagen', 'imagenUrl')}
-          </div>
-          
-          <div className="modal-content__footer">
-            {modalState.mode === 'view' ? (
-              <button onClick={closeModal} className="btn-modal-save" style={{ minWidth: '100px' }}>Cerrar</button>
-            ) : (
-              <>
-                <button onClick={closeModal} className="btn-modal-cancel" disabled={loading}>Cancelar</button>
-                <button onClick={handleSave} className="btn-modal-save" disabled={loading}>
-                  {loading ? 'Guardando...' : (modalState.mode === 'create' ? 'Guardar' : 'Guardar Cambios')}
-                </button>
-              </>
-            )}
-          </div>
+        <div className="modal-content__body">
+          {renderField('Nombre', 'nombre')}
+          {renderField('Descripción', 'descripcion', 'textarea')}
+          {renderField('URL de Imagen', 'imagenUrl')}
         </div>
       </UniversalModal>
 

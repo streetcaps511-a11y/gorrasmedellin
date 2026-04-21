@@ -171,7 +171,7 @@ Proveedor.buscarConFiltros = async function(filtros) {
 Proveedor.prototype.tieneCompras = async function() {
     const Compra = (await import('./compras.model.js')).default;
     const count = await Compra.count({
-        where: { IdProveedor: this.id }
+        where: { idProveedor: this.id }
     });
     return count > 0;
 };

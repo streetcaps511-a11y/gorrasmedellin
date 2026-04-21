@@ -70,7 +70,8 @@ const ClientesPage = () => {
     anularModal,
     confirmToggleStatus,
     closeAnularModal,
-    handleDelete
+    handleDelete,
+    loading
   } = useClientesLogic();
 
   const isFormView = modalState.isOpen;
@@ -158,6 +159,13 @@ const ClientesPage = () => {
           'Detalles del cliente'
         }
         size="medium"
+        onSave={handleSave}
+        actions={modalState.mode === 'view' ? [
+          { label: 'Cerrar', variant: 'primary', onClick: closeModal }
+        ] : [
+          { label: 'Cancelar', variant: 'secondary', onClick: closeModal },
+          { label: modalState.mode === 'edit' ? 'Guardar Cambios' : 'Guardar', variant: 'primary', onClick: handleSave }
+        ]}
       >
         <div className="clientes-form-wrapper yellow-scrollbar">
           <ClienteFormFields 
@@ -168,8 +176,6 @@ const ClientesPage = () => {
             departamentos={departamentos} 
             ciudades={ciudades} 
             loadingCities={loadingCities} 
-            closeModal={closeModal} 
-            handleSave={handleSave} 
             firstInputRef={firstInputRef}
           />
         </div>
@@ -182,6 +188,7 @@ const ClientesPage = () => {
           onConfirm={handleDelete} 
           entityName="cliente"
           entityData={deleteModal.cliente}
+          loading={loading}
         />
 
         <AnularOperacionModal

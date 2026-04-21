@@ -23,7 +23,7 @@ const UserFormFields = ({
     if (isSelectField) {
       if (fieldName === 'rol' && isEditingAdmin) {
         return (
-          <div className="form-field">
+          <div className="form-field form-field-horizontal">
             <label className="form-label">{label}:</label>
             <div className="admin-badge-field">
               <FaShieldAlt size={14} />
@@ -121,6 +121,9 @@ const UserFormFields = ({
           <div className="col">
             {renderField('Nombre completo', 'nombreCompleto', 'text')}
           </div>
+        </div>
+
+        <div className="form-row">
           <div className="col">
             {renderField('Email', 'email', 'email')}
           </div>
@@ -142,16 +145,6 @@ const UserFormFields = ({
         </div>
       </div>
 
-      <div className="form-actions">
-        {isReadOnly ? (
-          <button onClick={closeModal} className="btn-save">Cerrar</button>
-        ) : (
-          <>
-            <button onClick={closeModal} className="btn-cancel">Cancelar</button>
-            <button onClick={handleSave} className="btn-save">Guardar</button>
-          </>
-        )}
-      </div>
     </div>
   );
 };

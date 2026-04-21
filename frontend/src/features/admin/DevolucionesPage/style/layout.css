@@ -10,14 +10,14 @@
 }
 
 .devoluciones-header {
-  margin-bottom: 4px;
+  margin-bottom: 0px;
 }
 
 .devoluciones-header-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
+  margin-bottom: 10px;
 }
 
 .devoluciones-header-left {
@@ -84,7 +84,7 @@
 }
 
 .devoluciones-search-bar {
-  margin-bottom: 6px;
+  margin-bottom: 0px;
   display: flex;
   gap: 15px;
   align-items: center;
@@ -102,7 +102,7 @@
   border: 1px solid #F5C81B;
   overflow: hidden;
   background-color: #000000;
-  padding-bottom: 30px;
+  margin-top: 10px;
   min-height: 420px;
 }
 

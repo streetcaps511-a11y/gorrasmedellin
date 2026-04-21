@@ -85,22 +85,22 @@
 }
 
 .gm-info {
-  padding: 15px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 4px;
   flex: 1;
 }
 
 .gm-product-name {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   color: #fff;
   min-height: auto;
   overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
   -webkit-box-orient: vertical;
   text-transform: capitalize;
   line-height: 1.25;
@@ -159,8 +159,8 @@
 }
 
 .gm-badge--agotado {
-  background: rgba(239, 68, 68, 0.1) !important;
-  color: #ef4444 !important;
+  background: #ef4444 !important;
+  color: #fff !important;
   border: 1px solid #ef4444 !important;
 }
 
@@ -208,7 +208,7 @@
 }
 
 .gm-current-price {
-  font-size: 1.25rem;
+  font-size: 1.05rem;
   font-weight: 800;
   color: #F5C81B;
 }
@@ -232,11 +232,11 @@
 }
 
 .gm-btn-cart {
-  width: 50px;
-  height: 50px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   border: none;
-  background: #FFC107;
+  background: #F5C81B;
   color: #000;
   display: flex;
   align-items: center;

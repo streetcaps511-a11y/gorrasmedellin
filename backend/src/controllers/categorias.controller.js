@@ -88,15 +88,15 @@ const categoriaController = {
             }
 
             const productos = await Producto.findAll({
-                where: { IdCategoria: id, Estado: true },
+                where: { idCategoria: id, isActive: true },
                 limit: 5,
-                order: [['Nombre', 'ASC']]
+                order: [['nombre', 'ASC']]
             });
 
             return successResponse(res, {
                 categoria,
                 productos,
-                totalProductos: await Producto.count({ where: { IdCategoria: id } })
+                totalProductos: await Producto.count({ where: { idCategoria: id } })
             }, 'Categoría obtenida exitosamente');
 
         } catch (error) {
@@ -213,7 +213,7 @@ const categoriaController = {
             }
 
             const productosAsociados = await Producto.count({
-                where: { IdCategoria: id }
+                where: { idCategoria: id }
             });
 
             if (productosAsociados > 0) {

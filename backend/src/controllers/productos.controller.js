@@ -14,7 +14,7 @@ const productoController = {
         try {
             const { 
                 page = 1, 
-                limit = 20, 
+                limit = 999, // 🚀 Aumentamos el límite por defecto para que salgan todos los productos en la tienda
                 search = '', 
                 categoriaId,
                 oferta,
@@ -75,11 +75,13 @@ const productoController = {
             // 🚀 MAPEO PARA COMPATIBILIDAD CON FRONTEND LEGACY
             const productsWithLegacyMapped = rows.map(p => {
                 const productPlain = p.get({ plain: true });
-                let currentStock = productPlain.stock || 0;
                 
-                // Recalcular stock si es 0 pero tiene tallas
-                if (currentStock === 0 && Array.isArray(productPlain.tallasStock)) {
+                // 🔥 SIEMPRE calcular el stock real desde tallasStock para evitar desincronización
+                let currentStock = 0;
+                if (Array.isArray(productPlain.tallasStock)) {
                     currentStock = productPlain.tallasStock.reduce((sum, item) => sum + (Number(item.cantidad) || 0), 0);
+                } else if (productPlain.stock) {
+                    currentStock = Number(productPlain.stock);
                 }
 
                 return {
@@ -400,7 +402,7 @@ const productoController = {
             }
 
             // 🔍 VALIDACIÓN DE INTEGRIDAD REFERENCIAL (Evitar 500 por Foreign Key)
-            const { DetalleVenta, DetalleCompra, Devolucion } = sequelize.models;
+            const { DetalleVenta, CompraDetalle, Devolucion } = sequelize.models;
             
             const hasVentas = await DetalleVenta?.findOne({ where: { idProducto: id }, transaction });
             if (hasVentas) {
@@ -411,7 +413,7 @@ const productoController = {
                 });
             }
 
-            const hasCompras = await DetalleCompra?.findOne({ where: { idProducto: id }, transaction });
+            const hasCompras = await CompraDetalle?.findOne({ where: { idProducto: id }, transaction });
             if (hasCompras) {
                 await transaction.rollback();
                 return res.status(400).json({ 

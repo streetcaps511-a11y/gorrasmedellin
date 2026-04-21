@@ -1,5 +1,5 @@
 .entity-table-container {
-  width: 100%;
+  width: 98%;
   overflow-x: hidden;
   border-radius: 0;
   border: none;
@@ -15,7 +15,7 @@
   width: 100%;
   border-collapse: collapse;
   background-color: transparent;
-  table-layout: fixed;
+  table-layout: auto;
 }
 
 /* Header Styles */
@@ -26,19 +26,22 @@
 }
 
 .entity-table th {
-  padding: 12px 16px;
-  color: #FFFFFF; /* Blanco puro */
-  font-weight: 400; /* Sin negrita, como pidió el usuario */
+  padding: 10px 10px;
+  color: #FFFFFF;
+  font-weight: 400;
   text-align: left;
   font-size: 13px;
   letter-spacing: 0.5px;
   text-transform: none;
   border-bottom: 1px solid #222;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .entity-table th.actions-header {
   text-align: right;
-  width: 160px;
+  width: 120px;
 }
 
 /* Body Styles */
@@ -64,7 +67,7 @@
 }
 
 .entity-table-cell {
-  padding: 10px 16px; /* Balanceado */
+  padding: 6px 10px;
   color: #fff;
   font-size: 13px;
   white-space: nowrap;

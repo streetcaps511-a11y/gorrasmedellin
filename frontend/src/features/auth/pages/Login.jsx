@@ -16,6 +16,7 @@ const Login = () => {
   const [activeTab, setActiveTab] = useState("login");
   const [view, setView] = useState("auth");
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({}); // 🎯 Errores específicos por campo
   const [infoMsg, setInfoMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConflictModal, setShowConflictModal] = useState(false); // 🔐 Estado para el modal
@@ -47,6 +48,7 @@ const Login = () => {
   // ─── Helpers ─────────────────────────────────────
   const resetMessages = () => {
     setError("");
+    setFieldErrors({});
     setInfoMsg("");
   };
 
@@ -166,15 +168,24 @@ const Login = () => {
     },
     input: {
       width: "100%",
-      padding: "8px 12px",
+      padding: "10px 14px",
       borderRadius: "8px",
       backgroundColor: "#171a21",
-      border: "1px solid rgba(255,255,255,0.1)",
+      border: "1px solid rgba(255,193,7,0.15)",
       color: "#fff",
       fontSize: "14px",
       outline: "none",
-      marginBottom: "16px",
-      boxSizing: "border-box"
+      marginBottom: "4px", // Reducido para dejar espacio al error debajo
+      boxSizing: "border-box",
+      transition: "border-color 0.2s"
+    },
+    fieldError: {
+      color: "#ff4d4d",
+      fontSize: "11px",
+      marginBottom: "12px",
+      marginLeft: "4px",
+      display: "block",
+      fontWeight: "500"
     },
     inputWrap: { position: "relative", width: "100%" },
     eyeBtn: {
@@ -230,7 +241,10 @@ const Login = () => {
     console.log(`🔵 Intentando Login ${useForce ? '[FORZADO]' : ''}:`, loginData.correo);
 
     if (!loginData.correo?.trim() || !loginData.clave?.trim()) {
-      setError("Por favor completa correo y contraseña.");
+      const fe = {};
+      if (!loginData.correo?.trim()) fe.correo = "Ingresa tu correo";
+      if (!loginData.clave?.trim()) fe.clave = "Ingresa tu contraseña";
+      setFieldErrors(fe);
       setIsSubmitting(false);
       return;
     }
@@ -299,11 +313,16 @@ const Login = () => {
       if (err.name === 'AbortError') {
         setError("La petición tardó demasiado. Verifica tu conexión.");
       } else if (err.response) {
-        setError(err.response.data?.message || "Credenciales incorrectas");
+      const msg = err.response?.data?.message || "";
+      if (msg.toLowerCase().includes("correo") || msg.toLowerCase().includes("email") || msg.toLowerCase().includes("credenciales")) {
+        setFieldErrors({ correo: msg || "Credenciales incorrectas" });
+      } else if (msg.toLowerCase().includes("clave") || msg.toLowerCase().includes("contrase")) {
+        setFieldErrors({ clave: msg });
       } else {
-        setError("Error al iniciar sesión. Intenta de nuevo.");
+        setError(msg || "Error al iniciar sesión. Intenta de nuevo.");
       }
-    } finally {
+    }
+  } finally {
       setIsSubmitting(false);
     }
   };
@@ -318,9 +337,15 @@ const Login = () => {
     setIsSubmitting(true);
     
     if (registerData.clave !== registerData.confirmarClave) {
-      setError("Las contraseñas no coinciden.");
+      setFieldErrors({ confirmarClave: "Las contraseñas no coinciden" });
       setIsSubmitting(false);
       return;
+    }
+    
+    if (!registerData.fullName.trim()) {
+       setFieldErrors({ fullName: "El nombre es obligatorio" });
+       setIsSubmitting(false);
+       return;
     }
 
     try {
@@ -345,7 +370,16 @@ const Login = () => {
         setInfoMsg("¡Cuenta creada! Ya puedes iniciar sesión.");
         setActiveTab("login");
       } else {
-        setError(result.message || "No se pudo crear la cuenta");
+        const msg = result.message || "";
+        if (msg.toLowerCase().includes("correo") || msg.toLowerCase().includes("email") || msg.toLowerCase().includes("existe")) {
+          setFieldErrors({ correo: "Este correo ya está registrado" });
+        } else if (msg.toLowerCase().includes("documento")) {
+          setFieldErrors({ documentNumber: "Este documento ya está en uso" });
+        } else if (msg.toLowerCase().includes("nombre")) {
+          setFieldErrors({ fullName: "Revisa el nombre ingresado" });
+        } else {
+          setError(msg || "No se pudo crear la cuenta");
+        }
       }
 
     } catch {
@@ -460,33 +494,33 @@ const Login = () => {
                 <form onSubmit={handleLogin} onChange={resetMessages}>
                   <label style={styles.label}>Correo electrónico</label>
                   <input
-                    style={styles.input}
+                    style={{ ...styles.input, borderColor: fieldErrors.correo ? '#ff4d4d' : styles.input.border.split(' ')[2] }}
                     type="email"
                     placeholder="ejemplo@correo.com"
-                    required
                     value={loginData.correo}
                     onChange={(e) => setLoginData({ ...loginData, correo: e.target.value })}
                   />
+                  {fieldErrors.correo && <span style={styles.fieldError}>{fieldErrors.correo}</span>}
 
                   <label style={styles.label}>Contraseña</label>
                   <div style={styles.inputWrap}>
-                    <input
-                      style={{ ...styles.input, paddingRight: '40px' }}
-                      type={showLoginPass ? "text" : "password"}
-                      placeholder="••••••••"
-                      required
-                      value={loginData.clave}
-                      onChange={(e) => setLoginData({ ...loginData, clave: e.target.value })}
-                    />
-                    <button
-                      type="button"
-                      style={styles.eyeBtn}
-                      onClick={() => setShowLoginPass(!showLoginPass)}
-                      aria-label={showLoginPass ? "Ocultar contraseña" : "Mostrar contraseña"}
-                    >
-                      {showLoginPass ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
-                    </button>
-                  </div>
+                      <input
+                        style={{ ...styles.input, paddingRight: '40px', borderColor: fieldErrors.clave ? '#ff4d4d' : styles.input.border.split(' ')[2] }}
+                        type={showLoginPass ? "text" : "password"}
+                        placeholder="••••••••"
+                        value={loginData.clave}
+                        onChange={(e) => setLoginData({ ...loginData, clave: e.target.value })}
+                      />
+                      <button
+                        type="button"
+                        style={styles.eyeBtn}
+                        onClick={() => setShowLoginPass(!showLoginPass)}
+                        aria-label={showLoginPass ? "Ocultar contraseña" : "Mostrar contraseña"}
+                      >
+                        {showLoginPass ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
+                      </button>
+                    </div>
+                    {fieldErrors.clave && <span style={styles.fieldError}>{fieldErrors.clave}</span>}
 
                   {error && <div style={styles.error}>{error}</div>}
                   {infoMsg && <div style={styles.info}>{infoMsg}</div>}
@@ -535,10 +569,9 @@ const Login = () => {
                     <div style={{ flex: 0.85 }}>
                       <label style={styles.label}>Número</label>
                       <input
-                        style={styles.input}
+                        style={{ ...styles.input, borderColor: fieldErrors.documentNumber ? '#ff4d4d' : styles.input.border.split(' ')[2] }}
                         type="text"
                         placeholder="1234567"
-                        required
                         value={registerData.documentNumber}
                         onChange={(e) => {
                           const val = e.target.value;
@@ -547,39 +580,38 @@ const Login = () => {
                           }
                         }}
                       />
+                      {fieldErrors.documentNumber && <span style={styles.fieldError}>{fieldErrors.documentNumber}</span>}
                     </div>
                   </div>
 
                   <label style={styles.label}>Nombre completo</label>
                   <input
-                    style={styles.input}
+                    style={{ ...styles.input, borderColor: fieldErrors.fullName ? '#ff4d4d' : styles.input.border.split(' ')[2] }}
                     type="text"
                     placeholder="Tu nombre y apellido completos"
-                    required
                     value={registerData.fullName}
                     onChange={(e) => setRegisterData({ ...registerData, fullName: e.target.value })}
                   />
+                  {fieldErrors.fullName && <span style={styles.fieldError}>{fieldErrors.fullName}</span>}
 
                   <label style={styles.label}>Correo electrónico</label>
                   <input
-                    style={styles.input}
+                    style={{ ...styles.input, borderColor: fieldErrors.correo ? '#ff4d4d' : styles.input.border.split(' ')[2] }}
                     type="email"
                     placeholder="tu@email.com"
-                    required
                     value={registerData.correo}
                     onChange={(e) => setRegisterData({ ...registerData, correo: e.target.value })}
                   />
+                  {fieldErrors.correo && <span style={styles.fieldError}>{fieldErrors.correo}</span>}
 
                   <div className="login-input-row">
                     <div style={{ flex: 1 }}>
                       <label style={styles.label}>Contraseña</label>
                       <div style={styles.inputWrap}>
                         <input
-                          style={{ ...styles.input, paddingRight: '40px' }}
+                          style={{ ...styles.input, paddingRight: '40px', borderColor: fieldErrors.clave ? '#ff4d4d' : styles.input.border.split(' ')[2] }}
                           type={showRegPass ? "text" : "password"}
                           placeholder="••••••••"
-                          required
-                          minLength={6}
                           value={registerData.clave}
                           onChange={(e) => setRegisterData({ ...registerData, clave: e.target.value })}
                         />
@@ -587,16 +619,15 @@ const Login = () => {
                           {showRegPass ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
                         </button>
                       </div>
+                      {fieldErrors.clave && <span style={styles.fieldError}>{fieldErrors.clave}</span>}
                     </div>
                     <div style={{ flex: 1 }}>
                       <label style={styles.label}>Confirmar contraseña</label>
                       <div style={styles.inputWrap}>
                         <input
-                          style={{ ...styles.input, paddingRight: '40px' }}
+                          style={{ ...styles.input, paddingRight: '40px', borderColor: fieldErrors.confirmarClave ? '#ff4d4d' : styles.input.border.split(' ')[2] }}
                           type={showRegConfirmPass ? "text" : "password"}
                           placeholder="••••••••"
-                          required
-                          minLength={6}
                           value={registerData.confirmarClave}
                           onChange={(e) => setRegisterData({ ...registerData, confirmarClave: e.target.value })}
                         />
@@ -604,6 +635,7 @@ const Login = () => {
                           {showRegConfirmPass ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
                         </button>
                       </div>
+                      {fieldErrors.confirmarClave && <span style={styles.fieldError}>{fieldErrors.confirmarClave}</span>}
                     </div>
                   </div>
 
@@ -693,6 +725,15 @@ const Login = () => {
           .login-hero-section { flex: 0 0 auto !important; padding: 60px 20px 30px 20px !important; }
           .login-form-wrapper { flex: 0 0 auto !important; padding-right: 0 !important; padding-bottom: 50px !important; }
           .login-form-card { max-width: 90% !important; padding: 20px 25px !important; }
+        }
+
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px #171a21 inset !important;
+            -webkit-text-fill-color: white !important;
+            transition: background-color 5000s ease-in-out 0s;
         }
       `}</style>
       {showConflictModal && (

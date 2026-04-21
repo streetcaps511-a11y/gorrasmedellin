@@ -1108,3 +1108,56 @@
         text-overflow: ellipsis;
     }
 }
+
+/* ============================================
+   SELECTOR DE CANTIDAD PARA DEVOLUCIONES
+   ============================================ */
+.gm-qty-selector-minimal {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 2px;
+    user-select: none;
+}
+
+.gm-qty-btn {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: #FFC107;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 6px;
+    outline: none;
+}
+
+.gm-qty-btn:hover {
+    background: rgba(255, 193, 7, 0.1);
+}
+
+.gm-qty-number {
+    width: 32px;
+    text-align: center;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    color: #fff;
+    font-weight: 700;
+}
+
+@media (max-width: 600px) {
+    .gm-return-product-summary-compact {
+        max-width: 100% !important;
+    }
+    
+    .gm-qty-selector-minimal {
+        transform: scale(0.95);
+    }
+}

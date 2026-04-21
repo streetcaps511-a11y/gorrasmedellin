@@ -148,6 +148,14 @@ const ProductosGrid = ({
 
         {/* CONTENIDO PRINCIPAL (Columna Derecha) */}
         <main className="gm-products-main-content">
+          {/* ⚡ ESTADO DE CARGA INICIAL */}
+          {(!initialProducts || initialProducts.length === 0) && (
+            <div className="gm-loading-container">
+              <div className="gm-loader"></div>
+              <p>Cargando catálogo premium...</p>
+            </div>
+          )}
+
           {/* Resultados de búsqueda */}
           {filteredProducts !== null && (
             <>

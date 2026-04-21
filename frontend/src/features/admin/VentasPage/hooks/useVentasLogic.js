@@ -271,7 +271,9 @@ export const useVentasLogic = (initialAvailableProducts = [], initialAvailableCu
         total: calcularTotal()
       };
       const created = await ventasService.createSale(saleToCreate);
-      setVentas(prev => [created, ...prev]);
+      const newVentas = [created, ...ventas];
+      setVentas(newVentas);
+      NitroCache.set('ventas', newVentas);
       showAlert('Venta registrada exitosamente');
       
       // 🔥 Sincronizar stock inmediatamente después de vender
@@ -295,7 +297,9 @@ export const useVentasLogic = (initialAvailableProducts = [], initialAvailableCu
       }
       const updated = await ventasService.updateSaleStatus(targetVentaId, status, reason, evidence);
       
-      setVentas(prev => prev.map(v => v.id === updated.id ? updated : v));
+      const newVentas = ventas.map(v => v.id === updated.id ? updated : v);
+      setVentas(newVentas);
+      NitroCache.set('ventas', newVentas);
       if (ventaViendo?.id === updated.id) setVentaViendo(updated);
       
       showAlert(`Venta actualizada correctamente`);
@@ -341,7 +345,9 @@ export const useVentasLogic = (initialAvailableProducts = [], initialAvailableCu
         m2
       );
       
-      setVentas(prev => prev.map(v => v.id === updated.id ? updated : v));
+      const newVentas = ventas.map(v => v.id === updated.id ? updated : v);
+      setVentas(newVentas);
+      NitroCache.set('ventas', newVentas);
       if (ventaViendo?.id === updated.id) setVentaViendo(updated);
 
       showAlert(nuevoEstado === 'Completada' ? "Venta completada ✅" : "Pago incompleto registrado ⚠️");
@@ -358,7 +364,9 @@ export const useVentasLogic = (initialAvailableProducts = [], initialAvailableCu
     try {
       const anularStatus = availableStatuses.find(s => s.toLowerCase().includes('anula')) || availableStatuses[3];
       const updated = await ventasService.updateSaleStatus(anularModal.venta.id, anularStatus || 'Anulada');
-      setVentas(prev => prev.map(v => v.id === updated.id ? updated : v));
+      const newVentas = ventas.map(v => v.id === updated.id ? updated : v);
+      setVentas(newVentas);
+      NitroCache.set('ventas', newVentas);
       showAlert('Venta anulada correctamente');
       setAnularModal({ isOpen: false, venta: null });
     } catch (error) {
