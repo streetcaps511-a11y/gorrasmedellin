@@ -69,7 +69,8 @@ export const createProducto = async (productoData) => {
   try {
     const backendData = mapFrontendToBackend(productoData);
     const response = await adminApi.createProducto(backendData);
-    return mapBackendToFrontend(response.data);
+    // ✅ Extraer la data real del producto (response.data.data)
+    return mapBackendToFrontend(response.data.data || response.data);
   } catch (error) {
     console.error("Error creating producto:", error);
     throw error;
@@ -80,7 +81,8 @@ export const updateProducto = async (id, productoData) => {
   try {
     const backendData = mapFrontendToBackend(productoData);
     const response = await adminApi.updateProducto(id, backendData);
-    return mapBackendToFrontend(response.data);
+    // ✅ Extraer la data real del producto (response.data.data)
+    return mapBackendToFrontend(response.data.data || response.data);
   } catch (error) {
     console.error("Error updating producto:", error);
     throw error;

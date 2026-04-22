@@ -165,24 +165,16 @@ export const useProductosLogic = () => {
         setModoVista("lista");
         showAlert(`Actualizado correctamente ✅`);
         
-        const response = await productosService.updateProducto(productoEditando.id, payload);
+        const updatedProd = await productosService.updateProducto(productoEditando.id, payload);
         
-        // Actualizar con data real del server por si acaso
-        if (response?.data) {
-          const updatedProd = response.data;
-          const finalProductos = previousProductos.map(p => p.id === productoEditando.id ? updatedProd : p);
-          setProductos(finalProductos);
-          NitroCache.set(CACHE_KEY, finalProductos);
-        } else {
-          const finalProductos = previousProductos.map(p => p.id === productoEditando.id ? { ...p, ...payload } : p);
-          setProductos(finalProductos);
-          NitroCache.set(CACHE_KEY, finalProductos);
-        }
+        // Actualizar lista con la data confirmada del servidor
+        const finalProductos = previousProductos.map(p => p.id === productoEditando.id ? updatedProd : p);
+        setProductos(finalProductos);
+        NitroCache.set(CACHE_KEY, finalProductos);
       } else {
         // Para CREAR, no podemos ser 100% optimistas sin ID, pero podemos evitar el loading global
         setLoading(true);
-        const response = await productosService.createProducto(payload);
-        const newProd = response?.data || response; // Depende de la estructura del API
+        const newProd = await productosService.createProducto(payload);
         
         const finalProductos = [newProd, ...productos];
         setProductos(finalProductos);
