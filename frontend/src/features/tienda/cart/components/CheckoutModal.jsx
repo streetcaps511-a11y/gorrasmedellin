@@ -104,7 +104,7 @@ const CheckoutModal = ({ isOpen, onClose, onConfirm, total, subtotal, selectedMe
                 <label style={{ color: '#e2e8f0', fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>
                   Dirección de envío <span style={{ color: '#ff4d4d', fontWeight: 'normal' }}>*</span>:
                 </label>
-                <input type="text" value={address} onChange={(e) => { setAddress(e.target.value); setAddressError(false); }} placeholder={'Ingresa tu dirección completa'} style={{ width: '100%', padding: '10px 12px', backgroundColor: '#1e293b', border: addressError ? '1px solid #ff4d4d' : '1px solid #334155', borderRadius: '8px', color: '#fff', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} />
+                <input type="text" value={address} onChange={(e) => { setAddress(e.target.value); setAddressError(false); }} placeholder={'Ingresa tu dirección completa'} style={{ width: '100%', padding: '10px 12px', backgroundColor: '#1E293B', border: addressError ? '1px solid #ff4d4d' : '1px solid #334155', borderRadius: '8px', color: '#fff', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} />
                 {addressError && <p style={{ color: '#ff4d4d', fontSize: '11px', margin: '4px 0 0 0' }}>Debes ingresar una dirección de envío</p>}
               </div>
             )}
@@ -180,7 +180,7 @@ const CheckoutModal = ({ isOpen, onClose, onConfirm, total, subtotal, selectedMe
             {isUpfront && (
               <div style={{ marginBottom: '16px' }}>
                 <label style={{ color: '#e2e8f0', fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>Comprobante de pago <span style={{ color: '#ff4d4d', fontWeight: 'normal' }}>*</span>:</label>
-                <input type="file" accept="image/*" onChange={(e) => setReceiptFile(e.target.files[0] || null)} style={{ width: '100%', padding: '8px', backgroundColor: '#1e293b', border: !receiptFile ? '1px solid #ff4d4d' : '1px solid #334155', borderRadius: '8px', color: '#94a3b8', fontSize: '12px' }} />
+                <input type="file" accept="image/*" onChange={(e) => setReceiptFile(e.target.files[0] || null)} style={{ width: '100%', padding: '8px', backgroundColor: '#1E293B', border: !receiptFile ? '1px solid #ff4d4d' : '1px solid #334155', borderRadius: '8px', color: '#94a3b8', fontSize: '12px' }} />
                 {!receiptFile && <p style={{ color: '#ff4d4d', fontSize: '11px', margin: '4px 0 0 0' }}>Debes adjuntar el comprobante de pago para continuar</p>}
               </div>
             )}

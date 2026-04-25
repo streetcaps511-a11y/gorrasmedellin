@@ -6,7 +6,7 @@
 
 .gm-products-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 24px;
   width: 100%;
   margin: 10px 0 0 0;
@@ -17,7 +17,7 @@
 /* Responsive Grid */
 @media (max-width: 1100px) {
   .gm-products-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -117,3 +117,6 @@
   background: var(--gm-yellow-primary);
   color: #000;
 }
+
+
+

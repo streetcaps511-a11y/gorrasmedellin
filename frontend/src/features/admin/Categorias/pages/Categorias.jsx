@@ -24,6 +24,17 @@ const CategoriasPage = () => {
     handleInputChange, loading
   } = useCategoriasLogic();
 
+  const isValidUrl = (url) => {
+    if (!url) return true;
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+
   const renderField = (label, fieldName, type = 'text') => {
     const isReadOnly = modalState.mode === 'view';
     const isError = isReadOnly ? false : (errors[fieldName] || false);
@@ -52,10 +63,17 @@ const CategoriasPage = () => {
             disabled={isReadOnly}
             readOnly={isReadOnly}
             onChange={(e) => handleInputChange(fieldName, e.target.value)}
-            className={`form-field__input ${isReadOnly ? 'readonly-field' : ''} ${isError ? 'form-field__input--error' : ''}`}
+            className={`form-field__input ${isReadOnly ? 'readonly-field' : ''} ${fieldName === 'imagenUrl' ? 'form-field__input--sm' : ''} ${isError || (fieldName === 'imagenUrl' && value && !isValidUrl(value)) ? 'form-field__input--error' : ''}`}
             placeholder={isReadOnly ? '' : `Ingrese ${label.toLowerCase()}...`}
           />
         )}
+        
+        {fieldName === 'imagenUrl' && value && value !== 'N/A' && !isValidUrl(value) && !isReadOnly && (
+           <div className="form-field__error form-field__error--visible">
+             <span className="form-field__error-icon">●</span> URL inválida
+           </div>
+        )}
+
         
         {fieldName === 'imagenUrl' && value && value !== 'N/A' && (
           <div className="image-preview" style={{ marginTop: '10px' }}>

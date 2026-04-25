@@ -1,4 +1,4 @@
-.gm-card {
+﻿.gm-card {
   background: #111827;
   border: none;
   border-radius: 12px;
@@ -9,13 +9,11 @@
   height: 100%;
   position: relative;
 }
-
 .gm-card:hover {
   background: #1f2937;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
   z-index: 10;
 }
-
 .gm-img-wrapper {
   aspect-ratio: 1 / 1;
   width: 100%;
@@ -23,7 +21,6 @@
   overflow: hidden;
   background: #000;
 }
-
 .gm-img-scroller {
   display: flex;
   overflow-x: auto;
@@ -35,11 +32,7 @@
   overscroll-behavior-x: contain;
   overscroll-behavior-y: auto;
 }
-
-.gm-img-scroller::-webkit-scrollbar {
-  display: none;
-}
-
+.gm-img-scroller::-webkit-scrollbar { display: none; }
 .gm-img-scroller img {
   flex: 0 0 100%;
   scroll-snap-align: start;
@@ -50,7 +43,6 @@
   touch-action: pan-y;
   transition: transform 0.5s ease;
 }
-
 .gm-img-dots {
   position: absolute;
   bottom: 10px;
@@ -67,40 +59,44 @@
   opacity: 0;
   transition: opacity 0.3s ease;
 }
-
-.gm-card:hover .gm-img-dots {
-  opacity: 1;
-}
-
+.gm-card:hover .gm-img-dots { opacity: 1; }
 .gm-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+  width: 6px; height: 6px; border-radius: 50%;
   background: rgba(255, 255, 255, 0.4);
-  transition: all 0.2s ease;
-  cursor: pointer;
+  transition: all 0.2s ease; cursor: pointer;
+}
+.gm-dot.active {
+  background: #F5C81B; transform: scale(1.2);
+  width: 12px; border-radius: 4px;
 }
 
-.gm-dot.active {
-  background: #F5C81B;
-  transform: scale(1.2);
-  width: 12px;
-  border-radius: 4px;
+/* Badge de imagen */
+.gm-img-badge-corner {
+  position: absolute;
+  top: 10px;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  z-index: 10;
+  text-transform: uppercase;
 }
+.gm-img-badge-corner.oferta { right: 10px; background: #F5C81B; color: #000; }
+.gm-img-badge-corner.agotado { left: 10px; background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
 
 .gm-info {
-  padding: 10px;
+  padding: 8px 10px 10px;
   display: flex;
   flex-direction: column;
   flex: 1;
-  gap: 4px;
+  gap: 2px;
 }
-
 .gm-product-name {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #fff;
+  margin: 0 !important; padding: 0 !important;
+  font-size: 0.82rem !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
   cursor: pointer;
   overflow: hidden;
   display: -webkit-box;
@@ -109,123 +105,124 @@
   -webkit-box-orient: vertical;
   line-height: 1.2;
   transition: color 0.2s ease;
+  text-transform: uppercase !important;
+}
+.gm-product-name:hover { color: #F5C81B; }
+
+/* Color swatches */
+.gm-color-tag-row {
+  display: flex; flex-wrap: wrap; gap: 3px;
+  margin-top: 2px; margin-bottom: 2px;
+}
+.gm-color-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(255,255,255,0.05);
+  padding: 1px 5px; border-radius: 10px;
+  font-size: 0.6rem; color: #cbd5e1;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.gm-color-swatch {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.2); flex-shrink: 0;
 }
 
-.gm-product-name:hover {
-  color: #F5C81B;
-}
-
-.gm-stars-row {
-  display: flex;
-  align-items: center;
-  margin: 0;
-}
-
-.gm-rating {
-  color: #F5C81B;
-  display: flex;
-  gap: 2px;
-}
-
-.gm-rating svg {
-  width: 11px;
-  height: 11px;
-}
-
-.gm-badge-container {
-  min-height: 18px;
-  display: flex;
-  align-items: center;
-  margin: 2px 0;
-}
-
-.gm-badge-inline {
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-weight: 800;
-  font-size: 0.65rem;
-  letter-spacing: .5px;
-  text-transform: uppercase;
-  border: 1px solid #F5C81B;
-  color: #F5C81B;
-  background: rgba(245, 200, 27, 0.05);
-}
-
+/* Fila principal precio + boton */
 .gm-actions-row {
   margin-top: auto;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   padding-top: 4px;
+  gap: 6px;
 }
 
+/* Columna de precios */
+.gm-price-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+.gm-price-main-row {
+  display: flex; align-items: center; gap: 5px;
+}
+.gm-current-price {
+  font-size: 1.05rem !important;
+  font-weight: 900 !important;
+  color: #F5C81B !important;
+  white-space: nowrap;
+}
+.gm-discount-tag {
+  font-size: 0.58rem; font-weight: 800;
+  color: #F5C81B; padding: 0px 4px;
+  border: 1px solid #F5C81B;
+  border-radius: 3px; white-space: nowrap; flex-shrink: 0;
+}
+.gm-offer-details {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.gm-old-price {
+  font-size: 0.65rem; color: #6B7280;
+  text-decoration: line-through;
+}
+.gm-saving-pill {
+  font-size: 0.6rem; font-weight: 700;
+  color: #10b981; letter-spacing: 0.2px;
+}
+
+/* Boton carrito */
+.gm-btn-cart {
+  width: 32px; height: 32px;
+  border-radius: 50%; border: none;
+  background: #F5C81B; color: #000;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s ease;
+  flex-shrink: 0;
+  box-shadow: 0 3px 8px rgba(245,200,27,0.25);
+}
+.gm-btn-cart:hover { background: #FFB300; transform: scale(1.1); }
+/* .gm-price-actions from Home.css */
 .gm-price-actions {
   display: flex;
   flex-direction: column;
-  gap: 0px;
 }
 
 .gm-price-main-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-}
-
-.gm-discount-tag-simple {
-  position: absolute;
-  top: -24px;
-  right: -5px;
-  background: #F5C81B !important; /* Yellow */
-  color: #000 !important; /* Black text */
-  padding: 2px 7px;
-  border-radius: 6px;
-  font-size: 0.72rem;
-  font-weight: 800;
-  box-shadow: 0 4px 12px rgba(245, 200, 27, 0.45);
-  z-index: 5;
-  pointer-events: none;
-  font-family: ui-sans-serif, system-ui;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .gm-current-price {
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: #F5C81B;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1rem !important;
+  font-weight: 400 !important;
+  color: #fff !important;
+  letter-spacing: 0.5px;
 }
 
 .gm-discount-tag {
-  font-size: 0.6rem;
-  font-weight: 800;
-  color: #F5C81B;
-  padding: 0px 3px;
-  border: 1px solid #F5C81B;
-  border-radius: 3px;
+  background-color: #0b1220;
+  color: #10b981;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 .gm-old-price {
-  font-size: 0.7rem;
-  color: #6B7280;
+  font-size: 0.8rem;
+  color: #64748b;
   text-decoration: line-through;
-  margin-top: -2px;
+  margin-top: 2px;
 }
 
-.gm-btn-cart {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: none;
-  background: #F5C81B;
-  color: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 10px rgba(245, 200, 27, 0.2);
-}
-
-.gm-btn-cart:hover {
-  background: #FFB300;
-  transform: scale(1.1);
+.gm-saving-pill {
+  color: #10b981;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-top: 2px;
 }

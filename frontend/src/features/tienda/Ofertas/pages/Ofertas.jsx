@@ -67,75 +67,12 @@ const Ofertas = () => {
 
       <div className="gm-container">
         {/* Botón para móviles */}
-        <button 
-          className="gm-mobile-filter-toggle" 
-          onClick={() => setIsFilterOpen(!isFilterOpen)}
-          style={{ display: 'none' }}
-        >
-          <FaFilter /> {isFilterOpen ? 'Ocultar Filtros' : 'Mostrar Filtros'}
-        </button>
+        
 
         <div className="gm-products-page-layout" style={{ marginTop: '30px' }}>
           
           {/* SIDEBAR DE FILTROS */}
-          <aside className={`gm-filters-sidebar ${isFilterOpen ? 'mobile-open' : ''}`}>
-            <div className="gm-filters-content">
-              <div className="gm-filters-header-row">
-                <h3>Filtros</h3>
-                {(selectedColors.length > 0 || selectedSizes.length > 0 || selectedCategories.length > 0 || searchTerm) && (
-                  <button onClick={clearFilters} className="gm-clear-all-btn">Limpiar</button>
-                )}
-              </div>
-
-              {/* COLORES (Círculos) */}
-              <div className={`gm-filter-group ${expandedFilters.colors ? 'is-expanded' : ''}`}>
-                <div className="gm-filter-group-header" onClick={() => toggleFilterSection('colors')}>
-                  <h4>Colores</h4>
-                  <span className="gm-chevron-icon">{expandedFilters.colors ? '−' : '+'}</span>
-                </div>
-                {expandedFilters.colors && (
-                  <div className="gm-color-options-row">
-                    {allAvailableFilters.colors.map(color => {
-                      const hex = COLOR_MAP[color.toLowerCase()] || '#555';
-                      const isActive = selectedColors.includes(color);
-                      return (
-                        <button 
-                          key={color}
-                          className={`gm-color-circle-btn ${isActive ? 'active' : ''}`}
-                          title={color}
-                          onClick={() => toggleFilter('color', color)}
-                          style={{ color: hex }}
-                        >
-                          {isActive && <div className="gm-color-check" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* TALLAS */}
-              <div className={`gm-filter-group ${expandedFilters.sizes ? 'is-expanded' : ''}`}>
-                <div className="gm-filter-group-header" onClick={() => toggleFilterSection('sizes')}>
-                  <h4>Tallas</h4>
-                  <span className="gm-chevron-icon">{expandedFilters.sizes ? '−' : '+'}</span>
-                </div>
-                {expandedFilters.sizes && (
-                  <div className="gm-filter-options gm-sizes-grid">
-                    {allAvailableFilters.sizes.map(size => (
-                      <button 
-                        key={size} 
-                        className={`gm-size-pill ${selectedSizes.includes(size) ? 'active' : ''}`}
-                        onClick={() => toggleFilter('size', size)}
-                      >
-                        {size}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </aside>
+          
 
           <main className="gm-products-main-content">
             <OfertasGrid 
@@ -179,3 +116,5 @@ const Ofertas = () => {
 };
 
 export default Ofertas;
+
+

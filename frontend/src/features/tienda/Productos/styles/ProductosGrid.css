@@ -11,7 +11,7 @@
   gap: 30px;
   align-items: flex-start;
   width: 100%;
-  padding-top: 20px;
+  padding-top: 0px;
 }
 
 .gm-filters-sidebar {
@@ -194,11 +194,11 @@
 /* GRID PRINCIPAL - 4 Columnas (Ahora coincide con el tamaño visual de Home) */
 .gm-products-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); 
-  gap: 20px;
+  grid-template-columns: repeat(5, 1fr); 
+  gap: 16px;
   width: 100%;
   margin: 0;
-  padding: 10px 0 30px 0;
+  padding: 0px 0 30px 0;
   overflow: visible;
 }
 
@@ -253,7 +253,7 @@
 
 @media (max-width: 1200px) {
   .gm-products-grid {
-     grid-template-columns: repeat(4, 1fr);
+     grid-template-columns: repeat(5, 1fr);
   }
 }
 @media (max-width: 1024px) {
@@ -263,7 +263,7 @@
 }
 @media (max-width: 768px) {
   .gm-products-grid {
-     grid-template-columns: repeat(3, 1fr);
+     grid-template-columns: repeat(2, 1fr);
      gap: 12px;
   }
 }
@@ -372,3 +372,7 @@
 @keyframes gm-spin {
   to { transform: rotate(360deg); }
 }
+
+
+
+

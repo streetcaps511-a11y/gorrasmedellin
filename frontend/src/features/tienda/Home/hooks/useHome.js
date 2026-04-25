@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { getHomeProducts } from "../services/homeApi";
 import { useCart } from "../../../shared/contexts";
 import { NitroCache } from "../../../shared/utils/NitroCache";
@@ -104,10 +104,10 @@ export const useHome = () => {
   const [showSizeError, setShowSizeError] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // FETCH PRODUCTOS CON CACHÉ
-  useEffect(() => {
-    // 1. Carga instantánea desde caché si existe
-    if (NitroCache.isFresh('home_products', 5 * 60 * 1000)) {
+  // FETCH PRODUCTOS CON CACÍE
+  const fetchProductos = useCallback(async (forceRefresh = false) => {
+    // Si la caché es reciente y no se fuerza el refresh, usar datos cacheados
+    if (!forceRefresh && NitroCache.isFresh('home_products', 5 * 60 * 1000)) {
       const cached = NitroCache.get('home_products');
       if (cached?.data) {
         setInitialProducts(cached.data);
@@ -117,74 +117,64 @@ export const useHome = () => {
       }
     }
 
-    const fetchProductos = async () => {
-      setLoading(initialProducts.length === 0);
-      try {
-        const res = await getHomeProducts();
-        if (res?.data?.data?.products) {
-          const productosDatabase = res.data.data.products.map((p) => ({
-            id: p.id_producto,
-            nombre: p.nombre,
-            categoria: p.categoria_nombre || p.categoria || p.categoriaData?.nombre || 'Gorra',
-            precio: p.precio_normal,
-            precioOferta: p.precio_descuento,
-            precioMayorista6: p.precio_mayorista6 || 0,
-            precioMayorista80: p.precio_mayorista80 || 0,
-            hasDiscount: p.has_discount || (p.precio_descuento > 0 && p.precio_descuento < p.precio_normal),
-            oferta: p.is_oferta || (p.precio_descuento > 0 && p.precio_descuento < p.precio_normal),
-            descripcion: p.descripcion || "",
-            tallas: p.tallas || [],
-            colores: p.colores || ["Negro"],
-            imagenes: p.imagenes || [],
-            isFeatured: p.is_featured || false,
-            sales: p.sales_count || 0,
-            isActive: p.is_active !== undefined ? p.is_active : true,
-            stock: p.stock,
-            tallasStock: p.tallasStock || []
-          }));
-          
-          setInitialProducts(productosDatabase);
-          setInventory(buildInitialInventoryFromProducts(productosDatabase));
-          
-          // 💾 Guardar en caché compartida (usada por catego también)
-          NitroCache.set('home_products', productosDatabase);
-          NitroCache.set('gm_catalog', productosDatabase); // clave compartida con categorías
-        }
-      } catch (error) {
-        if (error.response?.status !== 401) {
-          console.error("Error trayendo productos del Backend:", error);
-        }
-      } finally {
-        setLoading(false);
+    setLoading(true);
+    try {
+      const res = await getHomeProducts();
+      if (res?.data?.data?.products) {
+        const productosDatabase = res.data.data.products.map((p) => ({
+          id: p.id_producto,
+          nombre: p.nombre,
+          categoria: p.categoria_nombre || p.categoria || p.categoriaData?.nombre || 'Gorra',
+          precio: p.precio_normal,
+          precioOferta: p.precio_descuento,
+          precioMayorista6: p.precio_mayorista6 || 0,
+          precioMayorista80: p.precio_mayorista80 || 0,
+          hasDiscount: p.has_discount || (p.precio_descuento > 0 && p.precio_descuento < p.precio_normal),
+          oferta: p.is_oferta || (p.precio_descuento > 0 && p.precio_descuento < p.precio_normal),
+          descripcion: p.descripcion || "",
+          tallas: p.tallas || [],
+          colores: p.colores || ["Negro"],
+          imagenes: p.imagenes || [],
+          isFeatured: p.is_featured || false,
+          sales: p.sales_count || 0,
+          isActive: p.is_active !== undefined ? p.is_active : true,
+          stock: p.stock,
+          tallasStock: p.tallasStock || []
+        }));
+        
+        setInitialProducts(productosDatabase);
+        setInventory(buildInitialInventoryFromProducts(productosDatabase));
+        
+        // 💾 Guardar en caché compartida
+        NitroCache.set('home_products', productosDatabase);
+        NitroCache.set('gm_catalog', productosDatabase);
       }
-    };
-
-    if (NitroCache.isFresh('home_products', 5 * 60 * 1000)) {
-      const cached = NitroCache.get('home_products');
-      if (cached?.data) {
-        setInitialProducts(cached.data);
-        setInventory(buildInitialInventoryFromProducts(cached.data));
-        setLoading(false);
-      } else {
-        fetchProductos();
+    } catch (error) {
+      if (error.response?.status !== 401) {
+        console.error("Error trayendo productos del Backend:", error);
       }
-    } else {
-      fetchProductos();
+    } finally {
+      setLoading(false);
     }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // 📡 ESCUCHAR ACTUALIZACIONES (Sincronización instantánea)
+  useEffect(() => {
+    fetchProductos(false); // Carga inicial (usa caché si es fresca)
+
+    // 📡 Escuchar actualizaciones del admin (sincronización instantánea)
     const channel = new BroadcastChannel('app_sync');
     channel.onmessage = (event) => {
       if (event.data === 'productos_updated' || event.data === 'home_products_updated') {
         NitroCache.clear('home_products');
         NitroCache.clear('gm_catalog');
-        fetchProductos();
+        fetchProductos(true); // Fuerza refresh desde el servidor
       }
     };
 
     window.scrollTo(0, 0);
     return () => channel.close();
-  }, [initialProducts.length]);
+  }, [fetchProductos]);
+
 
   // SECCIONES
   const ofertas = useMemo(

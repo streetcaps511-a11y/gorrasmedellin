@@ -12,7 +12,7 @@
 .form-body {
   display: flex;
   flex-direction: column;
-  gap: 16px; 
+  gap: 0px; 
 }
 
 .view-mode .form-body {
@@ -21,8 +21,8 @@
 
 .form-row {
   display: flex;
-  gap: 8px;
-  margin-bottom: 2px;
+  gap: 2px;
+  margin-bottom: 0;
 }
 
 .view-mode .form-row {
@@ -38,7 +38,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  margin-bottom: 2px;
+  margin-bottom: 0;
 }
 
 .form-field-view {
@@ -50,7 +50,7 @@
   font-size: 11px;
   color: rgba(255, 255, 255, 0.9);
   font-weight: 600;
-  margin-bottom: 0px;
+  margin-bottom: 0;
   display: block;
   text-transform: none !important;
 }
@@ -61,7 +61,7 @@
 }
 
 .form-input {
-  background-color: #1e293b;
+  background-color: #1E293B !important;
   border: 1px solid #334155;
   border-radius: 6px;
   padding: 4px 10px;
@@ -78,7 +78,7 @@
 
 .form-input:focus {
   border-color: #F5C81B;
-  background-color: #1e293b;
+  background-color: #1E293B !important;
   box-shadow: 0 0 0 3px rgba(245, 200, 27, 0.1);
 }
 
@@ -92,7 +92,7 @@
 }
 
 .form-select {
-  background-color: #1e293b;
+  background-color: #1E293B !important;
   border: 1px solid #334155;
   border-radius: 6px;
   padding: 0 8px; /* Reducir padding para select */
@@ -128,7 +128,7 @@
 }
 
 .form-display {
-  background-color: #1e293b;
+  background-color: #1E293B !important;
   border: 1px solid #334155;
   border-radius: 6px;
   padding: 6px 8px;
@@ -190,8 +190,8 @@
   display: flex;
   gap: 8px;
   justify-content: flex-end;
-  padding-top: 10px;
-  margin-top: 12px;
+  padding-top: 6px;
+  margin-top: 6px;
 }
 
 .btn-cancel {
@@ -238,3 +238,5 @@
 @keyframes spin {
   to { transform: translateY(-50%) rotate(360deg); }
 }
+
+

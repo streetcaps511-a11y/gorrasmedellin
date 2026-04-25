@@ -487,6 +487,8 @@ const Home = () => {
 
     const isAgotado = Number(product.stock) === 0;
     const isOffer = (product.hasDiscount || product.has_discount || product.oferta) && product.precioOferta;
+    const discountPct = isOffer && product.precio > 0
+      ? Math.round(((product.precio - product.precioOferta) / product.precio) * 100) : 0;
 
     return (
       <div className="gm-card">
@@ -538,25 +540,23 @@ const Home = () => {
         </div>
         
         <div className="gm-info" onClick={handleOpenDetail} style={{ cursor: 'pointer' }}>
-          <h3 className="gm-product-name">
-            {product.nombre}
-          </h3>
+          {/* Nombre */}
+          <h3 className="gm-product-name">{product.nombre}</h3>
           
+          {/* Precio + botón */}
           <div className="gm-actions-row">
             <div className="gm-price-actions">
-              {(product.hasDiscount || product.has_discount || product.oferta) && product.precioOferta ? (
-                <div className="gm-price-main-row">
-                  <span className="gm-current-price">
-                    ${Math.round(product.precioOferta).toLocaleString()}
-                  </span>
-                  <span className="gm-old-price-simple">
-                    ${Math.round(product.precio).toLocaleString()}
-                  </span>
-                </div>
+              {isOffer ? (
+                <>
+                  <div className="gm-price-main-row">
+                    <span className="gm-current-price">${Math.round(product.precioOferta).toLocaleString()}</span>
+                    {discountPct > 0 && <span className="gm-discount-tag">-{discountPct}%</span>}
+                  </div>
+                  <span className="gm-old-price">${Math.round(product.precio).toLocaleString()}</span>
+                  <span className="gm-saving-pill">Ahorras ${Math.round(product.precio - product.precioOferta).toLocaleString()}</span>
+                </>
               ) : (
-                <span className="gm-current-price">
-                  ${Math.round(product.precio || 0).toLocaleString()}
-                </span>
+                <span className="gm-current-price">${Math.round(product.precio || 0).toLocaleString()}</span>
               )}
             </div>
             
@@ -566,11 +566,6 @@ const Home = () => {
               type="button"
             >
               <FaShoppingCart size={15} color="#000" />
-              {(product.hasDiscount || product.has_discount || product.oferta) && product.precioOferta && (
-                <span className="gm-discount-tag-simple">
-                  -{Math.round(((product.precio - product.precioOferta) / product.precio) * 100)}%
-                </span>
-              )}
             </button>
           </div>
         </div>

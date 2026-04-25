@@ -42,14 +42,11 @@ const Footer = () => {
             <Link to="/quienes-somos" className="footer-link">
               <FaChevronRight size={10} color="#FFC107" /> Quiénes Somos
             </Link>
+            <Link to="/politicas-envio" className="footer-link">
+              <FaChevronRight size={10} color="#FFC107" /> Políticas de Envío
+            </Link>
             <Link to="/politica-devoluciones" className="footer-link">
-              <FaChevronRight size={10} color="#FFC107" /> Política de Devoluciones
-            </Link>
-            <Link to="/terminos" className="footer-link">
-              <FaChevronRight size={10} color="#FFC107" /> Términos y Condiciones
-            </Link>
-            <Link to="/privacidad" className="footer-link">
-              <FaChevronRight size={10} color="#FFC107" /> Política de Privacidad
+              <FaChevronRight size={10} color="#FFC107" /> Políticas de Cambios y Devoluciones
             </Link>
           </div>
         </div>

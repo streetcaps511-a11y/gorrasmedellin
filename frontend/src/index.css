@@ -68,13 +68,14 @@ button {
 input,
 select,
 textarea {
-  background-color: #121212;
+  background-color: #1E293B;
   border: 1px solid #333;
   color: white;
-  padding: 10px;
+  padding: 6px 10px;
   border-radius: 6px;
-  font-size: 16px;
+  font-size: 14px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 input:focus,

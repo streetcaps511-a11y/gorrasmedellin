@@ -18,7 +18,7 @@
 }
 
 .details-modal-container {
-  background-color: #0f172a;
+  background-color: #1E293B;
   border: 1px solid #F5C81B;
   border-radius: 8px;
   padding: 24px;
@@ -94,6 +94,6 @@
 }
 
 .details-modal-container::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #1E293B;
   border-radius: 10px;
 }

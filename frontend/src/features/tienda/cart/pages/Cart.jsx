@@ -85,7 +85,7 @@ const Cart = () => {
   // Renderizado: Carrito vacío
   if (cartItems.length === 0) {
     return (
-      <div className="page-container" style={{ background: '#0f172a' }}>
+      <div className="page-container" style={{ background: '#1E293B' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%', padding: '30px 20px 0', textAlign: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '6px' }}>
             <FaShoppingCart style={{ color: '#F5C81B', fontSize: '26px' }} />
@@ -101,7 +101,7 @@ const Cart = () => {
           justifyContent: 'center', 
           alignItems: 'center', 
           padding: '40px 20px',
-          backgroundColor: '#0f172a'
+          backgroundColor: '#1E293B'
         }}>
           <div style={{
             textAlign: 'center',
@@ -160,7 +160,7 @@ const Cart = () => {
 
   // Renderizado: Carrito con productos
   return (
-    <div className="page-container" style={{ background: '#0b0f1a', minHeight: '100vh', position: 'relative' }}>
+    <div className="page-container" style={{ background: '#1E293B', minHeight: '100vh', position: 'relative' }}>
       <CartHero />
       
       <CustomConfirm 
@@ -225,7 +225,7 @@ const Cart = () => {
 
       {showFinalMessage && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.88)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 10001, padding: '15px' }}>
-          <div style={{ background: '#1e293b', color: 'white', borderRadius: '16px', width: '100%', maxWidth: '420px', border: '1px solid #F5C81B', padding: '30px', textAlign: 'center' }}>
+          <div style={{ background: '#1E293B', color: 'white', borderRadius: '16px', width: '100%', maxWidth: '420px', border: '1px solid #F5C81B', padding: '30px', textAlign: 'center' }}>
             <div style={{ fontSize: '50px', marginBottom: '16px' }}>📋</div>
             <h3 style={{ color: '#F5C81B', fontSize: '18px', fontWeight: 'bold', margin: '0 0 14px 0' }}>Pedido registrado</h3>
             <p style={{ color: '#CBD5E1', fontSize: '14px', lineHeight: '1.6', margin: '0 0 20px 0' }}>
@@ -240,7 +240,7 @@ const Cart = () => {
 
       {selectedDetailProduct && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 10000, padding: '15px' }} onClick={() => setSelectedDetailProduct(null)}>
-          <div style={{ background: '#1e293b', borderRadius: '16px', width: '100%', maxWidth: '500px', border: '1px solid #F5C81B', padding: '0', position: 'relative', overflow: 'hidden' }} onClick={(e) => e.stopPropagation()}>
+          <div style={{ background: '#1E293B', borderRadius: '16px', width: '100%', maxWidth: '500px', border: '1px solid #F5C81B', padding: '0', position: 'relative', overflow: 'hidden' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setSelectedDetailProduct(null)} style={{ position: 'absolute', top: '12px', right: '12px', background: 'rgba(0,0,0,0.5)', border: 'none', color: '#F5C81B', fontSize: '18px', cursor: 'pointer', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
               <FaTimes />
             </button>
@@ -394,41 +394,41 @@ const Cart = () => {
               {/* PAGINACIÓN */}
               {totalPages > 1 && (
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginTop: '20px', marginBottom: '30px' }}>
-                  <button 
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(prev => prev - 1)}
-                    style={{ 
-                      padding: '8px 16px', 
-                      borderRadius: '8px', 
-                      border: '1px solid rgba(255,255,255,0.1)', 
-                      background: currentPage === 1 ? 'rgba(255,255,255,0.05)' : '#111827', 
-                      color: currentPage === 1 ? '#4b5563' : '#F5C81B',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      fontWeight: 'bold',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    Anterior
-                  </button>
-                  <div style={{ color: '#fff', fontSize: '14px', fontWeight: 'bold' }}>
-                    Página <span style={{ color: '#F5C81B' }}>{currentPage}</span> de {totalPages}
-                  </div>
-                  <button 
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(prev => prev + 1)}
-                    style={{ 
-                      padding: '8px 16px', 
-                      borderRadius: '8px', 
-                      border: '1px solid rgba(255,255,255,0.1)', 
-                      background: currentPage === totalPages ? 'rgba(255,255,255,0.05)' : '#111827', 
-                      color: currentPage === totalPages ? '#4b5563' : '#F5C81B',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      fontWeight: 'bold',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    Siguiente
-                  </button>
+                    <button 
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage(prev => prev - 1)}
+                      style={{ 
+                        padding: '8px 16px', 
+                        borderRadius: '8px', 
+                        border: '1px solid rgba(255,255,255,0.1)', 
+                        background: currentPage === 1 ? 'rgba(255,255,255,0.05)' : '#1E293B', 
+                        color: currentPage === 1 ? '#4b5563' : '#F5C81B',
+                        cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                        fontWeight: 'bold',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      Anterior
+                    </button>
+                    <div style={{ color: '#fff', fontSize: '14px', fontWeight: 'bold' }}>
+                      Página <span style={{ color: '#F5C81B' }}>{currentPage}</span> de {totalPages}
+                    </div>
+                    <button 
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage(prev => prev + 1)}
+                      style={{ 
+                        padding: '8px 16px', 
+                        borderRadius: '8px', 
+                        border: '1px solid rgba(255,255,255,0.1)', 
+                        background: currentPage === totalPages ? 'rgba(255,255,255,0.05)' : '#1E293B', 
+                        color: currentPage === totalPages ? '#4b5563' : '#F5C81B',
+                        cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                        fontWeight: 'bold',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      Siguiente
+                    </button>
                 </div>
               )}
             </div>
@@ -436,7 +436,7 @@ const Cart = () => {
             {/* RESUMEN */}
             <div style={{ width: '350px', minWidth: '320px', display: 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', marginBottom: '15px' }}>
-                <Link to="/" style={{ flex: 1, background: '#111827', border: '1px solid rgba(255,255,255,0.06)', color: '#fff', padding: '10px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '13px', fontWeight: 'bold', textDecoration: 'none' }}>
+                <Link to="/" style={{ flex: 1, background: '#1E293B', border: '1px solid rgba(255,255,255,0.06)', color: '#fff', padding: '10px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '13px', fontWeight: 'bold', textDecoration: 'none' }}>
                   <FaArrowLeft size={12} /> Seguir
                 </Link>
                 <button onClick={handleClearCart} style={{ flex: 1, background: 'rgba(239, 68, 68, 0.1)', border: 'none', color: '#ef4444', padding: '10px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer' }}>

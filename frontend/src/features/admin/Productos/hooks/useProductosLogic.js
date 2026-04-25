@@ -107,8 +107,12 @@ export const useProductosLogic = () => {
   };
 
   const notifySync = () => {
+    // Invalida caché de la tienda para forzar refetch
+    NitroCache.clear('home_products');
+    NitroCache.clear('gm_catalog');
     const channel = new BroadcastChannel('app_sync');
     channel.postMessage('productos_updated');
+    channel.postMessage('home_products_updated');
     channel.close();
   };
 
@@ -171,6 +175,7 @@ export const useProductosLogic = () => {
         const finalProductos = previousProductos.map(p => p.id === productoEditando.id ? updatedProd : p);
         setProductos(finalProductos);
         NitroCache.set(CACHE_KEY, finalProductos);
+        notifySync(); // 📡 Notificar a la tienda que actualice
       } else {
         // Para CREAR, no podemos ser 100% optimistas sin ID, pero podemos evitar el loading global
         setLoading(true);
@@ -181,7 +186,7 @@ export const useProductosLogic = () => {
         setModoVista("lista");
         showAlert(`Registrado correctamente ✅`);
         
-        notifySync();
+        notifySync(); // 📡 Notificar a la tienda
         NitroCache.set(CACHE_KEY, finalProductos);
       }
     } catch (error) {
@@ -203,10 +208,8 @@ export const useProductosLogic = () => {
     
     setToggleModal({ isOpen: false, producto: null, targetStatus: true });
 
-    // Sincronización instantánea entre pestañas
-    const channel = new BroadcastChannel('app_sync');
-    channel.postMessage('productos_updated');
-    channel.close();
+    // Invalida caché tienda y notifica a todas las pestañas
+    notifySync();
 
     try {
       showAlert(targetStatus ? 'Activado ✅' : 'Desactivado ⏸️'); // Alerta inmediata

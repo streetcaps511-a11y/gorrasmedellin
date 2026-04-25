@@ -46,6 +46,16 @@ const ProductoForm = ({
   handleCantidadChange,
   setFormData // Occasionally needed for specific resets if required
 }) => {
+  const isValidUrl = (url) => {
+    if (!url) return true; // Empty is handled by other validation if required
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const formatCurrencyValue = (value) => {
     if (value === undefined || value === null || value === '') return '0';
     // Convertimos a número y tomamos la parte entera (para pesos colombianos no usamos decimales)
@@ -303,18 +313,28 @@ const ProductoForm = ({
                       <div className="no-items-placeholder">Agrega URLs</div>
                     ) : (
                       <div className="form-card-list">
-                        {urlsImagenes.map((url, index) => (
-                          <div key={index} className="form-list-row image-row">
-                            <input
-                              type="url"
-                              value={url}
-                              onChange={(e) => actualizarUrlImagen(index, e.target.value)}
-                              placeholder={`URL ${index + 1}`}
-                              className={`form-input-sm ${errors[`url_${index}`] ? 'has-error' : ''}`}
-                            />
-                            <button type="button" onClick={() => eliminarUrlImagen(index)} className="btn-delete"><FaTrash size={12} /></button>
-                          </div>
-                        ))}
+                        {urlsImagenes.map((url, index) => {
+                          const isInvalid = url.trim() !== '' && !isValidUrl(url);
+                          return (
+                            <div key={index} className="form-list-row-wrapper">
+                              <div className="form-list-row image-row">
+                                <input
+                                  type="text"
+                                  value={url}
+                                  onChange={(e) => actualizarUrlImagen(index, e.target.value)}
+                                  placeholder={`URL ${index + 1}`}
+                                  className={`form-input-sm ${errors[`url_${index}`] || isInvalid ? 'has-error' : ''}`}
+                                />
+                                <button type="button" onClick={() => eliminarUrlImagen(index)} className="btn-delete"><FaTrash size={12} /></button>
+                              </div>
+                              {(errors[`url_${index}`] || isInvalid) && (
+                                <div className="field-error-text" style={{ paddingLeft: '5px' }}>
+                                  {errors[`url_${index}`] || 'URL inválida'}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

@@ -212,8 +212,8 @@
 /* ===== PRODUCT GRID ===== */
 .gm-products-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
   width: 100%;
   margin-bottom: 60px;
 }
@@ -307,7 +307,7 @@
 /* Tablet grande - mantener sidebar, reducir columnas */
 @media (max-width: 1100px) {
   .gm-products-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -409,3 +409,4 @@
     min-height: 300px;
   }
 }
+

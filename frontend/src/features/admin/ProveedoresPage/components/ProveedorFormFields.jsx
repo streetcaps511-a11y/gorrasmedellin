@@ -71,7 +71,7 @@ const RenderField = ({
           </select>
           {fieldName === 'city' && loadingCities && <div className="spinner-sm" />}
         </div>
-        <div className="field-error">{error}</div>
+        {error && <div className="field-error">{error}</div>}
       </div>
     );
   }
@@ -94,7 +94,7 @@ const RenderField = ({
         className={`form-input ${error ? 'has-error' : ''}`}
         disabled={disabled}
       />
-      <div className="field-error">{error}</div>
+      {error && <div className="field-error">{error}</div>}
     </div>
   );
 };

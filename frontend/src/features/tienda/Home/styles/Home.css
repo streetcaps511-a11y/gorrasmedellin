@@ -6,9 +6,9 @@
   --gm-yellow-strong: #FFB300;
   --gm-yellow-solid: #D4A017;
   --gm-yellow-hover: #C59210;
-  --gm-blue-dark: #1E3A5F;
-  --gm-blue-medium: #152744;
-  --gm-blue-light: #2A4A6F;
+  --gm-blue-dark: #1E293B;
+  --gm-blue-medium: #050a14;
+  --gm-blue-light: #111827;
   --gm-blue-text: #E8F1F8;
   --gm-text: #fff;
   --gm-muted: rgba(255,255,255,.72);
@@ -674,7 +674,7 @@
 
 /* Product Card (from original code) */
 .gm-card {
-  background: #111827;
+  background: #1E293B;
   border-radius: 12px;
   overflow: hidden;
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); /* Smoother transition */
@@ -865,16 +865,18 @@
 
 .gm-product-name {
   margin: 0;
-  font-size: 0.95rem; /* Un poco más pequeño y elegante */
-  color: rgba(255,255,255,0.95);
+  font-size: 1rem;
+  color: #fff;
   min-height: auto;
   overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
   -webkit-box-orient: vertical;
-  font-weight: 300; /* Sin negrita */
-  line-height: 1.4;
+  font-weight: 800; /* Negrita */
+  line-height: 1.2;
   letter-spacing: 0.2px;
+  text-transform: uppercase;
 }
 
 @media (max-width: 768px) {
@@ -930,10 +932,10 @@
 
 .gm-discount-tag-simple {
   font-size: 0.75rem;
-  font-weight: 700;
-  color: #10B981;
-  background: rgba(16, 185, 129, 0.1);
-  padding: 2px 6px;
+  font-weight: 900;
+  color: #000;
+  background: #F5C81B;
+  padding: 2px 8px;
   border-radius: 4px;
 }
 

@@ -122,7 +122,7 @@
 .dev-field-label.replace { color: #F5C81B; } /* Amarillo para lo que reciben */
 
 .dev-field-input {
-  background-color: #0f172a; /* Azul profundo */
+  background-color: #1E293B !important; /* Azul más oscuro solicitado */
   border: 1px solid #334155;
   border-radius: 6px;
   color: #f8fafc;
@@ -135,11 +135,11 @@
 
 .dev-field-input:focus {
   border-color: #F5C81B;
-  background-color: #1e293b;
+  background-color: #1E293B !important;
 }
 
 .dev-field-textarea {
-  background-color: #0f172a;
+  background-color: #1E293B !important;
   border: 1px solid #334155;
   border-radius: 6px;
   color: #f8fafc;
@@ -153,7 +153,7 @@
 
 .dev-field-textarea:focus {
   border-color: #F5C81B;
-  background-color: #1e293b;
+  background-color: #1E293B !important;
 }
 
 .dev-field-input.has-error, .dev-field-textarea.has-error {

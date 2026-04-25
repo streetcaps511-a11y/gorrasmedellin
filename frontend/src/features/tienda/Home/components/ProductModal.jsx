@@ -71,13 +71,10 @@ const ProductModal = ({
 
   // Stock logic
   const getAvailableFor = (inv, productId, size) => {
-    // Si viene de Home u Ofertas, tenemos inv
     if (inv) {
       const pid = String(productId);
       return Math.max(0, Number(inv?.[pid]?.[size] ?? 0));
     }
-
-    // Si viene de Productos o Categoria, usamos tallasStock directamente
     if (!product.tallasStock) return 0;
     try {
       const stockObj = typeof product.tallasStock === 'string'
@@ -105,7 +102,6 @@ const ProductModal = ({
   const isAgotado = Number(product.stock) === 0;
   const isOffer = (product.hasDiscount || product.has_discount || product.oferta) && product.precioOferta;
 
-  // Wholesale dynamic pricing
   const getWholesalePrice = (qty, prod) => {
     const q = parseInt(qty) || 0;
     if (q >= 80 && parseFloat(prod.precioMayorista80) > 0) return prod.precioMayorista80;
@@ -125,18 +121,8 @@ const ProductModal = ({
         {/* LEFT: IMAGE */}
         <div className="gm-modal-left">
           <div className="gm-modal-imgbox">
-            {/* BADGES EN LA IMAGEN DEL MODAL */}
-            {isAgotado && (
-              <div className="gm-img-badge-corner agotado">
-                AGOTADO
-              </div>
-            )}
-            {isOffer && (
-              <div className="gm-img-badge-corner oferta">
-                OFERTA
-              </div>
-            )}
-            
+            {isAgotado && <div className="gm-img-badge-corner agotado">AGOTADO</div>}
+            {isOffer && <div className="gm-img-badge-corner oferta">OFERTA</div>}
             <img src={images[modalImgIndex]} alt={product.nombre} className="gm-modal-img" />
             {images.length > 1 && (
               <div className="gm-modal-dots">
@@ -154,24 +140,23 @@ const ProductModal = ({
 
         {/* RIGHT: INFO */}
         <div className="gm-modal-right">
-          {/* 1. Title + Color Tags */}
+          {/* 1. Title + Color Chips */}
           <div className="gm-modal-title-colors">
             <h2 className="gm-modal-title">{product.nombre}</h2>
-            {product.colores && product.colores.length > 0 && (
+            {product.colores && product.colores.filter(Boolean).length > 0 && (
               <div className="gm-modal-colors-inline">
-                {product.colores.map((c, idx) => {
+                {product.colores.filter(Boolean).map((c, idx) => {
                   const hex = colorNameToHex(c);
-                  const displayColor = (c.toLowerCase() === 'negro' || hex === '#000000' || hex === '#000') ? '#aaa' : hex;
+                  const swatchBg = (c.toLowerCase() === 'negro' || hex === '#000000') ? '#000' : hex;
                   return (
-                    <span
-                      key={idx}
-                      className="gm-color-tag"
-                      style={{
-                        color: displayColor,
-                        borderColor: displayColor,
-                        backgroundColor: 'transparent'
-                      }}
-                    >
+                    <span key={idx} className="gm-color-chip">
+                      <span
+                        className="gm-color-chip-swatch"
+                        style={{
+                          backgroundColor: swatchBg,
+                          borderColor: swatchBg === '#000' ? '#FFF' : 'rgba(255,255,255,0.15)'
+                        }}
+                      />
                       {c}
                     </span>
                   );
@@ -180,13 +165,12 @@ const ProductModal = ({
             )}
           </div>
 
-          {/* 2. Price + Bulk Message + Wholesale Tags */}
+          {/* 2. Price Row */}
           <div className="gm-price-row">
             <div className="gm-modal-price-container">
               <div className="gm-modal-price-main">
                 ${Math.round(currentPrice || 0).toLocaleString()}
               </div>
-
               {isOffer && (
                 <div className="gm-original-price-row">
                   <span className="gm-original-price">
@@ -198,23 +182,18 @@ const ProductModal = ({
                 </div>
               )}
             </div>
-
-            {/* Wholesale Badges */}
             <div className="gm-modal-tags-inline">
               {parseInt(quantity) >= 80 && parseFloat(product.precioMayorista80) > 0 ? (
-                <span className="gm-tag gm-tag--destacado" style={{ backgroundColor: '#10b981', color: '#fff' }}>
-                  Mayorista 80+
-                </span>
+                <span className="gm-tag gm-tag--destacado" style={{ backgroundColor: '#10b981', color: '#fff' }}>Mayorista 80+</span>
               ) : parseInt(quantity) >= 6 && parseFloat(product.precioMayorista6) > 0 ? (
-                <span className="gm-tag gm-tag--featured" style={{ backgroundColor: '#2a4a6f', color: '#fff' }}>
-                  Mayorista 6+
-                </span>
+                <span className="gm-tag gm-tag--featured" style={{ backgroundColor: '#2a4a6f', color: '#fff' }}>Mayorista 6+</span>
               ) : null}
             </div>
+          </div>
 
-            <div className="gm-bulk-discount-info">
-              A partir de {BULK_MIN_QTY} unidades tienes descuento por mayor
-            </div>
+          {/* 3. Bulk Info — cajón azul compacto debajo del precio */}
+          <div className="gm-bulk-info-box">
+            <span className="gm-bulk-info-text">🏷️ A partir de 6 unidades tienes descuento por mayor</span>
           </div>
 
           {/* 4. Description */}
@@ -250,62 +229,42 @@ const ProductModal = ({
                 })}
               </div>
               {showSizeError && (
-                <div className="gm-size-error-msg">
-                  ⚠️ Debes seleccionar una talla primero
-                </div>
+                <div className="gm-size-error-msg">⚠️ Debes seleccionar una talla primero</div>
               )}
             </div>
           )}
 
-          {/* 6. Quantity + Stock */}
+          {/* 6. Quantity + Stock (+ bulk info inline) */}
           <div className="gm-quantity-selector">
-            <span className="gm-quantity-label">Cantidad:</span>
-            <div className="gm-quantity-controls">
-              <button 
-                className="gm-qty-btn" 
-                onClick={decrementQuantity} 
-                disabled={Number(product.stock) === 0 || parseInt(quantity) <= 0} 
-                type="button"
-              >
-                <FaMinus size={10} />
-              </button>
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                className="gm-qty-input-manual"
-                value={quantity}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, '');
-                  handleQuantityInput(val);
-                }}
-                disabled={Number(product.stock) === 0}
-                onFocus={(e) => setTimeout(() => e.target.select(), 10)}
-                min="0"
-                max={remaining}
-              />
-              <button 
-                className="gm-qty-btn" 
-                onClick={incrementQuantity} 
-                disabled={Number(product.stock) === 0 || (selectedSize && parseInt(quantity) >= remaining)} 
-                type="button"
-              >
-                <FaPlus size={10} />
-              </button>
+            <div className="gm-quantity-label">Cantidad:</div>
+            <div className="gm-quantity-row">
+              <div className="gm-quantity-controls">
+                <button className="gm-qty-btn" onClick={decrementQuantity} disabled={Number(product.stock) === 0 || parseInt(quantity) <= 0} type="button">
+                  <FaMinus size={10} />
+                </button>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  className="gm-qty-input-manual"
+                  value={quantity}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    handleQuantityInput(val);
+                  }}
+                  disabled={Number(product.stock) === 0}
+                  onFocus={(e) => setTimeout(() => e.target.select(), 10)}
+                />
+                <button className="gm-qty-btn" onClick={incrementQuantity} disabled={Number(product.stock) === 0 || (selectedSize && parseInt(quantity) >= remaining)} type="button">
+                  <FaPlus size={10} />
+                </button>
+              </div>
+              {selectedSize && (
+                <span className="gm-stock-badge" style={{ color: getStockColor(remaining), borderColor: `${getStockColor(remaining)}44`, backgroundColor: `${getStockColor(remaining)}11` }}>
+                  {remaining} RESTANTES
+                </span>
+              )}
             </div>
-            {selectedSize && (
-              <span
-                className="gm-stock-badge"
-                style={{
-                  color: getStockColor(remaining),
-                  borderColor: `${getStockColor(remaining)}44`,
-                  backgroundColor: `${getStockColor(remaining)}11`
-                }}
-              >
-                {remaining} RESTANTES
-              </span>
-            )}
-            
             <button
               className={`gm-btn-add-mobile ${Number(product.stock) === 0 ? "gm-btn-disabled-agotado" : ""} ${showSizeError ? "gm-btn-error" : ""}`}
               onClick={handleModalAddToCart}
@@ -335,4 +294,3 @@ const ProductModal = ({
 };
 
 export default ProductModal;
-

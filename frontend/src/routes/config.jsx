@@ -26,6 +26,11 @@ const Profile = lazy(() => import("../features/tienda/Profile/pages/Profile"));
 const Cart = lazy(() => import("../features/tienda/cart/pages/Cart"));
 const SearchResults = lazy(() => import("../features/tienda/SearchResults/pages/SearchResults"));
 
+// Policies Pages
+const QuienesSomos = lazy(() => import("../features/tienda/Policies/pages/QuienesSomos"));
+const PoliticasEnvio = lazy(() => import("../features/tienda/Policies/pages/PoliticasEnvio"));
+const PoliticasCambios = lazy(() => import("../features/tienda/Policies/pages/PoliticasCambios"));
+
 // Auth Pages
 const Login = lazy(() => import("../features/auth/pages/Login"));
 const ResetPassword = lazy(() => import("../features/auth/pages/ResetPassword"));
@@ -46,6 +51,9 @@ export const STORE_ROUTES = [
   { path: "/search", element: <SearchResults /> },
   { path: "/login", element: <Login /> },
   { path: "/reset-password", element: <ResetPassword /> },
+  { path: "/quienes-somos", element: <QuienesSomos /> },
+  { path: "/politicas-envio", element: <PoliticasEnvio /> },
+  { path: "/politica-devoluciones", element: <PoliticasCambios /> },
 ];
 
 export const ADMIN_ROUTES = [
