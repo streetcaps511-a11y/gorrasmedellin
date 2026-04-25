@@ -231,15 +231,15 @@ export const useProductosLogic = () => {
     setProductos(prev => prev.filter(p => p.id !== producto.id));
     closeDeleteModal();
 
-    // Sincronizar instantáneamente con otras pestañas
-    const channel = new BroadcastChannel('app_sync');
-    channel.postMessage('productos_updated');
-    channel.close();
-
     try {
       showAlert('Eliminado exitosamente ✅'); 
       await productosService.deleteProducto(producto.id);
       
+      // Sincronizar con otras pestañas DESPUÉS de que el servidor confirme
+      const channel = new BroadcastChannel('app_sync');
+      channel.postMessage('productos_updated');
+      channel.close();
+
       // Actualizar caché
       const updated = previousProductos.filter(p => p.id !== producto.id);
       NitroCache.set(CACHE_KEY, updated);

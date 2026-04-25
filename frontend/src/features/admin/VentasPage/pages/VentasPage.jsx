@@ -214,7 +214,7 @@ const VentasPage = () => {
           </div>
 
           <div style={{ marginBottom: '12px' }}>
-            <label style={{ display: 'block', color: '#94a3b8', fontSize: '11px', fontWeight: 'bold', marginBottom: '6px' }}>SEGUNDO COMPROBANTE (OPCIONAL)</label>
+            <label style={{ display: 'block', color: '#94a3b8', fontSize: '11px', fontWeight: 'bold', marginBottom: '6px' }}>SEGUNDO COMPROBANTE</label>
             <div className="evidence-dropzone mini">
                 {partialPaymentModal.evidencia2 ? (
                     <div style={{ position: 'relative' }}>
