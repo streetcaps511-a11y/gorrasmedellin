@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { FaShoppingCart } from "react-icons/fa";
 
-const ProductCard = ({ product, openModal }) => {
+const ProductCard = ({ product, onOpenModal }) => {
   if (!product) return null;
   const images = Array.isArray(product.imagenes) && product.imagenes.filter(Boolean).length
     ? product.imagenes.filter(Boolean).map((x) => String(x).trim()).filter(Boolean).slice(0, 4)
@@ -37,7 +37,7 @@ const ProductCard = ({ product, openModal }) => {
     }
   };
 
-  const handleOpenDetail = () => { if (openModal) openModal(product); };
+  const handleOpenDetail = () => { if (onOpenModal) onOpenModal(product); };
 
   return (
     <div className="gm-card">

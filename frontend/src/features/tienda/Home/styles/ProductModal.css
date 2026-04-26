@@ -1,4 +1,4 @@
-/* ===== PRODUCT MODAL — UNIFIED STAR DESIGN ===== */
+/* ===== PRODUCT MODAL â€” UNIFIED STAR DESIGN ===== */
 
 .gm-modal-overlay {
   position: fixed;
@@ -19,7 +19,7 @@
 
 .gm-modal {
   position: relative;
-  width: min(1040px, 96vw);
+  width: min(920px, 95vw);
   background: #0b1220;
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 16px;
@@ -124,7 +124,7 @@
   flex-direction: column;
   gap: 10px;
   padding: 14px 22px;
-  overflow: hidden;
+  overflow-y: auto;
   max-height: 85vh;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -148,7 +148,7 @@
   flex-wrap: wrap;
 }
 
-.gm-modal-title { font-size: 1.5rem; font-weight: 800; color: #fff; margin: 0; line-height: 1.2; text-transform: none; font-family: "Inter", sans-serif; }
+.gm-modal-title { font-size: 1.5rem; font-weight: 800; color: #fff; margin: 0; line-height: 1.2; text-transform: capitalize; font-family: "Inter", sans-serif; }
 
 /* Color chips inline with title */
 .gm-modal-colors-inline {
@@ -196,7 +196,7 @@
   font-family: 'Inter', sans-serif;
 }
 
-/* Rediseño para que salgan al lado del precio */
+/* RediseÃ±o para que salgan al lado del precio */
 .gm-modal-price-container { display: flex; align-items: center; gap: 12px; flex-wrap: nowrap !important; white-space: nowrap; }
 
 /* Bulk discount message */
@@ -219,7 +219,7 @@
   flex-wrap: wrap;
 }
 
-/* Original price (struck through) — only shown for offers */
+/* Original price (struck through) â€” only shown for offers */
 .gm-original-price-row {
   display: flex;
   align-items: center;
@@ -254,7 +254,7 @@
   border-bottom: 1px solid rgba(255,255,255,0.04);
 }
 
-/* Bulk info: NO cajón — plain inline text */
+/* Bulk info: NO cajÃ³n â€” plain inline text */
 .gm-modal-desc-box.gm-bulk-box {
   background: none !important;
   border: none !important;
@@ -289,7 +289,7 @@
   font-weight: 800 !important;
   color: #fff;
   font-size: 0.85rem;
-  text-transform: none; /* Quitar mayúsculas sostenidas */
+  text-transform: none; /* Quitar mayÃºsculas sostenidas */
   letter-spacing: 0.5px;
 }
 
@@ -349,7 +349,7 @@
   font-weight: 800 !important;
   font-size: 0.85rem;
   color: #fff;
-  text-transform: none; /* Quitar mayúsculas sostenidas */
+  text-transform: none; /* Quitar mayÃºsculas sostenidas */
   letter-spacing: 0.5px;
 }
 
@@ -357,27 +357,34 @@
   display: flex;
   align-items: center;
   gap: 0;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.4);
+  background: #111827; /* Fondo sólido para el bloque completo */
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: 8px;
   overflow: hidden;
 }
 
 .gm-qty-btn {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border: none;
-  background: rgba(255,255,255,0.08);
+  background: #1f2937; /* Relleno sólido */
   color: #fff;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  outline: none;
+}
+
+.gm-qty-btn:focus,
+.gm-qty-btn:active {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .gm-qty-btn:hover:not(:disabled) {
-  background: rgba(255,255,255,0.15);
+  background: #374151;
   color: #F5C81B;
 }
 
@@ -388,10 +395,10 @@
 
 .gm-qty-input-manual {
   width: 50px;
-  height: 36px;
-  background: transparent;
-  border-left: 1px solid rgba(255,255,255,0.4);
-  border-right: 1px solid rgba(255,255,255,0.4);
+  height: 38px;
+  background: #111827;
+  border-left: 1px solid rgba(255,255,255,0.05);
+  border-right: 1px solid rgba(255,255,255,0.05);
   border-top: none;
   border-bottom: none;
   color: #fff;
@@ -401,6 +408,11 @@
   outline: none;
   appearance: none;
   -moz-appearance: textfield;
+}
+
+.gm-qty-input-manual:focus {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .gm-qty-input-manual::-webkit-outer-spin-button,
@@ -420,29 +432,43 @@
   border: 1px solid;
 }
 
-/* === ADD TO CART BUTTON === */
+/* === MOBILE TITLE BAR (Removido, ya no se oculta el título en móvil) === */
+
+/* === ADD TO CART BUTTON — pill style como tarjeta === */
 .gm-btn-add-cart {
-  width: 100%;
-  height: 44px;
-  border-radius: 10px;
+  width: 100%; /* Ajuste a full width pero con padding limitante o dejar fill container si se necesita espacio */
+  max-width: 100%; 
+  align-self: stretch; /* Estirar a lo ancho del modal */
+  min-height: 56px; /* Más altura */
+  border-radius: 12px; /* Un poco menos redondeado para parecerse al de layout.css (admin) o mantener pill */
   background: #F5C81B;
   color: #000;
-  font-weight: 800 !important;
-  font-size: 1.1rem;
-  letter-spacing: 0.5px;
+  font-weight: 900 !important;
+  font-size: 1.15rem; /* Letra un poco más grande */
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   border: none;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 14px rgba(245, 200, 27, 0.35);
+  padding: 0 16px;
+  margin-top: 14px; /* Más separación del contenido de arriba */
+  /* Posición normal, no sticky a pedido del usuario */
 }
 
 .gm-btn-add-cart:hover:not(:disabled) {
-  background: #FFA000;
-  transform: translateY(-2px);
-  
+  background: #FFB300;
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(245, 200, 27, 0.5);
+}
+
+.gm-btn-add-cart:active:not(:disabled) {
+  transform: scale(0.98);
+  box-shadow: 0 3px 10px rgba(245, 200, 27, 0.3);
 }
 
 .gm-btn-add-cart:disabled {
@@ -450,6 +476,24 @@
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+}
+
+/* Labels desktop vs mobile - Ahora ambos muestran el contenido completo */
+.gm-btn-label-desktop { display: inline; }
+.gm-btn-label-mobile { display: none; }
+.gm-btn-icon { display: inline; }
+
+@media (max-width: 980px) {
+  /* Ya no se oculta el icono ni el texto desktop en movil */
+  .gm-btn-label-desktop { display: inline; }
+  .gm-btn-label-mobile { display: none; }
+  .gm-btn-icon { display: inline; }
+  .gm-btn-add-cart {
+    width: 100%;
+    min-height: 54px; /* Buen tamaño para touch */
+    border-radius: 12px;
+    margin-top: 16px;
+  }
 }
 
 .gm-btn-add-mobile {
@@ -537,6 +581,7 @@
     width: 100%;
     max-height: 42vh;
     flex-shrink: 0;
+    overflow: hidden; /* EVITA QUE LA IMAGEN DESBORDE Y TAPE EL TEXTO ABAJO */
   }
   .gm-modal-imgbox {
     max-height: 42vh;
@@ -548,15 +593,15 @@
     max-height: none;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 12px 14px;
-    gap: 8px;
+    padding: 24px 14px 12px 14px; /* Bajar mucho más el contenido respecto a la imagen */
+    gap: 10px;
   }
   .gm-sizes { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
   .gm-sizes-wrap { flex-wrap: wrap; }
   .gm-quantity-selector { flex-direction: column; align-items: flex-start; gap: 6px; }
   .gm-img-badge-corner.oferta { right: auto !important; left: 10px !important; }
   .gm-img-badge-corner.agotado { left: auto !important; right: 10px !important; }
-  .gm-modal-title { font-size: 1.4rem !important; font-weight: 900; color: #fff; margin: 0; line-height: 1.1; text-transform: uppercase; }
+  .gm-modal-title { font-size: 1.4rem !important; font-weight: 900; color: #fff; margin: 0; line-height: 1.1; text-transform: capitalize; }
   .gm-modal-price-main { font-size: 1.45rem; }
   .gm-modal-colors-inline { display: flex; flex-wrap: wrap; }
   .gm-sizes-label, .gm-quantity-label { font-weight: 900 !important; }
@@ -584,17 +629,18 @@
   }
   .gm-modal-left {
     max-height: 38vw;
+    overflow: hidden; /* EVITA QUE LA IMAGEN DESBORDE Y TAPE EL TEXTO ABAJO */
   }
   .gm-modal-imgbox {
     max-height: 38vw;
     min-height: 140px;
   }
   .gm-modal-right {
-    padding: 10px 12px;
-    gap: 6px;
+    padding: 24px 12px 10px 12px; /* Bajar mucho más en pantallas pequeñas */
+    gap: 8px;
     overflow-y: auto;
   }
-  .gm-modal-title { font-size: 1.1rem !important; font-weight: 900; color: #fff; margin: 0; line-height: 1.1; text-transform: uppercase; }
+  .gm-modal-title { font-size: 1.25rem !important; font-weight: 900; color: #fff; margin: 0; line-height: 1.15; text-transform: capitalize; }
   .gm-modal-title-colors { flex-wrap: wrap; gap: 6px; }
   .gm-modal-price-main { font-size: 1.3rem; }
   .gm-sizes { display: flex; flex-direction: column; gap: 4px; }
@@ -602,7 +648,7 @@
   .gm-size-chip { padding: 4px 10px; font-size: 0.8rem; font-weight: 800; min-width: 34px; }
   .gm-modal-desc-box { padding: 7px 10px; }
   .gm-modal-description { font-size: 0.8rem; }
-  .gm-btn-add-cart { height: 38px; font-size: 1rem; }
+  .gm-btn-add-cart { min-height: 54px; font-size: 1.05rem; }
   .gm-qty-btn { width: 34px; height: 34px; }
   .gm-qty-input-manual { width: 46px; height: 34px; font-size: 0.85rem; }
 }
@@ -644,7 +690,7 @@
 /* Bulk info inline next to quantity */
 .gm-bulk-inline-text { font-size: 0.72rem; color: #64748b; font-weight: 500; white-space: nowrap; margin-left: 4px; }
 
-/* === BULK INFO BOX (caj�n azul debajo del precio) === */
+/* === BULK INFO BOX (cajón azul debajo del precio) === */
 .gm-bulk-info-box { background: rgba(42,74,111,0.35); border: 1px solid rgba(96,165,250,0.3); border-radius: 6px; padding: 5px 10px; display: inline-flex; width: fit-content; align-items: center; align-self: flex-start; }
 .gm-bulk-info-text {
   font-size: 0.74rem;
@@ -652,8 +698,6 @@
   color: #93c5fd;
   white-space: nowrap;
 }
-
-
 
 
 

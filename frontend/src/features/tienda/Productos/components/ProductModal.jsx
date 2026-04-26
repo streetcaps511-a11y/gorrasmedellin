@@ -191,9 +191,9 @@ const ProductModal = ({
             </div>
           </div>
 
-          {/* 3. Bulk Info — cajón azul compacto debajo del precio */}
+          {/* 3. Bulk Info */}
           <div className="gm-bulk-info-box">
-            <span className="gm-bulk-info-text">🏷️ A partir de 6 unidades tienes descuento por mayor</span>
+            <span className="gm-bulk-info-text">A partir de 6 unidades tienes descuento por mayor</span>
           </div>
 
           {/* 4. Description */}
@@ -234,7 +234,7 @@ const ProductModal = ({
             </div>
           )}
 
-          {/* 6. Quantity + Stock (+ bulk info inline) */}
+          {/* 6. Quantity + Stock */}
           <div className="gm-quantity-selector">
             <div className="gm-quantity-label">Cantidad:</div>
             <div className="gm-quantity-row">
@@ -265,27 +265,18 @@ const ProductModal = ({
                 </span>
               )}
             </div>
-            <button
-              className={`gm-btn-add-mobile ${Number(product.stock) === 0 ? "gm-btn-disabled-agotado" : ""} ${showSizeError ? "gm-btn-error" : ""}`}
-              onClick={handleModalAddToCart}
-              disabled={(selectedSize && parseInt(quantity) > remaining) || Number(product.stock) === 0}
-              type="button"
-            >
-              Añadir
-            </button>
           </div>
 
-          {/* 7. Add to Cart (full width) */}
+          {/* 7. Add to Cart — sticky al fondo */}
           <button
-            className={`gm-btn-add-cart gm-btn-desktop-only ${Number(product.stock) === 0 ? "gm-btn-disabled-agotado" : ""} ${showSizeError ? "gm-btn-error" : ""}`}
+            className={`gm-btn-add-cart ${Number(product.stock) === 0 ? "gm-btn-disabled-agotado" : ""} ${showSizeError ? "gm-btn-error" : ""}`}
             onClick={handleModalAddToCart}
             disabled={(selectedSize && parseInt(quantity) > remaining)}
-            style={{ height: '48px', fontSize: '1rem', fontWeight: 'bold' }}
           >
             {Number(product.stock) === 0 ? (
-              <><FaBan size={18} /> <span className="gm-btn-label">AGOTADO</span></>
+              <><FaBan size={18} className="gm-btn-icon" /> <span className="gm-btn-label-desktop">AGOTADO</span><span className="gm-btn-label-mobile">AGOTADO</span></>
             ) : (
-              <><FaShoppingCart size={18} /> <span className="gm-btn-label">Añadir al Carrito</span></>
+              <><FaShoppingCart size={18} className="gm-btn-icon" /> <span className="gm-btn-label-desktop">Añadir al Carrito</span><span className="gm-btn-label-mobile">Añadir</span></>
             )}
           </button>
         </div>

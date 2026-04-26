@@ -44,9 +44,9 @@ const ProductModal = ({
   quantity,
   incrementQuantity,
   decrementQuantity,
-  handleModalAddToCart,
+  handleAddToCart,
   showSizeError,
-  normalizeSizes,
+  sizesForModal,
   safeImg,
   BULK_MIN_QTY,
   handleQuantityInput
@@ -67,7 +67,7 @@ const ProductModal = ({
     ? product.imagenes.filter(Boolean).map(x => String(x).trim()).filter(Boolean)
     : [safeImg(product)];
 
-  const sizes = normalizeSizes(product);
+  const sizes = sizesForModal || [];
 
   // Stock logic
   const getAvailableFor = (inv, productId, size) => {
@@ -267,7 +267,7 @@ const ProductModal = ({
             </div>
             <button
               className={`gm-btn-add-mobile ${Number(product.stock) === 0 ? "gm-btn-disabled-agotado" : ""} ${showSizeError ? "gm-btn-error" : ""}`}
-              onClick={handleModalAddToCart}
+              onClick={handleAddToCart}
               disabled={(selectedSize && parseInt(quantity) > remaining) || Number(product.stock) === 0}
               type="button"
             >
@@ -277,15 +277,14 @@ const ProductModal = ({
 
           {/* 7. Add to Cart (full width) */}
           <button
-            className={`gm-btn-add-cart gm-btn-desktop-only ${Number(product.stock) === 0 ? "gm-btn-disabled-agotado" : ""} ${showSizeError ? "gm-btn-error" : ""}`}
-            onClick={handleModalAddToCart}
+            className={`gm-btn-add-cart ${Number(product.stock) === 0 ? "gm-btn-disabled-agotado" : ""} ${showSizeError ? "gm-btn-error" : ""}`}
+            onClick={handleAddToCart}
             disabled={(selectedSize && parseInt(quantity) > remaining)}
-            style={{ height: '48px', fontSize: '1rem', fontWeight: 'bold' }}
           >
             {Number(product.stock) === 0 ? (
-              <><FaBan size={18} /> <span className="gm-btn-label">AGOTADO</span></>
+              <><FaBan size={18} className="gm-btn-icon" /> <span className="gm-btn-label-desktop">AGOTADO</span><span className="gm-btn-label-mobile">AGOTADO</span></>
             ) : (
-              <><FaShoppingCart size={18} /> <span className="gm-btn-label">Añadir al Carrito</span></>
+              <><FaShoppingCart size={18} className="gm-btn-icon" /> <span className="gm-btn-label-desktop">Añadir al Carrito</span><span className="gm-btn-label-mobile">Añadir</span></>
             )}
           </button>
         </div>
