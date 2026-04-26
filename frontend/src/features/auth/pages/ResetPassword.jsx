@@ -1,3 +1,7 @@
+/* === PÁGINA PRINCIPAL === 
+   Este componente es la interfaz visual principal de la ruta. 
+   Se encarga de dibujar el HTML/JSX e invoca el Hook para obtener todas las funciones y estados necesarios. */
+
 // src/features/auth/pages/ResetPassword.jsx
 import React, { useState, useEffect } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";

@@ -1,3 +1,7 @@
+/* === COMPONENTE REUTILIZABLE === 
+   Pieza modular de interfaz (como Tarjetas, Modales o Botones). 
+   Recibe información a través de 'props' y notifica eventos hacia arriba (a la Página principal). */
+
 import React, { useState, useEffect } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { formatCurrency } from '../hooks/useChartData';

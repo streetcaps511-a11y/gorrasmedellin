@@ -1,3 +1,7 @@
+/* === COMPONENTE REUTILIZABLE === 
+   Pieza modular de interfaz (como Tarjetas, Modales o Botones). 
+   Recibe información a través de 'props' y notifica eventos hacia arriba (a la Página principal). */
+
 import '../../styles/Header.css';
 // src/components/Header.jsx
 import React from "react";

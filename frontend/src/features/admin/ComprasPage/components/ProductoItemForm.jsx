@@ -1,3 +1,7 @@
+/* === COMPONENTE REUTILIZABLE === 
+   Pieza modular de interfaz (como Tarjetas, Modales o Botones). 
+   Recibe información a través de 'props' y notifica eventos hacia arriba (a la Página principal). */
+
 import { FaTrash } from 'react-icons/fa';
 import { SearchSelect } from '../../../shared/services';
 

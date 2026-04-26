@@ -1,3 +1,7 @@
+/* === RUTAS DE BACKEND === 
+   Define las URLs expuestas de la API para este módulo. 
+   Aplica los middlewares de protección (como la validación de tokens JWT) antes de ceder el control al Controlador. */
+
 // routes/auth.routes.js
 import { Router } from 'express';
 import authController from '../controllers/auth.controller.js';

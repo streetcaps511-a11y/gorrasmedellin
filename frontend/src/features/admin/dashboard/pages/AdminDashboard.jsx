@@ -1,3 +1,7 @@
+/* === PÁGINA PRINCIPAL === 
+   Este componente es la interfaz visual principal de la ruta. 
+   Se encarga de dibujar el HTML/JSX e invoca el Hook para obtener todas las funciones y estados necesarios. */
+
 import '../style/AdminDashboard.css';
 import React from "react";
 import { FaSyncAlt } from "react-icons/fa";

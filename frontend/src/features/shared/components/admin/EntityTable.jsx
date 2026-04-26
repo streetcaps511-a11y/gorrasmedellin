@@ -1,3 +1,7 @@
+/* === COMPONENTE REUTILIZABLE === 
+   Pieza modular de interfaz (como Tarjetas, Modales o Botones). 
+   Recibe información a través de 'props' y notifica eventos hacia arriba (a la Página principal). */
+
 import '../../styles/EntityTable.css';
 import React from 'react';
 import { FaEye, FaEdit, FaTrash, FaBan, FaCheckCircle, FaTimesCircle, FaExclamationCircle } from 'react-icons/fa';

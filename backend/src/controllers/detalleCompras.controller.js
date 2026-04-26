@@ -1,3 +1,8 @@
+/* === CONTROLADOR DE BACKEND === 
+   Recibe las solicitudes (Requests) desde las Rutas, procesa las variables enviadas por el cliente, 
+   ejecuta las consultas a la base de datos protegiendo contra inyección SQL, 
+   y devuelve las respuestas en formato JSON. */
+
 // controllers/detalleCompras.controller.js
 import DetalleCompra from '../models/detalleCompras.model.js';
 import Producto from '../models/productos.model.js';

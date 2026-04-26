@@ -1,3 +1,7 @@
+/* === PÁGINA PRINCIPAL === 
+   Este componente es la interfaz visual principal de la ruta. 
+   Se encarga de dibujar el HTML/JSX e invoca el Hook para obtener todas las funciones y estados necesarios. */
+
 import '../styles/CategoriaDetalle.css';
 import '../styles/CategoryHero.css';
 import React, { useState } from "react";

@@ -1,3 +1,7 @@
+/* === SERVICIO API === 
+   Este archivo se encarga exclusivamente de la comunicación HTTP (GET, POST, PUT, DELETE) con el Backend. 
+   Toma los datos del Hook y realiza peticiones usando fetch o axios, y maneja posibles errores de red. */
+
 import crypto from 'crypto';
 import Usuario from '../models/usuarios.model.js';
 import { generateToken, verifyToken } from '../utils/jwt.js';

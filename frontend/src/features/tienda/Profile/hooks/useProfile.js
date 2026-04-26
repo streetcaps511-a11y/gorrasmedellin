@@ -1,3 +1,8 @@
+/* === HOOK DE LÓGICA === 
+   Este archivo maneja el estado de React, las reglas de negocio, y las validaciones del módulo. 
+   Separa la 'inteligencia' de la interfaz visual para mantener el código limpio. 
+   Recibe eventos de la UI y se comunica con los Servicios API. */
+
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useAuth } from "../../../shared/contexts";
 import * as profileApi from "../services/profileApi";

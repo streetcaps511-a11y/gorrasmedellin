@@ -1,3 +1,7 @@
+/* === PÁGINA PRINCIPAL === 
+   Este componente es la interfaz visual principal de la ruta. 
+   Se encarga de dibujar el HTML/JSX e invoca el Hook para obtener todas las funciones y estados necesarios. */
+
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {

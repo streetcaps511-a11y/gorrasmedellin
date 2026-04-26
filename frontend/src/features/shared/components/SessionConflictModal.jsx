@@ -1,3 +1,7 @@
+/* === COMPONENTE REUTILIZABLE === 
+   Pieza modular de interfaz (como Tarjetas, Modales o Botones). 
+   Recibe información a través de 'props' y notifica eventos hacia arriba (a la Página principal). */
+
 import React from 'react';
 import { FaUserShield, FaSignOutAlt, FaRocket } from 'react-icons/fa';
 import '../styles/SessionConflictModal.css';

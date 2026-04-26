@@ -1,3 +1,7 @@
+/* === COMPONENTE REUTILIZABLE === 
+   Pieza modular de interfaz (como Tarjetas, Modales o Botones). 
+   Recibe información a través de 'props' y notifica eventos hacia arriba (a la Página principal). */
+
 import React from 'react';
 
 export const ClienteFormFields = ({ modalState, formData, handleInputChange, errors, departamentos, ciudades, loadingCities, handleToggleViewMode, closeModal, handleSave, firstInputRef }) => {

@@ -1,3 +1,7 @@
+/* === RUTAS DE BACKEND === 
+   Define las URLs expuestas de la API para este módulo. 
+   Aplica los middlewares de protección (como la validación de tokens JWT) antes de ceder el control al Controlador. */
+
 // src/routes/config.jsx
 import React, { lazy } from 'react';
 

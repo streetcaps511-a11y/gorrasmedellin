@@ -1,3 +1,7 @@
+/* === RUTAS DE BACKEND === 
+   Define las URLs expuestas de la API para este módulo. 
+   Aplica los middlewares de protección (como la validación de tokens JWT) antes de ceder el control al Controlador. */
+
 import React, { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../features/shared/contexts";
