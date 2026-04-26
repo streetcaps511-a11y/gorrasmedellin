@@ -98,8 +98,8 @@ const UniversalModal = ({
             }
           }}
         >
-          {/* SCROLLABLE CONTENT */}
-          <div className="modal-content-scroll" style={{ overflowY: 'auto', flex: 1, paddingRight: '4px' }}>
+          {/* NO SCROLL CONTENT */}
+          <div className="modal-content-scroll" style={{ overflowY: 'hidden', flex: 1, paddingRight: '4px' }}>
             {children}
           </div>
 

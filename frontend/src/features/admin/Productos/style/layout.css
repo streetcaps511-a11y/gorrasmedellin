@@ -121,11 +121,11 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  border-radius: 12px;
+  border-radius: 6px;
   border: 1px solid #FFC300;
   overflow: hidden;
-  background-color: #000000;
-  margin-top: 10px;
+  background-color: transparent;
+  margin-top: 4px;
   padding-bottom: 0;
   min-height: 420px;
 }

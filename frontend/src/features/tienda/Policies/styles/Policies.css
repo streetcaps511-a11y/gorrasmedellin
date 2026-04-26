@@ -1,5 +1,5 @@
 .policy-page-container {
-  background-color: #0B0F19; /* dark theme */
+  background-color: transparent; /* inherit global dark theme */
   min-height: 100vh;
   padding: 60px 20px;
   color: #fff;

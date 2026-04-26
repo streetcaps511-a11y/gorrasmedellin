@@ -5,7 +5,7 @@ import ProfileDashboard from '../components/ProfileDashboard';
 import PersonalInfo from '../components/PersonalInfo';
 import OrdersSection from '../components/OrdersSection';
 import ReturnsSection from '../components/ReturnsSection';
-import { ImageModal, SuccessModal, ConfirmModal, PolicyModal } from '../components/ProfileModals';
+import { ImageModal, SuccessModal, ConfirmModal, PolicyModal, ExpiredReturnModal } from '../components/ProfileModals';
 import { CheckCircle } from 'lucide-react';
 import '../styles/Profile.css';
 
@@ -148,6 +148,13 @@ const Profile = () => {
         <PolicyModal 
           onClose={() => profile.setShowPolicyModal(false)} 
           onContinue={profile.handleContinueToReturn} 
+        />
+      )}
+
+      {profile.showExpiredModal && (
+        <ExpiredReturnModal 
+          {...profile.expiredModalData}
+          onClose={() => profile.setShowExpiredModal(false)} 
         />
       )}
 

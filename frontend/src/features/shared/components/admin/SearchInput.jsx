@@ -18,7 +18,7 @@ const SearchInput = ({
       ...style 
     }}>
       <input
-        type="search"
+        type="text"
         name="proveedores_search_filter"
         autoComplete="new-password"
         placeholder={placeholder}

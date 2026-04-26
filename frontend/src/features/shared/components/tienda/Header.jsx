@@ -105,42 +105,34 @@ const Header = () => {
             </Link>
 
             <form className="header-search" onSubmit={handleSearchSubmit}>
-              <input
-                className="search-input"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                onFocus={() => searchTerm.length >= 2 && setShowSearchDropdown(true)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setShowSearchDropdown(false);
-                  }
-                }}
-                onBlur={() => setTimeout(() => setShowSearchDropdown(false), 150)}
-                placeholder="Buscar gorras..."
-                aria-label="Buscar productos"
-                autoComplete="off"
-              />
-
-              <button
-                type="submit"
-                className="search-button"
-                aria-label="Buscar"
-                style={{ visibility: searchTerm ? 'hidden' : 'visible', opacity: searchTerm ? 0 : 1 }}
-              >
-                <FaSearch />
-              </button>
-
-              {searchTerm && (
-                <button
-                  type="button"
-                  className="search-clear-button"
-                  onClick={handleClearSearch}
-                  aria-label="Limpiar búsqueda"
-                  style={{ visibility: 'visible', opacity: 1, right: '8px' }}
-                >
-                  <FaTimes />
-                </button>
-              )}
+              <div className="search-input-wrapper">
+                <FaSearch className="search-icon-inside" />
+                <input
+                  className="search-input"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  onFocus={() => searchTerm.length >= 2 && setShowSearchDropdown(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setShowSearchDropdown(false);
+                    }
+                  }}
+                  onBlur={() => setTimeout(() => setShowSearchDropdown(false), 150)}
+                  placeholder="Buscar gorras..."
+                  aria-label="Buscar productos"
+                  autoComplete="off"
+                />
+                {searchTerm && (
+                  <button
+                    type="button"
+                    className="search-clear-button"
+                    onClick={handleClearSearch}
+                    aria-label="Limpiar búsqueda"
+                  >
+                    <FaTimes />
+                  </button>
+                )}
+              </div>
 
               {/* Dropdown de resultados en tiempo real */}
               {showSearchDropdown && searchResults.length > 0 && (
@@ -364,16 +356,26 @@ const Header = () => {
 
           <div className="search-mobile-container">
             <form onSubmit={handleSearchSubmit} className="search-mobile-form">
-              <input
-                className="search-mobile-input"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                placeholder="Buscar..."
-                aria-label="Buscar en móvil"
-              />
-              <button type="submit" className="search-mobile-button" aria-label="Buscar">
-                <FaSearch size={16} />
-              </button>
+              <div className="search-mobile-input-wrapper">
+                <FaSearch className="search-mobile-icon-inside" size={14} />
+                <input
+                  className="search-mobile-input"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  placeholder="Buscar..."
+                  aria-label="Buscar en móvil"
+                />
+                {searchTerm && (
+                  <button 
+                    type="button" 
+                    className="search-mobile-clear-button" 
+                    onClick={handleClearSearch}
+                    aria-label="Limpiar"
+                  >
+                    <FaTimes size={14} />
+                  </button>
+                )}
+              </div>
             </form>
           </div>
 

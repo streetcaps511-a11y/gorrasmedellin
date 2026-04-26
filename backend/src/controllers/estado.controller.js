@@ -17,7 +17,7 @@ const estadoController = {
                 where: whereClause,
                 limit: parseInt(limit),
                 offset: parseInt(offset),
-                order: [['id', 'ASC']]
+                order: [['IdEstado', 'ASC']]
             });
 
             return res.json({

@@ -109,7 +109,7 @@ const ProfileDashboard = ({
                     className="gm-status-badge-mini"
                     style={{ backgroundColor: `${o.statusColor}20`, color: o.statusColor }}
                   >
-                    {o.status}
+                    {(String(o.status).toUpperCase() === 'ANULADO' || String(o.status).toUpperCase() === 'ANULADA') ? 'RECHAZADO' : o.status}
                   </span>
                 </div>
               ))

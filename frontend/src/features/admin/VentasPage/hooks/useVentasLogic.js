@@ -39,7 +39,6 @@ export const useVentasLogic = (initialAvailableProducts = [], initialAvailableCu
   
   const [modoVista, setModoVista] = useState("lista"); // "lista", "formulario", "detalle"
   const [ventaViendo, setVentaViendo] = useState(null);
-  const [anularModal, setAnularModal] = useState({ isOpen: false, venta: null });
   const [approveModal, setApproveModal] = useState({ isOpen: false, venta: null });
   const [rejectModal, setRejectModal] = useState({ isOpen: false, venta: null });
   const [partialPaymentModal, setPartialPaymentModal] = useState({ isOpen: false, venta: null, montoRecibido: '', montoNuevo: '', evidencia2: null });
@@ -379,24 +378,6 @@ export const useVentasLogic = (initialAvailableProducts = [], initialAvailableCu
     }
   };
 
-  const handleAnularVenta = async () => {
-    setLoading(true);
-    try {
-      const anularStatus = availableStatuses.find(s => s.toLowerCase().includes('anula')) || availableStatuses[3];
-      const updated = await ventasService.updateSaleStatus(anularModal.venta.id, anularStatus || 'Anulada');
-      const newVentas = ventas.map(v => v.id === updated.id ? updated : v);
-      setVentas(newVentas);
-      NitroCache.set('ventas', newVentas);
-      notifySync();
-      showAlert('Venta anulada correctamente');
-      setAnularModal({ isOpen: false, venta: null });
-    } catch (error) {
-      showAlert("Error al anular", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // ====== FILTRADO ======
   const filtered = useMemo(() => {
     const term = searchTerm.toLowerCase().trim();
@@ -426,7 +407,6 @@ export const useVentasLogic = (initialAvailableProducts = [], initialAvailableCu
     alert, setAlert,
     modoVista, setModoVista,
     ventaViendo,
-    anularModal, setAnularModal,
     approveModal, setApproveModal,
     rejectModal, setRejectModal,
     partialPaymentModal, setPartialPaymentModal,
@@ -450,7 +430,6 @@ export const useVentasLogic = (initialAvailableProducts = [], initialAvailableCu
     handleCreateVenta,
     updateVentaStatus,
     handlePartialPayment,
-    handleAnularVenta,
     requiresReceipt
   };
 };

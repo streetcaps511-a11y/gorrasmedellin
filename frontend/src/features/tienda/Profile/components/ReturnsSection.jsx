@@ -403,29 +403,31 @@ const ReturnsSection = ({
                   </div>
                   
                   {/* Selector de Cantidad */}
-                  <div style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,193,7,0.02)' }}>
-                    <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>CANTIDAD A DEVOLVER:</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                      <div className="gm-qty-selector-minimal">
-                        <button 
-                          onClick={() => setReturnFormData({...returnFormData, cantidad: Math.max(1, returnFormData.cantidad - 1)})}
-                          className="gm-qty-btn"
-                          type="button"
-                        >
-                          -
-                        </button>
-                        <span className="gm-qty-number">{returnFormData.cantidad}</span>
-                        <button 
-                          onClick={() => setReturnFormData({...returnFormData, cantidad: Math.min(selectedProduct.maxQty, returnFormData.cantidad + 1)})}
-                          className="gm-qty-btn"
-                          type="button"
-                        >
-                          +
-                        </button>
+                  {selectedProduct.maxQty > 1 && (
+                    <div style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,193,7,0.02)' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>CANTIDAD A DEVOLVER:</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                        <div className="gm-qty-selector-minimal">
+                          <button 
+                            onClick={() => setReturnFormData({...returnFormData, cantidad: Math.max(1, returnFormData.cantidad - 1)})}
+                            className="gm-qty-btn"
+                            type="button"
+                          >
+                            -
+                          </button>
+                          <span className="gm-qty-number">{returnFormData.cantidad}</span>
+                          <button 
+                            onClick={() => setReturnFormData({...returnFormData, cantidad: Math.min(selectedProduct.maxQty, returnFormData.cantidad + 1)})}
+                            className="gm-qty-btn"
+                            type="button"
+                          >
+                            +
+                          </button>
+                        </div>
+                        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>de {selectedProduct.maxQty} compradas</span>
                       </div>
-                      <span style={{ fontSize: '0.75rem', color: '#64748b' }}>de {selectedProduct.maxQty} compradas</span>
                     </div>
-                  </div>
+                  )}
                   
                   {/* Total Dinámico */}
                   {returnFormData.cantidad > 1 && (

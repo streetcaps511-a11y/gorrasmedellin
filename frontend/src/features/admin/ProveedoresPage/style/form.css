@@ -12,11 +12,12 @@
 .form-body {
   display: flex;
   flex-direction: column;
-  gap: 0px; 
+  gap: 2px;
+  padding-bottom: 2px;
 }
 
 .view-mode .form-body {
-  gap: 2px;
+  gap: 1px;
 }
 
 .form-row {
@@ -39,6 +40,7 @@
   display: flex;
   flex-direction: column;
   margin-bottom: 0;
+  gap: 0;
 }
 
 .form-field-view {
@@ -47,12 +49,14 @@
 }
 
 .form-label {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.9);
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.6);
   font-weight: 600;
-  margin-bottom: 0;
+  margin-bottom: 0px;
+  margin-top: 0px;
   display: block;
-  text-transform: none !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.3px;
 }
 
 .form-label .required {
@@ -64,10 +68,10 @@
   background-color: #1E293B !important;
   border: 1px solid #334155;
   border-radius: 6px;
-  padding: 4px 10px;
+  padding: 2px 8px;
   color: #f1f5f9;
-  font-size: 13px;
-  height: 28px;
+  font-size: 12px;
+  height: 24px;
   width: 100%;
   outline: none;
   box-sizing: border-box;
@@ -95,10 +99,10 @@
   background-color: #1E293B !important;
   border: 1px solid #334155;
   border-radius: 6px;
-  padding: 0 8px; /* Reducir padding para select */
+  padding: 0 6px;
   color: #f1f5f9;
-  font-size: 13px;
-  height: 28px;
+  font-size: 12px;
+  height: 24px;
   width: 100%;
   outline: none;
   box-sizing: border-box;
@@ -128,8 +132,8 @@
 }
 
 .form-display {
-  background-color: #1E293B !important;
-  border: 1px solid #334155;
+  background-color: #1E293B !important; /* Filled as requested */
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 6px;
   padding: 6px 8px;
   color: #f1f5f9;
@@ -203,7 +207,7 @@
   font-size: 11px;
   font-weight: 500;
   cursor: pointer;
-  height: 28px;
+  height: 26px;
   min-width: 90px;
 }
 
@@ -211,12 +215,12 @@
   background-color: #F5C81B;
   border: 1px solid #F5C81B;
   color: #000;
-  padding: 8px 24px;
+  padding: 4px 20px;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  height: 38px;
+  height: 32px;
   min-width: 120px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   text-transform: none !important;

@@ -2,7 +2,7 @@ import '../style/index.css';
 import React from 'react';
 
 // ===== COMPONENTES COMPARTIDOS =====
-import { Alert, EntityTable, SearchInput, UniversalModal, ConfirmDeleteModal, AnularOperacionModal, CustomPagination, StatusPill } from '../../../shared/services';
+import { Alert, EntityTable, SearchInput, UniversalModal, ConfirmDeleteModal, CustomPagination, StatusPill } from '../../../shared/services';
 import RoleFormFields from '../components/RoleFormFields';
 import StatusFilter from '../components/StatusFilter';
 
@@ -59,15 +59,12 @@ const RolesPage = () => {
     openModal,
     closeModal,
     handleSave,
-    handleToggleStatus,
     openDeleteModal,
     closeDeleteModal,
     handleDelete,
-    anularModal,
-    confirmToggleStatus,
-    closeAnularModal,
     isAdministrador,
-    isRestrictedRole
+    isRestrictedRole,
+    handleToggleStatus
   } = useRolesLogic(AVAILABLE_PERMISSIONS);
 
   const getModalTitle = () => {
@@ -99,16 +96,6 @@ const RolesPage = () => {
           loading={loading}
         />
 
-        <AnularOperacionModal
-          isOpen={anularModal.isOpen}
-          onClose={closeAnularModal}
-          onConfirm={confirmToggleStatus}
-          title={anularModal.role?.isActive ? 'Confirmar Desactivación' : 'Confirmar Activación'}
-          operationType="rol"
-          operationData={anularModal.role}
-          confirmButtonText={anularModal.role?.isActive ? 'Desactivar' : 'Activar'}
-          cancelButtonText="Cancelar"
-        />
       </>
 
       {/* MODAL DE REGISTRO/EDICIÓN/DETALLES */}
@@ -126,7 +113,7 @@ const RolesPage = () => {
         onConfirm={modalState.mode !== 'details' ? handleSave : closeModal}
         confirmText={modalState.mode === 'details' ? 'Cerrar' : (loading ? 'Guardando...' : 'Guardar')}
       >
-        <div className="roles-modal-content yellow-scrollbar">
+        <div className="roles-modal-content">
           <RoleFormFields 
             modalMode={modalState.mode}
             currentRole={currentRole}
@@ -191,7 +178,7 @@ const RolesPage = () => {
               onReactivar={handleToggleStatus}
               idField="id"
               estadoField="isActive"
-              moduleType="generic"
+              moduleType="roles"
               actionIconSize={18}
               actionGap={14}
               isRestrictedActionCheck={isRestrictedRole}

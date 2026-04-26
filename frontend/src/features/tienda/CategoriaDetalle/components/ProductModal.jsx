@@ -280,6 +280,7 @@ const ProductModal = ({
             className={`gm-btn-add-cart gm-btn-desktop-only ${Number(product.stock) === 0 ? "gm-btn-disabled-agotado" : ""} ${showSizeError ? "gm-btn-error" : ""}`}
             onClick={handleModalAddToCart}
             disabled={(selectedSize && parseInt(quantity) > remaining)}
+            style={{ height: '48px', fontSize: '1rem', fontWeight: 'bold' }}
           >
             {Number(product.stock) === 0 ? (
               <><FaBan size={18} /> <span className="gm-btn-label">AGOTADO</span></>

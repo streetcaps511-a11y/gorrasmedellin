@@ -139,13 +139,13 @@ const InvoiceModal = ({ isOpen, onClose, invoiceData }) => {
         padding: '20px',
         position: 'relative'
       }}>
-        <div style={{ textAlign: 'center', marginBottom: '15px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '6px' }}>
           <img
             src="/logo.png"
             alt="Logo GM CAPS"
             style={{
-              width: '50px',
-              height: '50px',
+              width: '42px',
+              height: '42px',
               borderRadius: '6px',
               border: '1px solid #FFC107',
               objectFit: 'contain'
@@ -156,7 +156,7 @@ const InvoiceModal = ({ isOpen, onClose, invoiceData }) => {
           />
           <h3 style={{
             color: '#FFC107',
-            margin: '10px 0 0 0',
+            margin: '6px 0 0 0',
             fontSize: '14px',
             fontWeight: 'bold'
           }}>

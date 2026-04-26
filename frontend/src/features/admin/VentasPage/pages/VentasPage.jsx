@@ -1,5 +1,6 @@
 import '../style/index.css';
 import React, { useState, useEffect } from 'react';
+import jsPDF from 'jspdf';
 import { 
   FaArrowLeft, 
   FaPlus, 
@@ -12,11 +13,13 @@ import {
   FaBoxOpen,
   FaCamera,
   FaDollarSign,
-  FaExclamationTriangle
+  FaExclamationTriangle,
+  FaDownload,
+  FaEye
 } from "react-icons/fa";
 
 // ===== COMPONENTES COMPARTIDOS =====
-import { Alert, EntityTable, SearchInput, UniversalModal, AnularOperacionModal, DateInputWithCalendar, StatusPill, SearchSelect } from '../../../shared/services';
+import { Alert, EntityTable, SearchInput, UniversalModal, DateInputWithCalendar, StatusPill, SearchSelect } from '../../../shared/services';
 import CustomPagination from '../../../shared/components/admin/CustomPagination';
 
 import StatusFilter from '../components/StatusFilter';
@@ -29,48 +32,6 @@ import * as productosService from '../../Productos/services/productosApi';
 import * as clientesService from '../../ClientesPage/services/clientesApi';
 
 // Se eliminan PAYMENT_METHODS y SIZES quemados
-
-const columns = [
-  { 
-    header: 'No. Venta', 
-    field: 'id', 
-    render: (item) => <span className="sale-id-text">{item.id}</span> 
-  },
-  { 
-    header: 'Cliente', 
-    field: 'cliente', 
-    render: (item) => <span className="client-name-text">{typeof item.cliente === 'object' ? item.cliente?.nombre : item.cliente}</span> 
-  },
-  { 
-    header: 'Fecha', 
-    field: 'fecha', 
-    render: (item) => <span className="sale-date-text">{item.fecha}</span> 
-  },
-  { 
-    header: 'Total', 
-    field: 'total', 
-    render: (item) => <span className="sale-total-text">${Number(item.total).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> 
-  },
-  { 
-    header: 'Tipo', 
-    field: 'tipoEntrega', 
-    render: (item) => (
-      <span className={`delivery-type-pill ${item.tipoEntrega}`}>
-        {item.tipoEntrega === 'recoger' ? '🏪 Local' : '🚚 Envío'}
-      </span>
-    ) 
-  },
-  { 
-    header: 'Dirección', 
-    field: 'direccionEnvio', 
-    render: (item) => <span className="address-text-table" title={item.direccionEnvio}>{item.direccionEnvio || 'N/A'}</span> 
-  },
-  { 
-    header: 'Estado', 
-    field: 'estado', 
-    render: (item) => <StatusPill status={item.estado} /> 
-  }
-];
 
 const VentasPage = () => {
   const {
@@ -87,7 +48,6 @@ const VentasPage = () => {
     alert, setAlert,
     modoVista,
     ventaViendo,
-    anularModal, setAnularModal,
     approveModal, setApproveModal,
     rejectModal, setRejectModal,
     partialPaymentModal, setPartialPaymentModal,
@@ -111,15 +71,63 @@ const VentasPage = () => {
     handleCreateVenta,
     updateVentaStatus,
     handlePartialPayment,
-    handleAnularVenta,
     requiresReceipt
   } = useVentasLogic();
+
+  const columns = [
+    { 
+      header: 'No. Venta', 
+      field: 'id', 
+      render: (item) => <span className="sale-id-text">{item.id}</span> 
+    },
+    { 
+      header: 'Cliente', 
+      field: 'cliente', 
+      render: (item) => <span className="client-name-text">{typeof item.cliente === 'object' ? item.cliente?.nombre : item.cliente}</span> 
+    },
+    { 
+      header: 'Fecha', 
+      field: 'fecha', 
+      render: (item) => <span className="sale-date-text">{item.fecha}</span> 
+    },
+    { 
+      header: 'Total', 
+      field: 'total', 
+      render: (item) => <span className="sale-total-text">${Number(item.total).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> 
+    },
+    { 
+      header: 'Tipo', 
+      field: 'tipoEntrega', 
+      render: (item) => (
+        <span className={`delivery-type-pill ${item.tipoEntrega}`}>
+          {item.tipoEntrega === 'recoger' ? '🏪 Local' : '🚚 Envío'}
+        </span>
+      ) 
+    },
+    { 
+      header: 'Dirección', 
+      field: 'direccionEnvio', 
+      render: (item) => <span className="address-text-table" title={item.direccionEnvio}>{item.direccionEnvio || 'N/A'}</span> 
+    },
+    { 
+      header: 'Estado', 
+      field: 'estado', 
+      render: (item) => <StatusPill status={item.estado} /> 
+    }
+  ];
   
   // local state for image expansion
   const [imgModal, setImgModal] = useState({ open: false, src: '' });
   const openImage = (src) => setImgModal({ open: true, src });
 
   // local state for filtering products in detail view
+  // Reset scroll when switching views
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const wrappers = document.querySelectorAll('.yellow-scrollbar');
+    wrappers.forEach(w => w.scrollTop = 0);
+  }, [modoVista, ventaViendo]);
+
   const [detailSearch, setDetailSearch] = useState('');
 
   return (
@@ -132,185 +140,184 @@ const VentasPage = () => {
         />
       )}
 
-      <AnularOperacionModal 
-        isOpen={anularModal.isOpen} 
-        onClose={() => setAnularModal({ isOpen: false, venta: null })} 
-        onConfirm={handleAnularVenta} 
-        operationType="venta" 
-        operationData={anularModal.venta}
-        loading={loading}
-      />
 
-      <AnularOperacionModal 
-        isOpen={approveModal.isOpen} 
-        onClose={() => setApproveModal({ isOpen: false, venta: null })}
-        onConfirm={() => updateVentaStatus(availableStatuses[1])}
-        title="Confirmar Aprobación"
-        operationType="venta"
-        operationData={approveModal.venta}
-        confirmButtonText="Aprobar"
-        cancelButtonText="Cancelar"
-        loading={loading}
-      />
 
-      <UniversalModal 
-        isOpen={partialPaymentModal.isOpen} 
-        onClose={() => setPartialPaymentModal({ isOpen: false, venta: null, montoRecibido: '', montoNuevo: '', evidencia2: null })}
-        title="Informar Pago Incompleto"
-        width="450px"
-        loading={loading}
-        onSave={() => handlePartialPayment(partialPaymentModal.montoRecibido, partialPaymentModal.montoNuevo)}
-      >
-        <div style={{ padding: '0 8px 15px' }}>
-          <p style={{ color: '#fff', marginBottom: '14px', fontSize: '13px', textAlign: 'center', lineHeight: '1.4' }}>
-            La venta <strong>#{partialPaymentModal.venta?.id}</strong> es por un total de <strong>${Number(partialPaymentModal.venta?.total || 0).toLocaleString('es-CO')}</strong>.
-            <br/>Ingrese cuánto dinero recibió realmente en el comprobante.
-          </p>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
-            <div>
-              <label style={{ display: 'block', color: '#94a3b8', fontSize: '11px', fontWeight: 'bold', marginBottom: '5px' }}>1RA CONSIGNACIÓN <span style={{ color: '#ef4444' }}>*</span></label>
-              <input 
-                type="number"
-                step="0.01"
-                value={partialPaymentModal.montoRecibido}
-                onChange={(e) => setPartialPaymentModal(prev => ({ ...prev, montoRecibido: e.target.value }))}
-                placeholder="Ej: 400.000,50"
-                disabled={loading}
-                style={{ width: '100%', padding: '10px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#fff', outline: 'none', fontSize: '14px' }}
-              />
-            </div>
-            <div>
-              <label style={{ display: 'block', color: '#94a3b8', fontSize: '11px', fontWeight: 'bold', marginBottom: '5px' }}>2DA CONSIGNACIÓN</label>
-              <input 
-                type="number"
-                step="0.01"
-                value={partialPaymentModal.montoNuevo}
-                onChange={(e) => setPartialPaymentModal(prev => ({ ...prev, montoNuevo: e.target.value }))}
-                placeholder="Ej: 20.000,00"
-                disabled={loading}
-                style={{ width: '100%', padding: '10px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#fff', outline: 'none', fontSize: '14px' }}
-              />
+      {approveModal.isOpen && (
+        <div className="gm-zoom-overlay-admin" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ backgroundColor: '#0b1220', border: '1.5px solid #FFC300', borderRadius: '16px', padding: '35px', maxWidth: '450px', width: '90%', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)' }}>
+            <h3 style={{ color: '#FFC300', fontSize: '22px', fontWeight: '800', marginBottom: '20px', letterSpacing: '0.5px' }}>Confirmar Aprobación</h3>
+            <p style={{ color: '#fff', fontSize: '16px', marginBottom: '30px', fontWeight: '500' }}>
+              ¿Estás seguro de que deseas aprobar la venta <strong style={{ color: '#FFC300' }}>#{approveModal.venta?.id}</strong>?
+            </p>
+            <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
+              <button 
+                onClick={() => setApproveModal({ isOpen: false, venta: null })}
+                style={{ flex: 1, padding: '12px 20px', background: 'transparent', border: '1.5px solid rgba(255, 255, 255, 0.2)', color: '#fff', borderRadius: '10px', cursor: 'pointer', fontWeight: '700', fontSize: '14px' }}
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={() => updateVentaStatus(availableStatuses[1])}
+                style={{ flex: 1, padding: '12px 20px', background: '#FFC300', border: 'none', color: '#000', fontWeight: '800', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', boxShadow: '0 4px 12px rgba(255, 195, 0, 0.3)' }}
+              >
+                {loading ? 'Aprobando...' : 'Aprobar'}
+              </button>
             </div>
           </div>
+        </div>
+      )}
 
-          <div style={{ background: '#111827', padding: '12px', borderRadius: '8px', marginBottom: '12px', border: '1px solid #1f2937' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                <span style={{ fontSize: '12px', color: '#94a3b8' }}>Total Recibido:</span>
-                <span style={{ fontSize: '14px', color: '#fff', fontWeight: 'bold' }}>
-                    ${(Number(partialPaymentModal.montoRecibido || 0) + Number(partialPaymentModal.montoNuevo || 0)).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '12px', color: '#94a3b8' }}>Saldo Restante:</span>
-                <span style={{ 
+      {partialPaymentModal.isOpen && (
+        <div className="gm-zoom-overlay-admin" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ backgroundColor: '#0b1220', border: '1.5px solid #FFC300', borderRadius: '16px', padding: '30px', maxWidth: '450px', width: '90%', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)' }}>
+            <h3 style={{ color: '#FFC300', fontSize: '20px', fontWeight: '800', marginBottom: '15px', letterSpacing: '0.5px' }}>Informar Pago Incompleto</h3>
+            <div style={{ padding: '0 8px 15px', textAlign: 'left' }}>
+              <p style={{ color: '#fff', marginBottom: '14px', fontSize: '13px', textAlign: 'center', lineHeight: '1.4' }}>
+                La venta <strong>#{partialPaymentModal.venta?.id}</strong> es por un total de <strong>${Number(partialPaymentModal.venta?.total || 0).toLocaleString('es-CO')}</strong>.
+                <br/>Ingrese cuánto dinero recibió realmente en el comprobante.
+              </p>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', color: '#FFC300', fontSize: '11px', fontWeight: 'bold', marginBottom: '5px' }}>1RA CONSIGNACIÓN <span style={{ color: '#ef4444' }}>*</span></label>
+                  <input 
+                    type="number"
+                    step="0.01"
+                    value={partialPaymentModal.montoRecibido}
+                    onChange={(e) => setPartialPaymentModal(prev => ({ ...prev, montoRecibido: e.target.value }))}
+                    placeholder="Ej: 400.000,50"
+                    disabled={loading}
+                    style={{ width: '100%', padding: '10px', background: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', color: '#fff', outline: 'none', fontSize: '14px' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', color: '#FFC300', fontSize: '11px', fontWeight: 'bold', marginBottom: '5px' }}>2DA CONSIGNACIÓN</label>
+                  <input 
+                    type="number"
+                    step="0.01"
+                    value={partialPaymentModal.montoNuevo}
+                    onChange={(e) => setPartialPaymentModal(prev => ({ ...prev, montoNuevo: e.target.value }))}
+                    placeholder="Ej: 20.000,00"
+                    disabled={loading}
+                    style={{ width: '100%', padding: '10px', background: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', color: '#fff', outline: 'none', fontSize: '14px' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ background: '#000', padding: '16px', borderRadius: '12px', marginBottom: '15px', border: '1px solid rgba(255, 195, 0, 0.2)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.5)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Recibido:</span>
+                    <span style={{ fontSize: '15px', color: '#fff', fontWeight: '800', fontFamily: '"Outfit", sans-serif' }}>
+                        ${(Number(partialPaymentModal.montoRecibido || 0) + Number(partialPaymentModal.montoNuevo || 0)).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Saldo Restante:</span>
+                    <span style={{ 
+                        fontSize: '15px', 
+                        fontWeight: '800', 
+                        fontFamily: '"Outfit", sans-serif',
+                        color: (Number(partialPaymentModal.venta?.total || 0) - (Number(partialPaymentModal.montoRecibido || 0) + Number(partialPaymentModal.montoNuevo || 0))) <= 0 ? '#10b981' : '#ef4444' 
+                    }}>
+                        ${Math.max(0, (Number(partialPaymentModal.venta?.total || 0) - (Number(partialPaymentModal.montoRecibido || 0) + Number(partialPaymentModal.montoNuevo || 0)))).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', color: '#FFC300', fontSize: '11px', fontWeight: 'bold', marginBottom: '6px' }}>SEGUNDO COMPROBANTE</label>
+                <div className="evidence-dropzone mini">
+                    {partialPaymentModal.evidencia2 ? (
+                        <div style={{ position: 'relative' }}>
+                            <img src={partialPaymentModal.evidencia2} alt="Comprobante 2" style={{ width: '100%', borderRadius: '8px', maxHeight: '100px', objectFit: 'cover' }} />
+                            <button onClick={() => setPartialPaymentModal(p => ({ ...p, evidencia2: null }))} className="btn-remove-evidence mini"><FaTrash size={10} /></button>
+                        </div>
+                    ) : (
+                        <label className="btn-select-evidence mini" style={{ backgroundColor: 'transparent', border: '1px solid #FFC300', color: '#FFC300' }}>
+                            SUBIR SEGUNDO PAGO
+                            <input type="file" accept="image/*" onChange={handleImage2Upload} className="display-none" />
+                        </label>
+                    )}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '20px' }}>
+                <button 
+                  onClick={() => setPartialPaymentModal({ isOpen: false, venta: null, montoRecibido: '', evidencia2: null })}
+                  disabled={loading}
+                  style={{ flex: 1, padding: '12px 20px', background: 'transparent', border: '1.5px solid rgba(255, 255, 255, 0.2)', color: '#fff', borderRadius: '10px', cursor: 'pointer', fontWeight: '700', fontSize: '14px', opacity: loading ? 0.6 : 1 }}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={() => handlePartialPayment(partialPaymentModal.montoRecibido, partialPaymentModal.montoNuevo)}
+                  disabled={loading || (Number(partialPaymentModal.montoRecibido || 0) + Number(partialPaymentModal.montoNuevo || 0) < Number(partialPaymentModal.venta?.total || 0))}
+                  style={{ 
+                    flex: 1, 
+                    padding: '12px 20px', 
+                    background: (Number(partialPaymentModal.montoRecibido || 0) + Number(partialPaymentModal.montoNuevo || 0) < Number(partialPaymentModal.venta?.total || 0)) ? '#1e293b' : '#3b82f6',
+                    color: (Number(partialPaymentModal.montoRecibido || 0) + Number(partialPaymentModal.montoNuevo || 0) < Number(partialPaymentModal.venta?.total || 0)) ? '#94a3b8' : '#fff',
+                    border: 'none',
+                    fontWeight: '800', 
+                    borderRadius: '10px', 
+                    cursor: (Number(partialPaymentModal.montoRecibido || 0) + Number(partialPaymentModal.montoNuevo || 0) < Number(partialPaymentModal.venta?.total || 0)) ? 'not-allowed' : 'pointer', 
                     fontSize: '14px', 
-                    fontWeight: 'bold', 
-                    color: (Number(partialPaymentModal.venta?.total || 0) - (Number(partialPaymentModal.montoRecibido || 0) + Number(partialPaymentModal.montoNuevo || 0))) <= 0 ? '#10b981' : '#ef4444' 
-                }}>
-                    ${Math.max(0, (Number(partialPaymentModal.venta?.total || 0) - (Number(partialPaymentModal.montoRecibido || 0) + Number(partialPaymentModal.montoNuevo || 0)))).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </span>
+                    boxShadow: (Number(partialPaymentModal.montoRecibido || 0) + Number(partialPaymentModal.montoNuevo || 0) < Number(partialPaymentModal.venta?.total || 0)) ? 'none' : '0 4px 12px rgba(59, 130, 246, 0.3)',
+                    opacity: loading ? 0.6 : 1 
+                  }}
+                >
+                  {loading ? 'Procesando...' : 'Completar Venta'}
+                </button>
+              </div>
             </div>
           </div>
+        </div>
+      )}
 
-          <div style={{ marginBottom: '12px' }}>
-            <label style={{ display: 'block', color: '#94a3b8', fontSize: '11px', fontWeight: 'bold', marginBottom: '6px' }}>SEGUNDO COMPROBANTE</label>
-            <div className="evidence-dropzone mini">
-                {partialPaymentModal.evidencia2 ? (
-                    <div style={{ position: 'relative' }}>
-                        <img src={partialPaymentModal.evidencia2} alt="Comprobante 2" style={{ width: '100%', borderRadius: '8px', maxHeight: '100px', objectFit: 'cover' }} />
-                        <button onClick={() => setPartialPaymentModal(p => ({ ...p, evidencia2: null }))} className="btn-remove-evidence mini"><FaTrash size={10} /></button>
-                    </div>
-                ) : (
-                    <label className="btn-select-evidence mini" style={{ backgroundColor: 'transparent', border: '1px solid #94a3b8', color: '#94a3b8' }}>
-                        SUBIR SEGUNDO PAGO
-                        <input type="file" accept="image/*" onChange={handleImage2Upload} className="display-none" />
-                    </label>
-                )}
+      {rejectModal.isOpen && (
+        <div className="gm-zoom-overlay-admin" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ backgroundColor: '#0b1220', border: '1.5px solid #FFC300', borderRadius: '16px', padding: '35px', maxWidth: '450px', width: '90%', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)' }}>
+            <h3 style={{ color: '#FFC300', fontSize: '22px', fontWeight: '800', marginBottom: '20px', letterSpacing: '0.5px' }}>Rechazar Venta</h3>
+            <p style={{ color: '#fff', fontSize: '15px', marginBottom: '20px', fontWeight: '500' }}>
+              ¿Desea rechazar la venta <strong style={{ color: '#FFC300' }}>#{rejectModal.venta?.id}</strong>? Por favor, ingrese el motivo.
+            </p>
+            
+            <div style={{ marginBottom: '25px', textAlign: 'left' }}>
+              <label style={{ display: 'block', color: '#FFC300', fontSize: '12px', fontWeight: 'bold', marginBottom: '8px' }}>MOTIVO DE RECHAZO <span style={{ color: '#ef4444' }}>*</span></label>
+              <textarea 
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                placeholder="Ej: Comprobante de pago inválido, producto sin stock..."
+                disabled={loading}
+                style={{ width: '100%', padding: '12px', background: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', color: '#fff', minHeight: '100px', outline: 'none', fontSize: '13px', opacity: loading ? 0.6 : 1 }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
+              <button 
+                onClick={() => { setRejectModal({ isOpen: false, venta: null }); setRejectionReason(''); }}
+                disabled={loading}
+                style={{ flex: 1, padding: '12px 20px', background: 'transparent', border: '1.5px solid rgba(255, 255, 255, 0.2)', color: '#fff', borderRadius: '10px', cursor: 'pointer', fontWeight: '700', fontSize: '14px', opacity: loading ? 0.6 : 1 }}
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={() => {
+                  if (!rejectionReason.trim()) {
+                    setAlert({ show: true, message: "El motivo de rechazo es obligatorio", type: "error" });
+                    return;
+                  }
+                  updateVentaStatus(availableStatuses[2], rejectionReason);
+                }}
+                disabled={loading}
+                style={{ flex: 1, padding: '12px 20px', background: '#ef4444', border: 'none', color: '#fff', fontWeight: '800', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)', opacity: loading ? 0.6 : 1 }}
+              >
+                {loading ? 'Rechazando...' : 'Rechazar'}
+              </button>
             </div>
           </div>
-
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '20px' }}>
-            <button 
-              onClick={() => setPartialPaymentModal({ isOpen: false, venta: null, montoRecibido: '', evidencia2: null })}
-              disabled={loading}
-              className="view-btn-sec"
-              style={{ padding: '10px 20px', borderRadius: '8px' }}
-            >
-              Cancelar
-            </button>
-            <button 
-              onClick={() => handlePartialPayment(partialPaymentModal.montoRecibido, partialPaymentModal.montoNuevo)}
-              disabled={loading || (Number(partialPaymentModal.montoRecibido || 0) + Number(partialPaymentModal.montoNuevo || 0) < Number(partialPaymentModal.venta?.total || 0))}
-              className="ventas-btn-submit"
-              style={{ 
-                margin: 0, 
-                padding: '10px 20px', 
-                background: (Number(partialPaymentModal.montoRecibido || 0) + Number(partialPaymentModal.montoNuevo || 0) < Number(partialPaymentModal.venta?.total || 0)) ? '#334155' : '#FFC300',
-                color: (Number(partialPaymentModal.montoRecibido || 0) + Number(partialPaymentModal.montoNuevo || 0) < Number(partialPaymentModal.venta?.total || 0)) ? '#94a3b8' : '#000',
-                cursor: (Number(partialPaymentModal.montoRecibido || 0) + Number(partialPaymentModal.montoNuevo || 0) < Number(partialPaymentModal.venta?.total || 0)) ? 'not-allowed' : 'pointer'
-              }}
-            >
-              {loading ? 'Procesando...' : 'Completar Venta ✅'}
-            </button>
-          </div>
         </div>
-      </UniversalModal>
-
-      <UniversalModal 
-        isOpen={rejectModal.isOpen} 
-        onClose={() => { setRejectModal({ isOpen: false, venta: null }); setRejectionReason(''); }}
-        title="Rechazar Venta"
-        width="450px"
-        loading={loading}
-        onSave={() => {
-          if (!rejectionReason.trim()) {
-            setAlert({ show: true, message: "El motivo de rechazo es obligatorio", type: "error" });
-            return;
-          }
-          updateVentaStatus(availableStatuses[2], rejectionReason);
-        }}
-      >
-        <div style={{ padding: '20px' }}>
-          <p style={{ color: '#fff', marginBottom: '15px', fontSize: '14px', textAlign: 'center' }}>
-            ¿Desea rechazar la venta <strong>#{rejectModal.venta?.id}</strong>? Por favor, ingrese el motivo.
-          </p>
-          
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', color: '#FFC107', fontSize: '12px', fontWeight: 'bold', marginBottom: '8px' }}>MOTIVO DE RECHAZO <span style={{ color: '#ef4444' }}>*</span></label>
-            <textarea 
-              value={rejectionReason}
-              onChange={(e) => setRejectionReason(e.target.value)}
-              placeholder="Ej: Comprobante de pago inválido, producto sin stock..."
-              disabled={loading}
-              style={{ width: '100%', padding: '12px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#fff', minHeight: '100px', outline: 'none', fontSize: '13px', opacity: loading ? 0.6 : 1 }}
-            />
-          </div>
-
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-            <button 
-              onClick={() => { setRejectModal({ isOpen: false, venta: null }); setRejectionReason(''); }}
-              disabled={loading}
-              style={{ padding: '10px 20px', background: 'transparent', border: '1px solid #444', color: '#ccc', borderRadius: '8px', cursor: 'pointer', opacity: loading ? 0.6 : 1 }}
-            >
-              Cancelar
-            </button>
-            <button 
-              onClick={() => {
-                if (!rejectionReason.trim()) {
-                  setAlert({ show: true, message: "El motivo de rechazo es obligatorio", type: "error" });
-                  return;
-                }
-                updateVentaStatus(availableStatuses[2], rejectionReason);
-              }}
-              disabled={loading}
-              style={{ padding: '10px 20px', background: '#ef4444', border: 'none', color: '#fff', fontWeight: 'bold', borderRadius: '8px', cursor: 'pointer', opacity: loading ? 0.6 : 1 }}
-            >
-              {loading ? 'Rechazando...' : 'Rechazar'}
-            </button>
-          </div>
-        </div>
-      </UniversalModal>
+      )}
 
       {/* Visualador de Comprobante Premium */}
       {imgModal.open && (
@@ -396,7 +403,6 @@ const VentasPage = () => {
                 entities={paginatedVentas} 
                 columns={columns} 
                 onView={mostrarDetalle} 
-                onAnular={v => setAnularModal({ isOpen: true, venta: v })} 
                 onApprove={v => setApproveModal({ isOpen: true, venta: v })} 
                 onReject={v => setRejectModal({ isOpen: true, venta: v })}
                 onPartialPago={(v) => {
@@ -408,7 +414,6 @@ const VentasPage = () => {
                     evidencia2: v.evidencia2 || null 
                   });
                 }}
-                showAnularButton={true} 
                 moduleType="ventas" 
               />
             </div>
@@ -692,22 +697,24 @@ const VentasPage = () => {
             {/* Fila inferior: PRODUCTOS (Detalle) */}
             <div className="venta-form-card full-width-card" style={{ marginTop: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>ESTADO:</span>
-                  <StatusPill status={ventaViendo?.estado} />
-                </div>
+                <div className="section-title" style={{ marginBottom: 0 }}><FaBoxOpen size={14} /> PRODUCTOS ADQUIRIDOS</div>
                 
-                <div style={{ width: '250px' }}>
-                  <SearchInput 
-                    value={detailSearch} 
-                    onChange={setDetailSearch} 
-                    placeholder="Buscar producto..." 
-                    onClear={() => setDetailSearch('')}
-                  />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>ESTADO:</span>
+                    <StatusPill status={ventaViendo?.estado} />
+                  </div>
+                  
+                  <div style={{ width: '250px' }}>
+                    <SearchInput 
+                      value={detailSearch} 
+                      onChange={setDetailSearch} 
+                      placeholder="Buscar producto..." 
+                      onClear={() => setDetailSearch('')}
+                    />
+                  </div>
                 </div>
               </div>
-
-              <div className="section-title"><FaBoxOpen size={14} /> PRODUCTOS ADQUIRIDOS</div>
               <div className="products-table-header products-table-header-view">
                 <span className="header-label">PRODUCTO</span>
                 <span className="header-label">TALLA</span>

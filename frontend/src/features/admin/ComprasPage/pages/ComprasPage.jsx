@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { 
   Alert, EntityTable, SearchInput, CustomPagination, 
-  AnularOperacionModal, StatusPill, DateInputWithCalendar 
+  StatusPill, DateInputWithCalendar 
 } from '../../../shared/services';
 import StatusFilter from '../components/StatusFilter';
 import ProductoItemForm from '../components/ProductoItemForm';
@@ -29,11 +29,11 @@ const ComprasPage = () => {
   const {
     modoVista, searchTerm, setSearchTerm, filterStatus, setFilterStatus, filterDate, setFilterDate,
     currentPage, setCurrentPage, itemsPerPage, alert, setAlert, errors,
-    compraViendo, compraEditando, anularModal, setAnularModal, completarModal, setCompletarModal,
+    compraViendo, compraEditando, completarModal, setCompletarModal,
     nuevaCompra, setNuevaCompra, availableStatuses, availablePaymentMethods, availableSizes,
     proveedoresActivos, mostrarLista, mostrarFormulario, mostrarDetalle,
     agregarProducto, actualizarProducto, eliminarProducto, calcularTotal,
-    handleSubmit, handleAnularCompra, handleCompletarCompra, confirmCompletarCompra,
+    handleSubmit, handleCompletarCompra, confirmCompletarCompra,
     filtered, loading, actionLoading, actionLoadingText, availableProducts, isLoadingProducts
   } = useComprasLogic(location);
 
@@ -59,31 +59,33 @@ const ComprasPage = () => {
         />
       )}
       
-      <AnularOperacionModal
-        isOpen={anularModal.isOpen}
-        onClose={() => setAnularModal({ isOpen: false, compra: null })}
-        onConfirm={handleAnularCompra}
-        title="Anular Compra"
-        operationType="compra"
-        operationData={anularModal.compra}
-        confirmButtonText="Anular"
-        cancelButtonText="Conservar"
-        loading={actionLoading}
-        loadingText={actionLoadingText}
-      />
 
-      <AnularOperacionModal
-        isOpen={completarModal.isOpen}
-        onClose={() => setCompletarModal({ isOpen: false, compra: null })}
-        onConfirm={confirmCompletarCompra}
-        title="Confirmar Registro"
-        operationType="compra"
-        operationData={completarModal.compra}
-        confirmButtonText="Completar"
-        cancelButtonText="Cancelar"
-        loading={actionLoading}
-        loadingText={actionLoadingText}
-      />
+
+      {/* MODAL DE CONFIRMACIÓN DE COMPLETAR */}
+      {completarModal.isOpen && (
+        <div className="gm-zoom-overlay-admin" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ backgroundColor: '#000', border: '1px solid #334155', borderRadius: '12px', padding: '24px', maxWidth: '400px', width: '90%', textAlign: 'center' }}>
+            <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: '800', marginBottom: '12px' }}>Confirmar Registro</h3>
+            <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '24px' }}>
+              ¿Estás seguro de que deseas completar el registro de la compra <strong>#{completarModal.compra?.numCompra}</strong>?
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button 
+                onClick={() => setCompletarModal({ isOpen: false, compra: null })}
+                style={{ padding: '10px 20px', background: 'transparent', border: '1px solid #334155', color: '#fff', borderRadius: '8px', cursor: 'pointer' }}
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={confirmCompletarCompra}
+                style={{ padding: '10px 20px', background: '#F5C81B', border: 'none', color: '#000', fontWeight: '800', borderRadius: '8px', cursor: 'pointer' }}
+              >
+                {actionLoading ? 'Completando...' : 'Completar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="compras-container">
         <div className="compras-header">
@@ -172,9 +174,7 @@ const ComprasPage = () => {
                 entities={filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)}
                 columns={columns}
                 onView={mostrarDetalle}
-                onAnular={(c) => setAnularModal({ isOpen: true, compra: c })}
                 onComplete={handleCompletarCompra}
-                showAnularButton={true}
                 moduleType="compras"
                 className="compras-entity-table"
               />

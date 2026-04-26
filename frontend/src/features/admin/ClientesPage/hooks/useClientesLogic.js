@@ -4,8 +4,10 @@ import {
   fetchAllClientes,
   createNewCliente,
   updateExistingCliente,
-  deleteExistingCliente
+  deleteExistingCliente,
+  toggleClienteStatus
 } from "../services/clientesApi";
+
 
 // 🧠 MEMORIA GLOBAL (Caché Nitro)
 let clientesCache = {
@@ -53,7 +55,6 @@ export const useClientesLogic = () => {
   });
   const [errors, setErrors] = useState({});
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, cliente: null, customMessage: '' });
-  const [anularModal, setAnularModal] = useState({ isOpen: false, cliente: null, onReactivar: false });
   const firstInputRef = useRef(null);
 
   const filtered = clientes.filter(c => {
@@ -357,12 +358,13 @@ export const useClientesLogic = () => {
         return next;
       });
       
+      closeDeleteModal();
+      
       // Notificar éxito y actualizar caché
       showAlert(cliente.nombreCompleto, 'delete');
       const updatedData = await fetchAllClientes();
       NitroCache.set('clientes', updatedData);
 
-      closeDeleteModal();
     } catch (err) {
       const msg = err?.response?.data?.message || 'Error al eliminar cliente';
       showAlert(msg, 'error');
@@ -371,59 +373,7 @@ export const useClientesLogic = () => {
     }
   };
 
-  const handleToggleStatus = async (cliente, newStatus) => {
-    try {
-      const apiClienteData = {
-        ...cliente,
-        isActive: newStatus
-      };
-      await updateExistingCliente(cliente.id, apiClienteData);
-      showAlert(`Cliente "${cliente.nombreCompleto}" ${newStatus ? 'reactivado' : 'desactivado'}`, newStatus ? 'success' : 'error');
-      loadClientes();
-      
-      if (modalState.isOpen && modalState.cliente && String(modalState.cliente.id) === String(cliente.id)) {
-        setFormData(prev => ({ ...prev, isActive: newStatus }));
-      }
-    } catch (err) {
-      showAlert('Error al cambiar estado del cliente', 'error');
-    }
-  };
 
-  const handleReactivar = (cliente) => {
-    setAnularModal({ isOpen: true, cliente, onReactivar: true });
-  };
-  
-  const handleDesactivar = (cliente) => {
-    setAnularModal({ isOpen: true, cliente, onReactivar: false });
-  };
-
-  const closeAnularModal = () => {
-    setAnularModal({ isOpen: false, cliente: null, onReactivar: false });
-  };
-
-  const confirmToggleStatus = async () => {
-    const { cliente, onReactivar } = anularModal;
-    if (!cliente) return;
-    
-    const newStatus = onReactivar;
-    
-    // 🚀 Update UI immediately
-    setClientes(prev => prev.map(c => c.id === cliente.id ? { ...c, isActive: newStatus } : c));
-    closeAnularModal();
-
-    try {
-      const apiClienteData = {
-        ...cliente,
-        isActive: newStatus
-      };
-      await updateExistingCliente(cliente.id, apiClienteData);
-      showAlert(`Cliente "${cliente.nombreCompleto}" ${newStatus ? 'reactivado' : 'desactivado'} ✅`, newStatus ? 'success' : 'error');
-      loadClientes(); // Re-sync in background
-    } catch (err) {
-      loadClientes(); // Revert on failure
-      showAlert('Error al cambiar estado del cliente', 'error');
-    }
-  };
 
   return {
     clientes, setClientes,
@@ -454,10 +404,21 @@ export const useClientesLogic = () => {
     openDeleteModal,
     closeDeleteModal,
     handleDelete,
-    handleReactivar,
-    handleDesactivar,
-    anularModal,
-    confirmToggleStatus,
-    closeAnularModal
+    handleToggleStatus: async (cliente) => {
+      const previous = [...clientes];
+      const newState = !cliente.isActive;
+      setClientes(prev => prev.map(c =>
+        c.id === cliente.id ? { ...c, isActive: newState } : c
+      ));
+      try {
+        await toggleClienteStatus(cliente.id);
+        showAlert(newState ? 'Cliente activado ✅' : 'Cliente desactivado');
+        const next = clientes.map(c => c.id === cliente.id ? { ...c, isActive: newState } : c);
+        NitroCache.set('clientes', next);
+      } catch (err) {
+        setClientes(previous);
+        showAlert('Error al cambiar estado', 'error');
+      }
+    }
   };
 };

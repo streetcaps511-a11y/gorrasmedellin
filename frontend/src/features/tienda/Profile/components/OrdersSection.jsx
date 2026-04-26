@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   FaShoppingBag, FaSearch, FaTimes, FaChevronLeft, 
-  FaChevronRight, FaArrowLeft, FaExchangeAlt, FaDownload, FaUndo
+  FaChevronRight, FaArrowLeft, FaExchangeAlt, FaDownload, FaUndo, FaEye
 } from "react-icons/fa";
 import jsPDF from 'jspdf';
 import { RotateCcw } from 'lucide-react';
@@ -12,8 +12,18 @@ const OrdersSection = ({
   orderQuery, setOrderQuery, paginatedOrders, ordersPage, setOrdersPage,
   totalOrderPages, selectedOrder, setSelectedOrder, 
   openImage, handleReturnClick, setActiveTab, allReturns = [],
-  user = {}, formData = {}, handleBulkReturnClick, isBulkReturn
+  user = {}, formData = {}, handleBulkReturnClick, isBulkReturn,
+  setSelectedReturn, setReturnView // Añadidos para el modal de motivo
 }) => {
+  // ✅ Hooks SIEMPRE arriba, antes de cualquier return
+  const [showReasonModal, setShowReasonModal] = React.useState(false);
+  const [detailProdsPage, setDetailProdsPage] = React.useState(1);
+  const PRODS_PER_PAGE = 3;
+
+  React.useEffect(() => {
+    setDetailProdsPage(1);
+  }, [selectedOrder?.id]);
+
   const StatusBadge = ({ status, color }) => (
     <div className="gm-status-badge" style={{ backgroundColor: `${color}20`, color: color, border: `1px solid ${color}40` }}>
       <span className="gm-status-point" style={{ backgroundColor: color }} />
@@ -84,7 +94,10 @@ const OrdersSection = ({
                   <div className="gm-order-meta">
                     <div className="gm-order-total">{o.total}</div>
                     <div className="gm-order-date">{o.date.toUpperCase()}</div>
-                    <StatusBadge status={o.status} color={o.statusColor} />
+                    <StatusBadge 
+                      status={(String(o.status).toUpperCase() === 'ANULADO' || String(o.status).toUpperCase() === 'ANULADA') ? 'RECHAZADO' : o.status} 
+                      color={o.statusColor} 
+                    />
                   </div>
                 </div>
               ))}
@@ -126,13 +139,6 @@ const OrdersSection = ({
   }
 
   // DETALLE DEL PEDIDO
-  const [detailProdsPage, setDetailProdsPage] = React.useState(1);
-  const PRODS_PER_PAGE = 3;
-  
-  React.useEffect(() => {
-    setDetailProdsPage(1);
-  }, [selectedOrder?.id]);
-
   const totalProdsPages = Math.ceil((selectedOrder?.items?.length || 0) / PRODS_PER_PAGE);
   const paginatedItems = (selectedOrder?.items || []).slice(
     (detailProdsPage - 1) * PRODS_PER_PAGE, 
@@ -177,22 +183,23 @@ const OrdersSection = ({
     const total = typeof selectedOrder.total === 'string' ? parseInt(selectedOrder.total.replace(/[^0-9]/g, '')) : selectedOrder.total;
     const shipping = 'Consultar con el vendedor';
 
-    doc.setFillColor(15, 23, 42);
-    doc.rect(0, 0, 210, 297, 'F');
-    doc.setTextColor(255, 193, 7);
+    // doc.setFillColor(15, 23, 42);
+    // doc.rect(0, 0, 210, 297, 'F');
+    doc.setTextColor(0, 0, 0);
     doc.setFontSize(24);
     doc.setFont('helvetica', 'bold');
     doc.text("GORRAS MEDELLÍN", 105, 25, { align: 'center' });
-    doc.setTextColor(200, 200, 200);
+    doc.setTextColor(100, 100, 100);
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.text(`No. INV-${invoiceNumber}`, 105, 33, { align: 'center' });
     doc.text(`Fecha: ${date}`, 105, 38, { align: 'center' });
-    doc.setTextColor(255, 193, 7);
+
+    doc.setTextColor(0, 0, 0);
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.text("DATOS DEL CLIENTE:", 20, 55);
-    doc.setTextColor(230, 230, 230);
+    doc.setTextColor(50, 50, 50);
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.text(`Nombre: ${customerName}`, 20, 62);
@@ -201,23 +208,23 @@ const OrdersSection = ({
     doc.text(`Teléfono: ${customerPhone}`, 20, 77);
     const tableTop = 103;
     const boxHeight = (items.length * 7) + 15;
-    doc.setDrawColor(255, 193, 7);
+    doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.5);
     doc.rect(15, tableTop, 180, boxHeight);
     let yPosHead = 110;
-    doc.setTextColor(255, 193, 7);
+    doc.setTextColor(0, 0, 0);
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
     doc.text("Producto", 20, yPosHead);
     doc.text("Cant.", 90, yPosHead);
     doc.text("Precio", 110, yPosHead);
     doc.text("Total", 140, yPosHead);
-    doc.setDrawColor(255, 193, 7);
+    doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.1);
     doc.line(15, 113, 195, 113);
     let yPosItems = 120;
     items.forEach(item => {
-      doc.setTextColor(255, 255, 255);
+      doc.setTextColor(0, 0, 0);
       doc.setFont('helvetica', 'normal');
       doc.text(item.name.length > 30 ? item.name.substring(0, 30) + "..." : item.name, 20, yPosItems);
       doc.text(String(item.quantity), 90, yPosItems);
@@ -226,19 +233,19 @@ const OrdersSection = ({
       yPosItems += 7;
     });
     let yPosTotals = yPosItems + 15;
-    doc.setTextColor(200, 200, 200);
+    doc.setTextColor(100, 100, 100);
     doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
     doc.text("Envío:", 120, yPosTotals);
     doc.text(shipping || 'N/A', 150, yPosTotals);
     yPosTotals += 10;
-    doc.setTextColor(255, 193, 7);
+    doc.setTextColor(0, 0, 0);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.text("TOTAL:", 120, yPosTotals);
     doc.setFontSize(16);
     doc.text(`$${total.toLocaleString()}`, 150, yPosTotals);
-    doc.setTextColor(150, 150, 150);
+    doc.setTextColor(100, 100, 100);
     doc.setFontSize(9);
     doc.setFont('helvetica', 'italic');
     doc.text("Gracias por elegir Gorras Medellín. Comprobante histórico.", 20, yPosTotals + 20);
@@ -248,30 +255,92 @@ const OrdersSection = ({
   return (
     <div className="gm-order-detail">
       <div className="gm-detail-top-row">
-        <button onClick={() => setOrderView('list')} className="gm-back-btn" style={{ padding: '6px 12px', fontSize: '0.7rem' }}><FaArrowLeft /> Volver</button>
-        <div className="gm-header-right-group" style={{ gap: '15px', display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <button onClick={() => setOrderView('list')} className="gm-back-btn-circle" title="Volver"><FaArrowLeft /></button>
+          <h3 className="gm-section-title" style={{ fontSize: '1.1rem', margin: 0 }}>Pedido {selectedOrder.id}</h3>
+        </div>
+        
+        <div className="gm-header-right-group" style={{ gap: '4px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+          <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
           <button 
             onClick={handleDownloadPDF} 
             className="gm-download-btn-premium"
             style={{
-              padding: '6px 12px',
+              padding: '6px 16px',
               backgroundColor: '#0f172a',
-              color: '#60A5FA',
-              border: '1px solid #60A5FA',
-              borderRadius: '6px',
-              fontSize: '0.7rem',
+              color: '#ffffff',
+              border: '1px solid rgba(255,255,255,0.4)',
+              borderRadius: '8px',
+              fontSize: '0.75rem',
               fontWeight: 'bold',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
+              gap: '8px',
+              height: '36px',
               transition: 'all 0.2s ease'
             }}
           >
             <FaDownload /> PDF
           </button>
-          <h3 className="gm-section-title" style={{ fontSize: '0.95rem', margin: 0 }}>Pedido {selectedOrder.id}</h3>
-          <StatusBadge status={selectedOrder.status} color={selectedOrder.statusColor} />
+            <StatusBadge 
+              status={(String(selectedOrder.status).toUpperCase() === 'ANULADO' || String(selectedOrder.status).toUpperCase() === 'ANULADA') ? 'RECHAZADO' : selectedOrder.status} 
+              color={selectedOrder.statusColor} 
+            />
+            {/* Ver Motivo para Rechazados/Anulados */}
+            {(String(selectedOrder.status || '').toLowerCase().includes('rechaz') || String(selectedOrder.status || '').toLowerCase().includes('anulad')) && selectedOrder.rejectionReason && (
+              <button 
+                onClick={() => setShowReasonModal(true)}
+                style={{
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid #ef4444',
+                  color: '#ef4444',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontSize: '0.75rem',
+                  padding: '4px 12px',
+                  borderRadius: '100px',
+                  fontWeight: '600',
+                  transition: 'all 0.2s ease',
+                  height: '36px'
+                }}
+              >
+                <FaEye size={12} /> Ver motivo
+              </button>
+            )}
+          </div>
+          
+          {/* Botón Devolver Pedido */}
+          {(String(selectedOrder.status).toUpperCase() === 'COMPLETADA' || selectedOrder.status === 'Entregado') && !hasExistingReturn && (
+            <button 
+              onClick={() => handleBulkReturnClick(selectedOrder)}
+              style={{
+                marginTop: '15px',
+                marginRight: 0,
+                marginBottom: 0,
+                marginLeft: 0,
+                padding: '6px 16px',
+                fontSize: '0.75rem',
+                height: '32px',
+                backgroundColor: 'transparent',
+                borderColor: '#ef4444',
+                border: '1px solid #ef4444',
+                color: '#ef4444',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                outline: 'none',
+                boxShadow: 'none'
+              }}
+            >
+              <RotateCcw size={12} />
+              Devolver todo el pedido
+            </button>
+          )}
         </div>
       </div>
 
@@ -281,16 +350,6 @@ const OrdersSection = ({
             <h4 className="gm-detail-block-title" style={{ fontSize: '1rem', color: '#fff', fontWeight: 400, margin: 0, textTransform: 'none', fontFamily: '"Montserrat", sans-serif', letterSpacing: '0.5px' }}>Productos del pedido</h4>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              {(String(selectedOrder.status).toUpperCase() === 'COMPLETADA' || selectedOrder.status === 'Entregado') && !hasExistingReturn && (
-                <button 
-                  onClick={() => handleBulkReturnClick(selectedOrder)}
-                  className="gm-bulk-return-btn-premium"
-                >
-                  <RotateCcw size={14} style={{ marginRight: '8px' }} />
-                  Solicitar Devolución del Pedido
-                </button>
-              )}
-
               {totalProdsPages > 1 && (
                 <div className="gm-mini-pagination">
                   <button 
@@ -432,14 +491,18 @@ const OrdersSection = ({
           </div>
         </div>
       </div>
-      
-      {String(selectedOrder.status || '').toLowerCase().includes('rechaz') && selectedOrder.rejectionReason && (
-        <div className="gm-rejection-reason-banner">
-          <div className="gm-rejection-header">
-            MENSAJE DEL ADMINISTRADOR (PEDIDO RECHAZADO):
-          </div>
-          <div className="gm-rejection-content">
-            {selectedOrder.rejectionReason}
+
+      {showReasonModal && (
+        <div className="gm-reason-modal-overlay" onClick={() => setShowReasonModal(false)}>
+          <div className="gm-reason-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="gm-reason-modal-header">
+              <h3>Motivo del Rechazo</h3>
+              <button className="gm-close-reason-modal" onClick={() => setShowReasonModal(false)}>×</button>
+            </div>
+            <div className="gm-reason-modal-body">
+              <p>{selectedOrder.rejectionReason}</p>
+            </div>
+
           </div>
         </div>
       )}

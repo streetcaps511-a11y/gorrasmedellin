@@ -3,8 +3,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 20px;
-  background-color: #000000;
-  border-top: 1px solid #FFC300;
+  background-color: transparent;
+  border-top: 1px solid rgba(255, 195, 0, 0.2);
   font-size: 11px;
   color: #FFC300;
   height: 54px;

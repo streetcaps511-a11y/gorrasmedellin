@@ -85,7 +85,7 @@ const Cart = () => {
   // Renderizado: Carrito vacío
   if (cartItems.length === 0) {
     return (
-      <div className="page-container" style={{ background: '#1E293B' }}>
+      <div className="page-container" style={{ minHeight: '100vh', position: 'relative' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%', padding: '30px 20px 0', textAlign: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '6px' }}>
             <FaShoppingCart style={{ color: '#F5C81B', fontSize: '26px' }} />
@@ -100,8 +100,7 @@ const Cart = () => {
           flexDirection: 'column', 
           justifyContent: 'center', 
           alignItems: 'center', 
-          padding: '40px 20px',
-          backgroundColor: '#1E293B'
+          padding: '40px 20px'
         }}>
           <div style={{
             textAlign: 'center',
@@ -160,7 +159,7 @@ const Cart = () => {
 
   // Renderizado: Carrito con productos
   return (
-    <div className="page-container" style={{ background: '#1E293B', minHeight: '100vh', position: 'relative' }}>
+    <div className="page-container" style={{ minHeight: '100vh', position: 'relative' }}>
       <CartHero />
       
       <CustomConfirm 

@@ -73,8 +73,8 @@
   border-radius: 8px;
   border: 1px solid #FFC300;
   overflow: hidden;
-  background-color: #000000;
-  margin-top: 10px;
+  background-color: transparent;
+  margin-top: 6px;
   min-height: 420px;
   padding-bottom: 0px;
 }

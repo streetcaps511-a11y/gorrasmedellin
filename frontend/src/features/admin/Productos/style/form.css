@@ -27,7 +27,7 @@
 
 /* Secciones como Cajas */
 .product-form-section {
-  background-color: transparent;
+  background-color: #000;
   border-radius: 12px;
   padding: 20px;
   border: 1px solid rgba(255, 195, 0, 0.45);
@@ -313,7 +313,7 @@
 }
 
 .form-card {
-  background-color: transparent;
+  background-color: #000;
   border: 1px solid rgba(255, 255, 255, 0.35); 
   border-radius: 10px;
   padding: 15px;
@@ -543,8 +543,9 @@
 
 /* Asegurar espacio para el desplegable de colores */
 .form-card.colores .form-card-list {
-  min-height: 200px; /* Un poco más de espacio */
-  overflow: visible !important;
+  max-height: 250px;
+  overflow-y: auto;
+  padding-bottom: 100px; /* Extra space at bottom to allow dropdown to show without cutting */
 }
 
 .form-card.colores .form-card-content {
@@ -555,3 +556,21 @@
 .form-card.colores .form-list-row {
   overflow: visible !important;
 }
+
+.btn-add-circle {
+  background: transparent;
+  border: 1px solid #FFC300;
+  color: #FFC300;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-add-circle:hover {
+  background: rgba(255, 195, 0, 0.1);
+  transform: translateY(-1px);
+}
+

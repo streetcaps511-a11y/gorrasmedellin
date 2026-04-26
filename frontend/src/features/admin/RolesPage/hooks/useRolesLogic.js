@@ -40,11 +40,6 @@ export const useRolesLogic = (initialAvailablePermissions = []) => {
     isOpen: false, 
     role: null 
   });
-  
-  const [anularModal, setAnularModal] = useState({ 
-    isOpen: false, 
-    role: null 
-  });
 
   const [fieldErrors, setFieldErrors] = useState({
     name: false,
@@ -163,35 +158,7 @@ export const useRolesLogic = (initialAvailablePermissions = []) => {
     }
   };
 
-  const handleToggleStatus = async (role) => {
-    if (isAdministrador(role)) {
-      showAlert('El rol "Administrador" siempre está activo', "error");
-      return;
-    }
-    setAnularModal({ isOpen: true, role });
-  };
 
-  const closeAnularModal = () => {
-    setAnularModal({ isOpen: false, role: null });
-  };
-
-  const confirmToggleStatus = async () => {
-    const role = anularModal.role;
-    if (!role) return;
-
-    setLoading(true);
-    try {
-      const nuevoEstado = !role.isActive;
-      await rolesService.updateRole(role.id, { ...role, isActive: nuevoEstado });
-      setRoles(prev => prev.map(r => r.id === role.id ? { ...r, isActive: nuevoEstado } : r));
-      showAlert(`Rol "${role.name}" ${nuevoEstado ? 'activado' : 'desactivado'} correctamente`);
-      closeAnularModal();
-    } catch (error) {
-      showAlert("Error al actualizar estado", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const openDeleteModal = (role) => {
     if (isAdministrador(role)) {
@@ -252,14 +219,30 @@ export const useRolesLogic = (initialAvailablePermissions = []) => {
     openModal,
     closeModal,
     handleSave,
-    handleToggleStatus,
-    confirmToggleStatus,
-    closeAnularModal,
-    anularModal,
     openDeleteModal,
     closeDeleteModal,
     handleDelete,
     isAdministrador,
-    isRestrictedRole: (role) => (role?.name || "").toLowerCase() === "administrador" || (role?.name || "").toLowerCase() === "cliente"
+    isRestrictedRole: (role) => (role?.name || "").toLowerCase() === "administrador" || (role?.name || "").toLowerCase() === "cliente",
+    handleToggleStatus: async (role) => {
+      if ((role?.name || "").toLowerCase() === "administrador") {
+        showAlert('El rol "Administrador" no se puede desactivar', "error");
+        return;
+      }
+      const previous = [...roles];
+      const newState = !role.isActive;
+      setRoles(prev => prev.map(r =>
+        r.id === role.id ? { ...r, isActive: newState } : r
+      ));
+      try {
+        await rolesService.updateRole(role.id, { ...role, isActive: newState });
+        showAlert(newState ? 'Rol activado ✅' : 'Rol desactivado');
+        const next = roles.map(r => r.id === role.id ? { ...r, isActive: newState } : r);
+        NitroCache.set('roles_admin', next);
+      } catch (err) {
+        setRoles(previous);
+        showAlert('Error al cambiar estado', 'error');
+      }
+    }
   };
 };

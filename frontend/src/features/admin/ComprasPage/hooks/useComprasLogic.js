@@ -5,7 +5,6 @@ import Swal from 'sweetalert2';
 import { 
   fetchAllCompras, 
   createNewCompra, 
-  annulExistingCompra, 
   fetchAllProveedores, 
   getStatuses, 
   getPaymentMethods, 
@@ -50,7 +49,6 @@ export const useComprasLogic = (location) => {
   const [errors, setErrors] = useState({});
   const [compraViendo, setCompraViendo] = useState(null);
   const [compraEditando, setCompraEditando] = useState(null);
-  const [anularModal, setAnularModal] = useState({ isOpen: false, compra: null });
   const [completarModal, setCompletarModal] = useState({ isOpen: false, compra: null });
   const [productos, setProductos] = useState([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
@@ -79,12 +77,28 @@ export const useComprasLogic = (location) => {
     estado: 'Pendiente'
   });
 
-  const proveedoresActivos = useMemo(() =>
-    proveedores.filter(s => s.Estado ?? s.estado ?? s.isActive).map(s => ({
+  const proveedoresActivos = useMemo(() => {
+    // Si no hay proveedores, retornar vacío
+    if (!Array.isArray(proveedores)) return [];
+
+    return proveedores.filter(s => {
+      // Tomamos el estado de cualquier campo posible
+      const st = s.isActive ?? s.isActive ?? s.estado ?? s.Estado;
+      
+      // Si el estado no está definido, asumimos que está activo (para evitar ocultar datos por error)
+      if (st === undefined || st === null) return true;
+      
+      // Si es booleano, devolvemos el valor
+      if (typeof st === 'boolean') return st;
+      
+      // Si es string, verificamos que no sea inactivo
+      const lower = st.toString().toLowerCase();
+      return !lower.includes('inactiv'); 
+    }).map(s => ({
       id: s.IdProveedor || s.id,
-      nombre: s.Nombre || s.nombre || s.companyName
-    })),
-  [proveedores]);
+      nombre: s.Nombre || s.nombre || s.companyName || s.contactName || 'Sin Nombre'
+    }));
+  }, [proveedores]);
 
   // ✅ CARGA RÁPIDA (Nitro Sync)
   const fetchData = useCallback(async () => {
@@ -136,17 +150,33 @@ export const useComprasLogic = (location) => {
   const mostrarFormulario = useCallback(async (compra = null) => {
     setProductoPage(1);
 
-    // ⚡ Carga lazy de productos solo al abrir el formulario
-    if (productos.length === 0 && fetchAllProductos) {
-      setIsLoadingProducts(true);
-      try {
-        const prData = await fetchAllProductos();
-        setProductos(Array.isArray(prData) ? prData : []);
-      } catch (e) {
-        console.error('Error cargando productos:', e);
-      } finally {
-        setIsLoadingProducts(false);
+    // ⚡ Refrescar productos y proveedores siempre para asegurar que salgan todos los nuevos
+    setIsLoadingProducts(true);
+    try {
+      const [prData, pvData] = await Promise.all([
+        fetchAllProductos(),
+        fetchAllProveedores()
+      ]);
+
+      // Actualizar proveedores
+      if (Array.isArray(pvData)) {
+        setProveedores(pvData);
+        NitroCache.set('compras_prov', pvData);
       }
+
+      // Aseguramos que la data tenga los campos nombre/precio que espera el formulario
+      const mapped = (Array.isArray(prData) ? prData : []).map(p => ({
+        ...p,
+        nombre: p.nombre || p.Nombre,
+        id: p.id || p.IdProducto,
+        precioCompra: p.precioCompra || p.PrecioCompra,
+        precioVenta: p.precioVenta || p.PrecioVenta
+      }));
+      setProductos(mapped);
+    } catch (e) {
+      console.error('Error cargando datos del formulario:', e);
+    } finally {
+      setIsLoadingProducts(false);
     }
 
     if (compra) {
@@ -289,22 +319,7 @@ export const useComprasLogic = (location) => {
     }
   }, [nuevaCompra, compraEditando, proveedoresActivos, calcularTotal, fetchData, mostrarLista, showAlert]);
 
-  const handleAnularCompra = useCallback(async () => {
-    setActionLoadingText('Anulando...');
-    setActionLoading(true);
-    try {
-      await annulExistingCompra(anularModal.compra?.numCompra);
-      showAlert('La compra ha sido anulada correctamente');
-      fetchData();
-      setTimeout(() => {
-        setAnularModal({ isOpen: false, compra: null });
-      }, 500);
-    } catch (error) {
-      showAlert('Error al anular compra', 'error');
-    } finally {
-      setActionLoading(false);
-    }
-  }, [anularModal.compra, fetchData, showAlert]);
+
 
   const filtered = useMemo(() => {
     return compras.filter(c => {
@@ -362,7 +377,6 @@ export const useComprasLogic = (location) => {
     errors, setErrors,
     compraViendo, setCompraViendo,
     compraEditando, setCompraEditando,
-    anularModal, setAnularModal,
     completarModal, setCompletarModal,
     nuevaCompra, setNuevaCompra,
     proveedoresActivos,
@@ -375,7 +389,6 @@ export const useComprasLogic = (location) => {
     eliminarProducto,
     calcularTotal,
     handleSubmit,
-    handleAnularCompra,
     handleCompletarCompra,
     confirmCompletarCompra,
     filtered,

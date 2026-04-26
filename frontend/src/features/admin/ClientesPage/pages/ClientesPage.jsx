@@ -1,6 +1,6 @@
 import '../style/index.css';
 import React from 'react';
-import { EntityTable, Alert, SearchInput, UniversalModal, ConfirmDeleteModal, AnularOperacionModal, CustomPagination, StatusPill } from '../../../shared/services';
+import { EntityTable, Alert, SearchInput, UniversalModal, ConfirmDeleteModal, CustomPagination, StatusPill } from '../../../shared/services';
 
 import { useClientesLogic } from '../hooks/useClientesLogic';
 import { StatusFilter } from '../components/StatusFilter';
@@ -65,13 +65,9 @@ const ClientesPage = () => {
     handleSave,
     openDeleteModal,
     closeDeleteModal,
-    handleReactivar,
-    handleDesactivar,
-    anularModal,
-    confirmToggleStatus,
-    closeAnularModal,
     handleDelete,
-    loading
+    loading,
+    handleToggleStatus
   } = useClientesLogic();
 
   const isFormView = modalState.isOpen;
@@ -124,12 +120,10 @@ const ClientesPage = () => {
               columns={columns} 
               onView={c => openModal('view', c)} 
               onEdit={c => openModal('edit', c)} 
-              onAnular={handleDesactivar}
-              onReactivar={handleReactivar}
               onDelete={openDeleteModal}
-              showAnularButton={true}
+              onAnular={handleToggleStatus}
+              onReactivar={handleToggleStatus}
               showDeleteButton={true}
-              showReactivarButton={true}
               moduleType="clientes"
               estadoField="isActive"
               actionIconSize={18}
@@ -158,6 +152,7 @@ const ClientesPage = () => {
           modalState.mode === 'edit' ? 'Editar cliente' : 
           'Detalles del cliente'
         }
+        subtitle={modalState.mode === 'create' ? "Complete el formulario para registrar un nuevo cliente" : modalState.mode === 'edit' ? "Modifique los datos del cliente seleccionado" : "Consulta de información histórica del cliente"}
         size="medium"
         onSave={handleSave}
         actions={modalState.mode === 'view' ? [
@@ -191,16 +186,6 @@ const ClientesPage = () => {
           loading={loading}
         />
 
-        <AnularOperacionModal
-          isOpen={anularModal?.isOpen}
-          onClose={closeAnularModal}
-          onConfirm={confirmToggleStatus}
-          title={anularModal?.onReactivar ? 'Confirmar Activación' : 'Confirmar Desactivación'}
-          operationType="cliente"
-          operationData={anularModal?.cliente}
-          confirmButtonText={anularModal?.onReactivar ? 'Activar' : 'Desactivar'}
-          cancelButtonText="Cancelar"
-        />
       </>
     </>
   );

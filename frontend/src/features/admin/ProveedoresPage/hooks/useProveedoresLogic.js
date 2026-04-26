@@ -59,10 +59,6 @@ export const useProveedoresLogic = () => {
     isOpen: false, 
     proveedor: null 
   });
-  const [anularModal, setAnularModal] = useState({ 
-    isOpen: false, 
-    proveedor: null 
-  });
 
   // ====== FETCH INICIAL ======
   const fetchData = useCallback(async () => {
@@ -280,34 +276,7 @@ export const useProveedoresLogic = () => {
     }
   };
 
-  const handleToggleStatus = async (item) => {
-    setAnularModal({ isOpen: true, proveedor: item });
-  };
 
-  const closeAnularModal = () => {
-    setAnularModal({ isOpen: false, proveedor: null });
-  };
-
-  const confirmToggleStatus = async () => {
-    const proveedor = anularModal.proveedor;
-    if (!proveedor) return;
-    
-    const targetStatus = !proveedor.isActive;
-    
-    // 🚀 Optimistic Update
-    setProveedores(prev => prev.map(p => p.id === proveedor.id ? { ...p, isActive: targetStatus } : p));
-    showAlert(`Proveedor ${targetStatus ? 'activado' : 'desactivado'} correctamente ✅`);
-    closeAnularModal();
-
-    try {
-      await proveedoresService.updateProveedor(proveedor.id, { ...proveedor, isActive: targetStatus });
-      fetchData(); // Sync in background
-    } catch (error) {
-      fetchData(); // Revert on failure
-      const errorMsg = error.response?.data?.message || 'Error al actualizar estado';
-      showAlert(errorMsg, 'error');
-    }
-  };
 
   const openDeleteModal = (proveedor) => {
     if (proveedor.isActive) {
@@ -346,6 +315,26 @@ export const useProveedoresLogic = () => {
     }
   };
 
+  const handleToggleStatus = async (proveedor) => {
+    const newStatus = !proveedor.isActive;
+    const previousProveedores = [...proveedores];
+    
+    // 🚀 Actualización OPTIMISTA
+    setProveedores(prev => prev.map(p => p.id === proveedor.id ? { ...p, isActive: newStatus } : p));
+    
+    try {
+      await proveedoresService.updateProveedor(proveedor.id, { ...proveedor, isActive: newStatus });
+      showAlert(`Proveedor ${newStatus ? 'activado' : 'desactivado'} ✅`);
+      
+      // Sincronizar caché
+      const updated = previousProveedores.map(p => p.id === proveedor.id ? { ...p, isActive: newStatus } : p);
+      NitroCache.set('proveedores_admin', updated);
+    } catch (error) {
+      setProveedores(previousProveedores);
+      showAlert("No se pudo cambiar el estado", "error");
+    }
+  };
+
   return {
     proveedores,
     searchTerm, setSearchTerm,
@@ -371,13 +360,10 @@ export const useProveedoresLogic = () => {
     openModal,
     closeModal,
     handleSave,
-    anularModal,
-    handleToggleStatus,
-    confirmToggleStatus,
-    closeAnularModal,
     openDeleteModal,
     closeDeleteModal,
     handleDelete,
-    availableStatuses
+    availableStatuses,
+    handleToggleStatus
   };
 };

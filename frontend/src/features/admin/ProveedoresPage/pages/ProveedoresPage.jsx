@@ -2,7 +2,7 @@ import '../style/index.css';
 import React from 'react';
 
 // ===== COMPONENTES COMPARTIDOS =====
-import { Alert, EntityTable, SearchInput, UniversalModal, ConfirmDeleteModal, AnularOperacionModal, CustomPagination, StatusPill } from '../../../shared/services';
+import { Alert, EntityTable, SearchInput, UniversalModal, ConfirmDeleteModal, CustomPagination, StatusPill } from '../../../shared/services';
 // ===== COMPONENTES LOCALES =====
 import ProveedorFormFields from '../components/ProveedorFormFields';
 import StatusFilter from '../components/StatusFilter';
@@ -97,15 +97,12 @@ const ProveedoresPage = () => {
     openModal,
     closeModal,
     handleSave,
-    handleToggleStatus,
     openDeleteModal,
     closeDeleteModal,
     handleDelete,
-    anularModal,
-    closeAnularModal,
-    confirmToggleStatus,
     alert, setAlert,
-    availableStatuses
+    availableStatuses,
+    handleToggleStatus
   } = useProveedoresLogic();
 
   const getModalTitle = () => {
@@ -138,18 +135,6 @@ const ProveedoresPage = () => {
           loadingText={actionLoadingText}
         />
 
-        <AnularOperacionModal
-          isOpen={anularModal?.isOpen}
-          onClose={closeAnularModal}
-          onConfirm={confirmToggleStatus}
-          title={anularModal?.proveedor?.isActive ? 'Confirmar Desactivación' : 'Confirmar Activación'}
-          operationType="proveedor"
-          operationData={anularModal?.proveedor}
-          confirmButtonText={anularModal?.proveedor?.isActive ? 'Desactivar' : 'Activar'}
-          cancelButtonText="Cancelar"
-          loading={actionLoading}
-          loadingText={actionLoadingText}
-        />
       </>
 
       <div className="proveedores-container">
@@ -169,7 +154,7 @@ const ProveedoresPage = () => {
           </div>
 
           <div className="proveedores-controls">
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, marginRight: '20px' }}>
               <SearchInput
                 value={searchTerm}
                 onChange={setSearchTerm}
@@ -220,6 +205,7 @@ const ProveedoresPage = () => {
   isOpen={modalState.isOpen}
   onClose={closeModal}
   title={getModalTitle()}
+  subtitle={modalState.mode === 'create' ? "Ingrese la información básica de su nuevo proveedor" : modalState.mode === 'edit' ? "Actualice la información del proveedor seleccionado" : "Detalles completos de la ficha del proveedor"}
   size="medium"
   loading={actionLoading}
   loadingText={actionLoadingText}

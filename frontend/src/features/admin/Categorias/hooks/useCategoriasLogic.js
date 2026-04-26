@@ -26,7 +26,8 @@ export const useCategoriasLogic = () => {
 
   const showAlert = useCallback((msg, type = 'success') => {
     setAlert({ show: true, message: msg, type });
-    setTimeout(() => setAlert({ show: false, message: '', type: 'success' }), 3000);
+    const duration = type === 'error' ? 6000 : 3000;
+    setTimeout(() => setAlert({ show: false, message: '', type: 'success' }), duration);
   }, []);
 
   const fetchData = useCallback(async (showLoading = false) => {
@@ -80,19 +81,15 @@ export const useCategoriasLogic = () => {
     return filteredCategories.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredCategories, currentPage]);
 
-  const handleToggleStatus = (category) => setAnularModalState({ isOpen: true, category });
-  const closeAnularModal = () => setAnularModalState({ isOpen: false, category: null });
-
-  const handleConfirmToggle = useCallback(async () => {
-    const { category } = anularModalState;
+  const handleToggleStatus = useCallback(async (category) => {
     if (!category) return;
+    const previousCategorias = [...categorias];
     const newStatus = !category.isActive;
     
     // Actuamos de inmediato en la UI
     setCategorias(prev => prev.map(c => c.id === category.id ? { ...c, isActive: newStatus, estado: newStatus ? 'Activo' : 'Inactivo' } : c));
-    closeAnularModal();
 
-    // Notar de inmediato a otras pestañas
+    // Notificar a otras pestañas
     const channel = new BroadcastChannel('app_sync');
     channel.postMessage('categorias_updated');
     channel.close();
@@ -100,12 +97,12 @@ export const useCategoriasLogic = () => {
     try {
       showAlert(`Categoría ${newStatus ? 'activada ✅' : 'desactivada ⏸️'}`, newStatus ? 'success' : 'warning');
       await categoriasApi.update(category.id, { ...category, estado: newStatus });
-      fetchData(); // Sincronizar suavemente en segundo plano
+      fetchData(); // Sincronizar
     } catch (error) {
-      fetchData();
+      setCategorias(previousCategorias);
       showAlert("Error al cambiar estado", "error");
     }
-  }, [anularModalState, showAlert, fetchData]);
+  }, [categorias, showAlert, fetchData]);
 
   return {
     categorias, paginatedCategories, loading, alert, setAlert, searchTerm, setSearchTerm,
@@ -161,7 +158,7 @@ export const useCategoriasLogic = () => {
         showAlert(msg, "error");
       } finally { setLoading(false); }
     },
-    handleToggleStatus, handleConfirmToggle, closeAnularModal,
+    handleToggleStatus,
     openDeleteModal: (cat) => setDeleteModalState({ isOpen: true, category: cat }),
     closeDeleteModal: () => setDeleteModalState({ isOpen: false, category: null }),
     handleDelete: async () => {
@@ -186,8 +183,9 @@ export const useCategoriasLogic = () => {
 
         setDeleteModalState({ isOpen: false, category: null });
       } catch (error) {
-        const msg = error?.response?.data?.message || "Error al eliminar";
+        const msg = error?.response?.data?.message || "Error al eliminar la categoría";
         showAlert(msg, "error");
+        setDeleteModalState({ isOpen: false, category: null });
       } finally {
         setLoading(false);
       }

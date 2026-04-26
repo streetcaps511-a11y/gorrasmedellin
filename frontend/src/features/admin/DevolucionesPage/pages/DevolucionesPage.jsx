@@ -1,5 +1,5 @@
 import '../style/index.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   FaArrowLeft, 
   FaArrowRight,
@@ -49,6 +49,13 @@ const DevolucionesPage = () => {
   const [devParaRechazar, setDevParaRechazar] = React.useState(null);
   const [motivoRechazoTabla, setMotivoRechazoTabla] = React.useState('');
 
+  // Reset scroll when switching views
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const wrappers = document.querySelectorAll('.devoluciones-container, .yellow-scrollbar');
+    wrappers.forEach(w => w.scrollTop = 0);
+  }, [modoVista, devolucionViendo]);
+
   const columns = [
     { header: 'N° de devolución', field: 'id', render: (item) => <span className="dev-id-text">{item.id}</span> },
     { header: 'Cliente', field: 'cliente', render: (item) => <span className="dev-client-text">{item.cliente}</span> },
@@ -67,7 +74,7 @@ const DevolucionesPage = () => {
         />
       )}
       
-      <div className="devoluciones-container no-scrollbar">
+      <div className="devoluciones-container">
         {/* HEADER */}
         <div className="devoluciones-header">
           <div className="devoluciones-header-top">
@@ -126,7 +133,7 @@ const DevolucionesPage = () => {
 
         {/* CONTENIDO PRINCIPAL */}
         {modoVista === "lista" ? (
-          <div className="devoluciones-main-content no-scrollbar">
+          <div className="devoluciones-main-content">
             <div className="devoluciones-table-wrapper">
               <EntityTable
                 entities={filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)}
@@ -159,7 +166,7 @@ const DevolucionesPage = () => {
           </div>
         ) : modoVista === "formulario" ? (
           /* MODO REGISTRO: NUEVA ESTRUCTURA PREMIUM */
-          <div className="devoluciones-premium-registration-grid no-scrollbar">
+          <div className="devoluciones-premium-registration-grid yellow-scrollbar">
             {/* COLUMNA IZQUIERDA: DATOS Y PRODUCTOS */}
             <div className="devoluciones-registration-column">
               {/* CARD 1: DATOS GENERALES */}
@@ -478,7 +485,7 @@ const DevolucionesPage = () => {
           </div>
         ) : (
           /* MODO VISTA: DETALLE (AESTHETIC UPGRADE) */
-          <div className="devoluciones-premium-registration-grid detail-view-grid no-scrollbar">
+          <div className="devoluciones-premium-registration-grid detail-view-grid">
             {/* COLUMNA IZQUIERDA: DATOS Y PRODUCTOS */}
             <div className="devoluciones-registration-column">
               {/* CARD 1: DATOS GENERALES */}
@@ -631,18 +638,18 @@ const DevolucionesPage = () => {
 
       {/* MODAL DE CONFIRMACIÓN: APROBAR */}
       {devParaAprobar && (
-        <div className="anular-modal-backdrop" onClick={() => setDevParaAprobar(null)}>
-          <div className="anular-modal-container" onClick={e => e.stopPropagation()}>
-            <h3 className="anular-modal-title">Confirmar Aprobación</h3>
-            <div className="anular-modal-message-container">
-              <p className="anular-modal-message">
-                ¿Estás seguro de que deseas <span style={{color: '#F5C81B', fontWeight: 800}}>APROBAR</span> la devolución para <span className="anular-modal-highlight">{devParaAprobar.cliente}</span>?
+        <div className="delete-modal-backdrop" onClick={() => setDevParaAprobar(null)}>
+          <div className="delete-modal-container" onClick={e => e.stopPropagation()}>
+            <h3 className="delete-modal-title">Confirmar Aprobación</h3>
+            <div className="delete-modal-message-container">
+              <p className="delete-modal-message">
+                ¿Estás seguro de que deseas <span style={{color: '#F5C81B', fontWeight: 800}}>APROBAR</span> la devolución para <span className="delete-modal-highlight">{devParaAprobar.cliente}</span>?
               </p>
             </div>
-            <div className="anular-modal-actions">
-              <button className="anular-modal-btn anular-modal-btn-cancel" onClick={() => setDevParaAprobar(null)}>CANCELAR</button>
+            <div className="delete-modal-actions">
+              <button className="delete-modal-btn delete-modal-btn-cancel" onClick={() => setDevParaAprobar(null)}>CANCELAR</button>
               <button 
-                className="anular-modal-btn anular-modal-btn-confirm" 
+                className="delete-modal-btn delete-modal-btn-confirm" 
                 onClick={() => {
                   const status = availableStatuses.find(s => {
                     const str = String(s).toLowerCase();
@@ -661,12 +668,12 @@ const DevolucionesPage = () => {
 
       {/* MODAL DE RECHAZO: MOTIVO OBLIGATORIO */}
       {devParaRechazar && (
-        <div className="anular-modal-backdrop" onClick={() => { setDevParaRechazar(null); setMotivoRechazoTabla(''); }}>
-          <div className="anular-modal-container" style={{ maxWidth: '550px' }} onClick={e => e.stopPropagation()}>
-            <h3 className="anular-modal-title">Rechazar Solicitud</h3>
-            <div className="anular-modal-message-container">
-              <p className="anular-modal-message">
-                Indique el motivo del rechazo para la solicitud de <span className="anular-modal-highlight">{devParaRechazar.cliente}</span>:
+        <div className="delete-modal-backdrop" onClick={() => { setDevParaRechazar(null); setMotivoRechazoTabla(''); }}>
+          <div className="delete-modal-container" style={{ maxWidth: '550px' }} onClick={e => e.stopPropagation()}>
+            <h3 className="delete-modal-title">Rechazar Solicitud</h3>
+            <div className="delete-modal-message-container">
+              <p className="delete-modal-message">
+                Indique el motivo del rechazo para la solicitud de <span className="delete-modal-highlight">{devParaRechazar.cliente}</span>:
               </p>
               <textarea 
                 className="dev-field-textarea" 
@@ -677,15 +684,15 @@ const DevolucionesPage = () => {
                 autoFocus
               />
             </div>
-            <div className="anular-modal-actions">
+            <div className="delete-modal-actions">
               <button 
-                className="anular-modal-btn anular-modal-btn-cancel" 
+                className="delete-modal-btn delete-modal-btn-cancel" 
                 onClick={() => { setDevParaRechazar(null); setMotivoRechazoTabla(''); }}
               >
                 CANCELAR
               </button>
               <button 
-                className="anular-modal-btn anular-modal-btn-confirm" 
+                className="delete-modal-btn delete-modal-btn-confirm" 
                 style={{ opacity: !motivoRechazoTabla.trim() ? 0.5 : 1 }}
                 disabled={!motivoRechazoTabla.trim()}
                 onClick={() => {

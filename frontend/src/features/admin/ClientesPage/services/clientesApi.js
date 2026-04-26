@@ -3,7 +3,9 @@ import {
   createCliente,
   updateCliente,
   deleteCliente,
+  patch,
 } from '../../../shared/services/adminApi';
+
 
 export const mapClienteData = (c) => ({
   id: c.id?.toString() || c.IdCliente?.toString() || '',
@@ -71,6 +73,17 @@ export const deleteExistingCliente = async (id) => {
     return response?.data;
   } catch (error) {
     console.error('Error deleting cliente:', error);
+    throw error;
+  }
+};
+
+/** Cambia solo el estado activo/inactivo usando PATCH /api/clientes/:id/estado */
+export const toggleClienteStatus = async (id) => {
+  try {
+    const response = await patch(`/api/clientes/${id}/estado`);
+    return response?.data?.data || response?.data;
+  } catch (error) {
+    console.error('Error toggling cliente status:', error);
     throw error;
   }
 };

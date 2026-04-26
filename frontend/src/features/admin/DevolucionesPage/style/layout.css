@@ -101,8 +101,8 @@
   border-radius: 8px;
   border: 1px solid #F5C81B;
   overflow: hidden;
-  background-color: #000000;
-  margin-top: 10px;
+  background-color: transparent;
+  margin-top: 6px;
   min-height: 420px;
 }
 

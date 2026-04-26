@@ -81,15 +81,7 @@ export const createNewCompra = async (compraData) => {
   }
 };
 
-export const annulExistingCompra = async (id) => {
-  try {
-    const response = await api.delete(`/api/compras/${id}`);
-    return response?.data;
-  } catch (error) {
-    console.error('Error annulling compra:', error);
-    throw error;
-  }
-};
+
 
 export const updateCompraStatus = async (id, estado) => {
   try {

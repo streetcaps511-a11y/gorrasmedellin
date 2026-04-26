@@ -2,7 +2,7 @@
 .clientes-form-grid {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
   max-width: 100%;
 }
 
@@ -16,34 +16,37 @@
 }
 
 .form-field-label {
-  font-size: 11px;
-  color: #e2e8f0;
-  font-weight: 500;
-  margin-bottom: 4px;
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 700;
+  margin-bottom: 2px;
   display: block;
+  text-transform: none; /* Removed uppercase */
 }
 
 .form-field-display {
-  background-color: #1E293B !important;
-  border: 1px solid #334155;
+  background-color: #1E293B !important; /* Added fill */
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
-  padding: 4px 8px;
+  padding: 0 10px;
   color: #f1f5f9;
   font-size: 12px;
-  height: 28px;
+  height: 32px;
   width: 100%;
   outline: none;
   box-sizing: border-box;
+  display: flex;
+  align-items: center;
 }
 
 .form-field-input {
-  background-color: #1E293B !important;
-  border: 1px solid #334155;
+  background-color: #1E293B !important; /* Added fill */
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 6px;
-  padding: 4px 8px;
-  color: #f1f5f9;
+  padding: 0 10px;
+  color: #fff;
   font-size: 12px;
-  height: 28px;
+  height: 32px;
   width: 100%;
   outline: none;
   box-sizing: border-box;

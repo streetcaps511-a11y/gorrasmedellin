@@ -8,20 +8,18 @@ import EntityTable from '../../../shared/components/admin/EntityTable';
 import SearchInput from '../../../shared/components/admin/SearchInput';
 import UniversalModal from '../../../shared/components/admin/UniversalModal';
 import ConfirmDeleteModal from '../../../shared/components/admin/ConfirmDeleteModal';
-import AnularOperacionModal from '../../../shared/components/admin/AnularOperacionModal';
 import CustomPagination from '../../../shared/components/admin/CustomPagination';
 import Alert from '../../../shared/components/admin/Alert';
 import StatusPill from '../../../shared/components/admin/StatusPill';
 
 const CategoriasPage = () => {
   const {
-    alert, modalState, deleteModalState, searchTerm, setSearchTerm,
+    alert, setAlert, modalState, deleteModalState, searchTerm, setSearchTerm,
     filterStatus, currentPage, totalItems, totalPages, startItem, endItem,
     paginatedCategories, handlePageChange, handleFilterSelect, clearSearch,
     openModal, closeModal, openDeleteModal, closeDeleteModal,
-    anularModalState, handleConfirmToggle, closeAnularModal,
-    handleSave, handleDelete, handleToggleStatus, formData, errors,
-    handleInputChange, loading
+    handleSave, handleDelete, formData, errors,
+    handleInputChange, loading, handleToggleStatus
   } = useCategoriasLogic();
 
   const isValidUrl = (url) => {
@@ -76,8 +74,8 @@ const CategoriasPage = () => {
 
         
         {fieldName === 'imagenUrl' && value && value !== 'N/A' && (
-          <div className="image-preview" style={{ marginTop: '10px' }}>
-            <img src={value} alt="Vista previa" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+          <div className="image-preview" style={{ marginTop: '15px', height: '180px', display: 'flex', justifyContent: 'center', backgroundColor: '#0f172a', borderRadius: '8px', padding: '10px', border: '1px solid #1e293b' }}>
+            <img src={value} alt="Vista previa" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '4px' }} />
           </div>
         )}
         
@@ -100,7 +98,7 @@ const CategoriasPage = () => {
       <div className="categorias-page">
         {/* Header */}
         <div className="categorias-page__header">
-          <div className="categorias-page__title-section" style={{ marginBottom: '4px' }}>
+          <div className="categorias-page__title-section">
             <div>
               <h1 className="categorias-page__title">Categorías</h1>
               <p className="categorias-page__subtitle">Administra las categorías de productos</p>
@@ -110,14 +108,15 @@ const CategoriasPage = () => {
             </button>
           </div>
           <div className="categorias-page__actions">
-            <SearchInput
-              value={searchTerm}
-              onChange={setSearchTerm}
-              placeholder="Buscar por nombre o descripción..."
-              onClear={clearSearch}
-              fullWidth={true}
-              style={{ height: '32px' }}
-            />
+            <div style={{ flex: 1 }}>
+              <SearchInput
+                value={searchTerm}
+                onChange={setSearchTerm}
+                placeholder="Buscar por nombre o descripción..."
+                onClear={clearSearch}
+                fullWidth={true}
+              />
+            </div>
             <StatusFilter filterStatus={filterStatus} onFilterChange={handleFilterSelect} />
           </div>
         </div>
@@ -145,9 +144,9 @@ const CategoriasPage = () => {
                 onView={(cat) => openModal('view', cat)}
                 onEdit={(cat) => openModal('edit', cat)}
                 onDelete={(cat) => openDeleteModal(cat)}
-                onAnular={(cat) => handleToggleStatus(cat)}
-                onReactivar={(cat) => handleToggleStatus(cat)}
-                isActiveField="isActive"
+                onAnular={handleToggleStatus}
+                onReactivar={handleToggleStatus}
+                estadoField="isActive"
                 moduleType="categorias"
               />
             )}
@@ -194,18 +193,6 @@ const CategoriasPage = () => {
         onConfirm={handleDelete}
         entityName="categoría"
         entityData={deleteModalState.category}
-        loading={loading}
-      />
-
-      <AnularOperacionModal
-        isOpen={anularModalState.isOpen}
-        onClose={closeAnularModal}
-        onConfirm={() => handleConfirmToggle()}
-        title={anularModalState.category?.isActive ? 'Confirmar Desactivación' : 'Confirmar Activación'}
-        operationType="categoría"
-        operationData={anularModalState.category}
-        confirmButtonText={anularModalState.category?.isActive ? 'Desactivar' : 'Activar'}
-        cancelButtonText="Cancelar"
         loading={loading}
       />
 

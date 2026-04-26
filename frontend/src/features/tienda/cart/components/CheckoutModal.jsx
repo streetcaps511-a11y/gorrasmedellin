@@ -57,7 +57,7 @@ const CheckoutModal = ({ isOpen, onClose, onConfirm, total, subtotal, selectedMe
 
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.88)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 10000, padding: '15px' }}>
-      <div style={{ background: '#0f172a', color: 'white', borderRadius: '14px', width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none', border: '1px solid #FFC107', padding: '22px', position: 'relative' }}>
+      <div style={{ background: '#0f172a', color: 'white', borderRadius: '14px', width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none', border: '1px solid #FFC107', padding: '16px', position: 'relative' }}>
         <button onClick={handleClose} style={{ position: 'absolute', top: '12px', right: '12px', background: 'transparent', border: 'none', color: '#FFC107', fontSize: '18px', cursor: 'pointer', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <FaTimes />
         </button>
@@ -65,7 +65,7 @@ const CheckoutModal = ({ isOpen, onClose, onConfirm, total, subtotal, selectedMe
         {/* ========== PASO 1: SELECCIONAR MÉTODO ========== */}
         {step === 1 && (
           <>
-            <h3 style={{ color: '#FFC107', textAlign: 'center', fontSize: '17px', margin: '0 0 18px 0' }}>Completa tu pedido</h3>
+            <h3 style={{ color: '#FFC107', textAlign: 'center', fontSize: '17px', margin: '0 0 12px 0' }}>Completa tu pedido</h3>
 
             {/* Selector de Entrega */}
             <div style={{ marginBottom: '16px' }}>
@@ -77,8 +77,8 @@ const CheckoutModal = ({ isOpen, onClose, onConfirm, total, subtotal, selectedMe
             </div>
 
             {/* Métodos principales centrados */}
-            <div style={{ marginBottom: '16px' }}>
-              <p style={{ color: '#e2e8f0', fontSize: '13px', fontWeight: 'bold', marginBottom: '10px', textAlign: 'center' }}>Métodos de pago</p>
+            <div style={{ marginBottom: '10px' }}>
+              <p style={{ color: '#e2e8f0', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', textAlign: 'center' }}>Métodos de pago</p>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '8px' }}>
                 {upfrontMethods.map(m => (
                   <button key={m.id} onClick={() => { setSelectedMethod(m.id); setAddressError(false); }} style={{ background: selectedMethod === m.id ? 'rgba(255,193,7,0.15)' : '#1e293b', border: selectedMethod === m.id ? '2px solid #FFC107' : '1px solid #334155', borderRadius: '10px', padding: '8px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}>
@@ -100,7 +100,7 @@ const CheckoutModal = ({ isOpen, onClose, onConfirm, total, subtotal, selectedMe
 
             {/* Dirección */}
             {selectedMethod && isDelivery && (
-              <div style={{ marginBottom: '14px' }}>
+              <div style={{ marginBottom: '10px' }}>
                 <label style={{ color: '#e2e8f0', fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>
                   Dirección de envío <span style={{ color: '#ff4d4d', fontWeight: 'normal' }}>*</span>:
                 </label>
@@ -110,7 +110,7 @@ const CheckoutModal = ({ isOpen, onClose, onConfirm, total, subtotal, selectedMe
             )}
 
             {/* Resumen */}
-            <div style={{ backgroundColor: 'rgba(255,193,7,0.05)', borderRadius: '8px', padding: '12px', marginBottom: '16px', fontSize: '12px' }}>
+            <div style={{ backgroundColor: 'rgba(255,193,7,0.05)', borderRadius: '8px', padding: '10px', marginBottom: '12px', fontSize: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                 <span style={{ color: '#ccc' }}>Subtotal:</span>
                 <span style={{ color: '#fff' }}>${subtotal.toLocaleString()}</span>
@@ -127,8 +127,8 @@ const CheckoutModal = ({ isOpen, onClose, onConfirm, total, subtotal, selectedMe
 
             {/* Botones Paso 1 */}
             <div style={{ display: 'flex', gap: '10px' }}>
-              <button onClick={handleClose} style={{ flex: 1, padding: '11px', backgroundColor: 'transparent', border: '1px solid #666', borderRadius: '8px', color: '#CBD5E1', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Cancelar</button>
-              <button onClick={handleContinue} disabled={!selectedMethod} style={{ flex: 1, padding: '11px', backgroundColor: !selectedMethod ? '#555' : '#FFC107', border: 'none', borderRadius: '8px', color: '#000', fontWeight: 'bold', cursor: !selectedMethod ? 'not-allowed' : 'pointer', fontSize: '13px' }}>
+              <button onClick={handleClose} style={{ flex: 1, padding: '8px', backgroundColor: 'transparent', border: '1px solid #666', borderRadius: '8px', color: '#CBD5E1', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Cancelar</button>
+              <button onClick={handleContinue} disabled={!selectedMethod} style={{ flex: 1, padding: '8px', backgroundColor: !selectedMethod ? '#555' : '#FFC107', border: 'none', borderRadius: '8px', color: '#000', fontWeight: 'bold', cursor: !selectedMethod ? 'not-allowed' : 'pointer', fontSize: '13px' }}>
                 Continuar
               </button>
             </div>
@@ -138,23 +138,23 @@ const CheckoutModal = ({ isOpen, onClose, onConfirm, total, subtotal, selectedMe
         {/* ========== PASO 2: QR / COMPROBANTE ========== */}
         {step === 2 && (
           <>
-            <h3 style={{ color: '#FFC107', textAlign: 'center', fontSize: '17px', margin: '0 0 18px 0' }}>
+            <h3 style={{ color: '#FFC107', textAlign: 'center', fontSize: '17px', margin: '0 0 12px 0' }}>
               {isBold ? 'Completa tu pago con Bold' : (isNequi || isBancolombia) ? `Paga con ${currentMethod?.name}` : 'Confirma tu pedido'}
             </h3>
 
             {/* QR Nequi */}
             {isNequi && (
-              <div style={{ textAlign: 'center', margin: '0 0 16px 0', padding: '16px', backgroundColor: '#fff', borderRadius: '12px' }}>
-                <p style={{ color: '#000', fontSize: '13px', fontWeight: 'bold', margin: '0 0 10px 0' }}>Escanea el QR para pagar con Nequi</p>
-                <img src={currentMethod.qr} alt="QR Nequi" style={{ width: '220px', height: '220px', objectFit: 'contain', borderRadius: '8px', display: 'block', margin: '0 auto' }} />
+              <div style={{ textAlign: 'center', margin: '0 0 12px 0', padding: '12px', backgroundColor: '#fff', borderRadius: '12px' }}>
+                <p style={{ color: '#000', fontSize: '13px', fontWeight: 'bold', margin: '0 0 8px 0' }}>Escanea el QR para pagar con Nequi</p>
+                <img src={currentMethod.qr} alt="QR Nequi" style={{ width: '180px', height: '180px', objectFit: 'contain', borderRadius: '8px', display: 'block', margin: '0 auto' }} />
               </div>
             )}
 
             {/* QR Bancolombia */}
             {isBancolombia && (
-              <div style={{ textAlign: 'center', margin: '0 0 16px 0', padding: '16px', backgroundColor: '#fff', borderRadius: '12px' }}>
-                <p style={{ color: '#000', fontSize: '13px', fontWeight: 'bold', margin: '0 0 10px 0' }}>Escanea el QR para pagar con Bancolombia</p>
-                <img src={currentMethod.qr} alt="QR Bancolombia" style={{ width: '220px', height: '220px', objectFit: 'contain', borderRadius: '8px', display: 'block', margin: '0 auto' }} />
+              <div style={{ textAlign: 'center', margin: '0 0 12px 0', padding: '12px', backgroundColor: '#fff', borderRadius: '12px' }}>
+                <p style={{ color: '#000', fontSize: '13px', fontWeight: 'bold', margin: '0 0 8px 0' }}>Escanea el QR para pagar con Bancolombia</p>
+                <img src={currentMethod.qr} alt="QR Bancolombia" style={{ width: '180px', height: '180px', objectFit: 'contain', borderRadius: '8px', display: 'block', margin: '0 auto' }} />
               </div>
             )}
 
@@ -178,7 +178,7 @@ const CheckoutModal = ({ isOpen, onClose, onConfirm, total, subtotal, selectedMe
 
             {/* Comprobante de pago (OBLIGATORIO para métodos de pago adelantado) */}
             {isUpfront && (
-              <div style={{ marginBottom: '16px' }}>
+              <div style={{ marginBottom: '12px' }}>
                 <label style={{ color: '#e2e8f0', fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>Comprobante de pago <span style={{ color: '#ff4d4d', fontWeight: 'normal' }}>*</span>:</label>
                 <input type="file" accept="image/*" onChange={(e) => setReceiptFile(e.target.files[0] || null)} style={{ width: '100%', padding: '8px', backgroundColor: '#1E293B', border: !receiptFile ? '1px solid #ff4d4d' : '1px solid #334155', borderRadius: '8px', color: '#94a3b8', fontSize: '12px' }} />
                 {!receiptFile && <p style={{ color: '#ff4d4d', fontSize: '11px', margin: '4px 0 0 0' }}>Debes adjuntar el comprobante de pago para continuar</p>}
@@ -197,7 +197,7 @@ const CheckoutModal = ({ isOpen, onClose, onConfirm, total, subtotal, selectedMe
             </div>
 
             {/* Resumen final */}
-            <div style={{ backgroundColor: 'rgba(255,193,7,0.05)', borderRadius: '8px', padding: '12px', marginBottom: '16px', fontSize: '12px' }}>
+            <div style={{ backgroundColor: 'rgba(255,193,7,0.05)', borderRadius: '8px', padding: '10px', marginBottom: '12px', fontSize: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                 <span style={{ color: '#ccc' }}>Método:</span>
                 <span style={{ color: '#FFC107', fontWeight: 'bold' }}>{currentMethod?.name}</span>
@@ -220,8 +220,8 @@ const CheckoutModal = ({ isOpen, onClose, onConfirm, total, subtotal, selectedMe
 
             {/* Botones Paso 2 */}
             <div style={{ display: 'flex', gap: '10px' }}>
-              <button onClick={handleBack} style={{ flex: 1, padding: '11px', backgroundColor: 'transparent', border: '1px solid #666', borderRadius: '8px', color: '#CBD5E1', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>← Volver</button>
-              <button onClick={onConfirm} disabled={isProcessing || (isUpfront && !receiptFile)} style={{ flex: 1, padding: '11px', backgroundColor: (isProcessing || (isUpfront && !receiptFile)) ? '#555' : '#FFC107', border: 'none', borderRadius: '8px', color: '#000', fontWeight: 'bold', cursor: (isProcessing || (isUpfront && !receiptFile)) ? 'not-allowed' : 'pointer', fontSize: '13px', opacity: isProcessing ? 0.7 : 1 }}>
+              <button onClick={handleBack} style={{ flex: 1, padding: '8px', backgroundColor: 'transparent', border: '1px solid #666', borderRadius: '8px', color: '#CBD5E1', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>← Volver</button>
+              <button onClick={onConfirm} disabled={isProcessing || (isUpfront && !receiptFile)} style={{ flex: 1, padding: '8px', backgroundColor: (isProcessing || (isUpfront && !receiptFile)) ? '#555' : '#FFC107', border: 'none', borderRadius: '8px', color: '#000', fontWeight: 'bold', cursor: (isProcessing || (isUpfront && !receiptFile)) ? 'not-allowed' : 'pointer', fontSize: '13px', opacity: isProcessing ? 0.7 : 1 }}>
                 {isProcessing ? 'Procesando...' : 'Confirmar Compra'}
               </button>
             </div>

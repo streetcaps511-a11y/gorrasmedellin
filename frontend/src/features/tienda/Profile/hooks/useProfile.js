@@ -15,6 +15,8 @@ export const useProfile = () => {
   });
   const [errors, setErrors] = useState({}); // 🟢 Estado para errores de perfil
   const [showPolicyModal, setShowPolicyModal] = useState(false);
+  const [showExpiredModal, setShowExpiredModal] = useState(false);
+  const [expiredModalData, setExpiredModalData] = useState({ periodDays: 5, expiredDate: '', orderDate: '' });
   const [orderQuery, setOrderQuery] = useState("");
   const [returnQuery, setReturnQuery] = useState("");
   const [avatarUrl, setAvatarUrl] = useState(authUser?.avatarUrl || "");
@@ -55,14 +57,16 @@ export const useProfile = () => {
   });
   const [initialProducts, setInitialProducts] = useState([]);
 
-  // Load products
+  // Load products (Only when needed for returns)
   useEffect(() => {
-    const fetchProds = async () => {
-      const prods = await profileApi.getProducts();
-      setInitialProducts(prods);
-    };
-    fetchProds();
-  }, []);
+    if (activeTab === 'returns' && initialProducts.length === 0) {
+      const fetchProds = async () => {
+        const prods = await profileApi.getProducts();
+        setInitialProducts(prods);
+      };
+      fetchProds();
+    }
+  }, [activeTab, initialProducts.length]);
 
   // Sync auth user
   useEffect(() => {
@@ -205,7 +209,45 @@ export const useProfile = () => {
     setShowImageModal(true); 
   };
 
+  const checkReturnPeriod = (order) => {
+    if (!order?.date) return true; // Expired by default if no date
+    const [day, month, year] = order.date.split('/').map(Number);
+    const orderDate = new Date(year, month - 1, day);
+    const today = new Date();
+    
+    // Calcular fecha de expiración (5 días después)
+    const expirationDate = new Date(orderDate);
+    expirationDate.setDate(expirationDate.getDate() + 5);
+    
+    const diffTime = today - orderDate;
+    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+    
+    if (diffDays > 5) {
+      setExpiredModalData({
+        periodDays: 5,
+        orderDate: order.date,
+        expiredDate: expirationDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })
+      });
+      setShowExpiredModal(true);
+      return false;
+    }
+    return true;
+  };
+
   const handleReturnClick = (product, order) => {
+    if (!checkReturnPeriod(order)) return;
+    
+    // 🛡️ VERIFICAR SI YA EXISTE UNA DEVOLUCIÓN PARA ESTE PRODUCTO EN ESTA ORDEN
+    const hasReturn = allReturns.some(r => 
+      r.orderId === order.id && 
+      String(r.productId) === String(product.id) && 
+      !String(r.status).toLowerCase().includes('rechazad')
+    );
+    if (hasReturn) {
+      showTopToast("Este producto ya tiene una solicitud de cambio en curso.");
+      return;
+    }
+
     setIsBulkReturn(false);
     setSelectedProduct({ ...product, orderId: order.id, maxQty: product.qty || 1 });
     setReturnFormData({ replacementProductId: "", mismoModelo: false, evidence: null, reason: "", cantidad: 1 });
@@ -216,6 +258,18 @@ export const useProfile = () => {
 
   const handleBulkReturnClick = (order) => {
     if (!order || !order.items?.length) return;
+    if (!checkReturnPeriod(order)) return;
+
+    // 🛡️ VERIFICAR SI YA HAY DEVOLUCIONES PARA ESTA ORDEN
+    const hasReturn = allReturns.some(r => 
+      r.orderId === order.id && 
+      !String(r.status).toLowerCase().includes('rechazad')
+    );
+    if (hasReturn) {
+      showTopToast("Este pedido ya cuenta con solicitudes de cambio activas.");
+      return;
+    }
+
     setIsBulkReturn(true);
     // Para devolución masiva, seleccionamos el primer producto para el pre-llenado de la UI
     // pero guardaremos la orden completa
@@ -374,171 +428,221 @@ export const useProfile = () => {
     const cached = NitroCache.get(CACHE_RETURNS);
     return Array.isArray(cached?.data) ? cached.data : [];
   });
-  const [isLoadingData, setIsLoadingData] = useState(allOrders.length === 0);
+  const [isLoadingData, setIsLoadingData] = useState(false);
+  const [hasLoadedOrders, setHasLoadedOrders] = useState(false);
+  const [hasLoadedReturns, setHasLoadedReturns] = useState(false);
+
+  const loadOrders = async (silent = false) => {
+    if (!silent && !hasLoadedOrders) setIsLoadingData(true);
+    try {
+      const orders = await profileApi.getMyOrders();
+      const mappedOrders = mapOrders(orders);
+      setAllOrders(mappedOrders);
+      NitroCache.set(CACHE_ORDERS, mappedOrders);
+      setHasLoadedOrders(true);
+    } catch (err) {
+      console.error("Error loading orders:", err);
+    } finally {
+      setIsLoadingData(false);
+    }
+  };
+
+  const loadReturns = async (silent = false) => {
+    if (!silent && !hasLoadedReturns) setIsLoadingData(true);
+    try {
+      const returns = await profileApi.getMyReturns();
+      const mappedReturns = mapReturns(returns);
+      setAllReturns(mappedReturns);
+      NitroCache.set(CACHE_RETURNS, mappedReturns);
+      setHasLoadedReturns(true);
+    } catch (err) {
+      console.error("Error loading returns:", err);
+    } finally {
+      setIsLoadingData(false);
+    }
+  };
+
+  const loadProfileInfo = async () => {
+    try {
+      const perfil = await profileApi.getMiPerfil();
+      if (perfil) {
+        const profileData = Array.isArray(perfil) ? perfil[0] : perfil;
+        updateProfileState(profileData);
+      }
+    } catch (err) {
+      console.error("Error loading profile info:", err);
+    }
+  };
+
+  const updateProfileState = (profileData) => {
+    setAvatarUrl(profileData.avatarUrl || "");
+    setFormData(prev => ({
+      ...prev,
+      documentType: profileData.tipoDocumento || profileData.TipoDocumentoTexto || profileData.TipoDocumento || prev.documentType,
+      documentNumber: profileData.numeroDocumento || profileData.Documento || profileData.numero_documento || prev.documentNumber,
+      name: profileData.nombreCompleto || profileData.Nombre || profileData.nombre || prev.name,
+      phone: profileData.telefono || profileData.Telefono || profileData.phone || prev.phone,
+      email: profileData.email || profileData.Email || profileData.Correo || prev.email,
+      department: profileData.departamento || profileData.Departamento || prev.department,
+      city: profileData.ciudad || profileData.Ciudad || prev.city,
+      address: profileData.direccion || profileData.Direccion || prev.address
+    }));
+    setUser(prev => ({
+      ...prev,
+      ...profileData,
+      Nombre: profileData.Nombre || profileData.nombreCompleto || profileData.nombre || prev?.Nombre,
+      Telefono: profileData.Telefono || profileData.telefono || profileData.phone || prev?.Telefono,
+      Correo: profileData.Email || profileData.email || profileData.Correo || prev?.Correo,
+      Direccion: profileData.Direccion || profileData.direccion || prev?.Direccion
+    }));
+  };
+
+  const mapOrders = (orders) => {
+    const normalizeStatus = (order) => {
+      const rawStatus = order.idEstado || order.IdEstado || order.estado || order.estadoVenta?.nombre || 'Pendiente';
+      const lower = String(rawStatus).toLowerCase();
+      if (lower.includes('completad') || lower.includes('aprob')) return 'Completada';
+      if (lower.includes('rechaz') || lower.includes('anulad')) return 'Rechazado';
+      return 'Pendiente';
+    };
+
+    const statusColorMap = {
+      'Completada': '#10b981',
+      'Rechazado': '#ef4444',
+      'Anulado': '#6b7280',
+      'Pendiente': '#FFC107'
+    };
+
+    const getImageUrl = (raw) => {
+      if (!raw) return null;
+      if (typeof raw === 'string' && raw.startsWith('/uploads')) {
+        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+        return `${baseUrl}${raw}`;
+      }
+      return raw;
+    };
+
+    return orders.map(o => {
+      const status = normalizeStatus(o);
+      return {
+        id: `PED-${o.id}`,
+        date: new Date(o.fecha).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' }),
+        total: `$${Number(o.total || 0).toLocaleString('es-CO')}`,
+        status,
+        statusColor: statusColorMap[status] || '#FFC107',
+        paymentMethod: o.metodoPago,
+        address: o.direccion || o.direccionEnvio || "Medellín, Colombia",
+        phone: o.telefono || o.Telefono || o.Teléfono || null,
+        receipt: getImageUrl(o.comprobante || o.Comprobante || o.evidencia),
+        receipt2: getImageUrl(o.comprobante2 || o.Comprobante2),
+        monto1: o.monto1 || 0,
+        monto2: o.monto2 || 0,
+        rejectionReason: o.motivoRechazo || o.MotivoRechazo || null,
+        items: (o.detalles || []).map(d => ({
+          id: d.idProducto || d.id,
+          name: d.producto?.nombre || "Producto",
+          price: `$${Number(d.precio || d.precioUnitario || d.producto?.precioVenta || 0).toLocaleString('es-CO')}`,
+          size: d.talla || "U",
+          qty: d.cantidad,
+          image: d.producto?.imagenes?.[0] || "https://res.cloudinary.com/dxc5qqsjd/image/upload/v1762910780/gorraazultodaNY_cyfchf.jpg"
+        }))
+      };
+    });
+  };
+
+  const mapReturns = (returns) => {
+    const getImageUrl = (raw) => {
+      if (!raw) return null;
+      if (typeof raw === 'string' && raw.startsWith('/uploads')) {
+        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+        return `${baseUrl}${raw}`;
+      }
+      return raw;
+    };
+
+    return returns.map(r => {
+      let statusName = r.idEstado || r.estado || "Pendiente";
+      if (statusName === 1 || statusName === "1") statusName = "Completada";
+      else if (statusName === 2 || statusName === "2") statusName = "Pendiente";
+      else if (statusName === 3 || statusName === "3") statusName = "Rechazada";
+
+      const originalItem = r.ventaOriginal?.detalles?.find(d => 
+        String(d.idProducto) === String(r.idProducto)
+      );
+
+      const pImg = Array.isArray(r.productoInfo?.imagenes) ? r.productoInfo.imagenes[0] : null;
+
+      const colorMap = {
+        'Aprobada': '#10b981',
+        'Completada': '#10b981',
+        'Rechazada': '#ef4444',
+        'Rechazado': '#ef4444',
+        'Anulado': '#6b7280',
+        'Anulada': '#6b7280',
+        'Pendiente': '#FFC107'
+      };
+
+      return {
+        id: `DEV-${r.id}`,
+        orderId: `PED-${r.idVenta}`,
+        rawOrderId: r.idVenta,
+        productId: r.idProducto,
+        size: r.talla || originalItem?.talla || "U",
+        quantity: r.cantidad || originalItem?.cantidad || 1,
+        date: new Date(r.fecha).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' }),
+        status: statusName,
+        statusColor: colorMap[statusName] || '#FFC107',
+        productName: r.productoOriginal || r.nombreProductoOriginal || r.productoInfo?.nombre || "Producto",
+        amount: `$${Number(r.precioUnitario || r.valor || 0).toLocaleString('es-CO')}`,
+        reason: r.motivo || r.descripcion || "Cambio por talla",
+        rejectionReason: r.observacion || null,
+        productImage: getImageUrl(pImg) || "https://res.cloudinary.com/dxc5qqsjd/image/upload/v1762910780/gorraazultodaNY_cyfchf.jpg",
+        evidenceImage: getImageUrl(r.evidencia || r.evidenciaUrl) || "https://res.cloudinary.com/dxc5qqsjd/image/upload/v1762910780/gorraazultodaNY_cyfchf.jpg",
+        mismoModelo: (r.mismoModelo === true || r.MismoModelo === true) || (String(r.idProducto || r.IdProducto) === String(r.idProductoCambio || r.IdProductoCambio)),
+        replacementProductName: r.productoCambio || r.ProductoCambio || r.producto_cambio || r.product_cambio,
+        idLote: r.idLote || null,
+        precio: parseFloat(r.valor || r.precioUnitario || 0)
+      };
+    });
+  };
 
   const loadProfileData = async (silent = false) => {
-    if (!silent && allOrders.length === 0) setIsLoadingData(true);
-      try {
-        const [orders, returns, perfil] = await Promise.all([
-          profileApi.getMyOrders(),
-          profileApi.getMyReturns(),
-          profileApi.getMiPerfil()
-        ]);
-
-        if (perfil) {
-           const profileData = Array.isArray(perfil) ? perfil[0] : perfil;
-           setAvatarUrl(profileData.avatarUrl || "");
-           setFormData(prev => ({
-             ...prev,
-             documentType: profileData.tipoDocumento || profileData.TipoDocumentoTexto || profileData.TipoDocumento || prev.documentType,
-             documentNumber: profileData.numeroDocumento || profileData.Documento || profileData.numero_documento || prev.documentNumber,
-             name: profileData.nombreCompleto || profileData.Nombre || profileData.nombre || prev.name,
-             phone: profileData.telefono || profileData.Telefono || profileData.phone || prev.phone,
-             email: profileData.email || profileData.Email || profileData.Correo || prev.email,
-             department: profileData.departamento || profileData.Departamento || prev.department,
-             city: profileData.ciudad || profileData.Ciudad || prev.city,
-             address: profileData.direccion || profileData.Direccion || prev.address
-           }));
-           // 🔥 ACTUALIZAR TAMBIÉN EL OBJETO USER PARA QUE LOS COMPONENTES HIJOS TENGAN DATA FRESCA
-           setUser(prev => ({
-             ...prev,
-             ...profileData,
-             // Garantizar mapeos comunes (Prioridad MAYÚSCULAS de la DB)
-             Nombre: profileData.Nombre || profileData.nombreCompleto || profileData.nombre || prev?.Nombre,
-             Telefono: profileData.Telefono || profileData.telefono || profileData.phone || prev?.Telefono,
-             Correo: profileData.Email || profileData.email || profileData.Correo || prev?.Correo,
-             Direccion: profileData.Direccion || profileData.direccion || prev?.Direccion
-           }));
-        }
-
-        const normalizeStatus = (order) => {
-          const rawStatus = order.idEstado || order.IdEstado || order.estado || order.estadoVenta?.nombre || 'Pendiente';
-          const lower = String(rawStatus).toLowerCase();
-          if (lower.includes('completad') || lower.includes('aprob')) return 'Completada';
-          if (lower.includes('rechaz')) return 'Rechazado';
-          if (lower.includes('anulad')) return 'Anulado';
-          return 'Pendiente';
-        };
-
-        const statusColorMap = {
-          'Completada': '#10b981',
-          'Rechazado': '#ef4444',
-          'Anulado': '#6b7280',
-          'Pendiente': '#FFC107'
-        };
-
-        const getImageUrl = (raw) => {
-          if (!raw) return null;
-          if (typeof raw === 'string' && raw.startsWith('/uploads')) {
-            const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-            return `${baseUrl}${raw}`;
-          }
-          return raw;
-        };
-
-        const mappedOrders = orders.map(o => {
-          const status = normalizeStatus(o);
-          return {
-            id: `PED-${o.id}`,
-            date: new Date(o.fecha).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' }),
-            total: `$${Number(o.total || 0).toLocaleString('es-CO')}`,
-            status,
-            statusColor: statusColorMap[status] || '#FFC107',
-            paymentMethod: o.metodoPago,
-            address: o.direccion || o.direccionEnvio || "Medellín, Colombia",
-            phone: o.telefono || o.Telefono || o.Teléfono || null,
-            receipt: getImageUrl(o.comprobante || o.Comprobante || o.evidencia),
-            receipt2: getImageUrl(o.comprobante2 || o.Comprobante2),
-            monto1: o.monto1 || 0,
-            monto2: o.monto2 || 0,
-            rejectionReason: o.motivoRechazo || o.MotivoRechazo || null,
-            items: (o.detalles || []).map(d => ({
-              id: d.idProducto || d.id, // USAR ID DE PRODUCTO REAL
-              name: d.producto?.nombre || "Producto",
-              price: `$${Number(d.precio || d.precioUnitario || d.producto?.precioVenta || 0).toLocaleString('es-CO')}`,
-              size: d.talla || "U",
-              qty: d.cantidad,
-              image: d.producto?.imagenes?.[0] || "https://res.cloudinary.com/dxc5qqsjd/image/upload/v1762910780/gorraazultodaNY_cyfchf.jpg"
-            }))
-          };
-        });
-
-        const mappedReturns = returns.map(r => {
-          let statusName = r.idEstado || r.estado || "Pendiente";
-          
-          // Compatibilidad: Convertir IDs numéricos viejos a nombres
-          if (statusName === 1 || statusName === "1") statusName = "Completada";
-          else if (statusName === 2 || statusName === "2") statusName = "Pendiente";
-          else if (statusName === 3 || statusName === "3") statusName = "Rechazada";
-
-          // Resolución robusta del ítem original
-          const originalItem = r.ventaOriginal?.detalles?.find(d => 
-            String(d.idProducto) === String(r.idProducto)
-          );
-
-          // Obtener imagen real del producto
-          const pImg = Array.isArray(r.productoInfo?.imagenes) ? r.productoInfo.imagenes[0] : null;
-
-          // Mapeo de colores para devoluciones (consistente con pedidos)
-          const colorMap = {
-            'Aprobada': '#10b981',
-            'Completada': '#10b981',
-            'Rechazada': '#ef4444',
-            'Rechazado': '#ef4444',
-            'Anulado': '#6b7280',
-            'Anulada': '#6b7280',
-            'Pendiente': '#FFC107'
-          };
-
-          return {
-            id: `DEV-${r.id}`,
-            orderId: `PED-${r.idVenta}`,
-            rawOrderId: r.idVenta,
-            productId: r.idProducto,
-            size: r.talla || originalItem?.talla || "U",
-            quantity: r.cantidad || originalItem?.cantidad || 1,
-            date: new Date(r.fecha).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' }),
-            status: statusName,
-            statusColor: colorMap[statusName] || '#FFC107',
-            productName: r.productoOriginal || r.nombreProductoOriginal || r.productoInfo?.nombre || "Producto",
-            amount: `$${Number(r.precioUnitario || r.valor || 0).toLocaleString('es-CO')}`,
-            reason: r.motivo || r.descripcion || "Cambio por talla",
-            rejectionReason: r.observacion || null,
-            // Guardamos ambas imágenes por separado
-            productImage: getImageUrl(pImg) || "https://res.cloudinary.com/dxc5qqsjd/image/upload/v1762910780/gorraazultodaNY_cyfchf.jpg",
-            evidenceImage: getImageUrl(r.evidencia || r.evidenciaUrl) || "https://res.cloudinary.com/dxc5qqsjd/image/upload/v1762910780/gorraazultodaNY_cyfchf.jpg",
-            mismoModelo: (r.mismoModelo === true || r.MismoModelo === true) || (String(r.idProducto || r.IdProducto) === String(r.idProductoCambio || r.IdProductoCambio)),
-            replacementProductName: r.productoCambio || r.ProductoCambio || r.producto_cambio || r.product_cambio,
-            idLote: r.idLote || null,
-            precio: parseFloat(r.valor || r.precioUnitario || 0)
-          };
-        });
-
-        setAllOrders(mappedOrders);
-        setAllReturns(mappedReturns);
-        
-        // Actualizar caché para la próxima visita
-        NitroCache.set(CACHE_ORDERS, mappedOrders);
-        NitroCache.set(CACHE_RETURNS, mappedReturns);
-      } catch (err) {
-        console.error("Error loading profile data:", err);
-      } finally {
-        setIsLoadingData(false);
-      }
+    // Recarga todo si es necesario (p.ej. después de una acción)
+    await Promise.all([
+      loadProfileInfo(),
+      loadOrders(silent),
+      loadReturns(silent)
+    ]);
   };
 
   useEffect(() => {
     if (authUser) {
-      loadProfileData();
-      
-      // 🔄 Auto-refresco del perfil cada 25 segundos para ver actualizaciones de Admin
-      const interval = setInterval(() => {
-        loadProfileData(true);
-      }, 25000);
-      
-      return () => clearInterval(interval);
+      loadProfileInfo();
     }
   }, [authUser]);
+
+  useEffect(() => {
+    if (!authUser) return;
+    if (activeTab === 'account') {
+      loadOrders();
+      loadReturns();
+    } else if (activeTab === 'orders') {
+      loadOrders();
+    } else if (activeTab === 'returns') {
+      loadReturns();
+    }
+  }, [activeTab, authUser]);
+
+  useEffect(() => {
+    if (authUser) {
+      const interval = setInterval(() => {
+        if (activeTab === 'account' || activeTab === 'orders') loadOrders(true);
+        if (activeTab === 'account' || activeTab === 'returns') loadReturns(true);
+        loadProfileInfo();
+      }, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [authUser, activeTab]);
 
   const filteredOrders = useMemo(() => {
     const q = orderQuery.toLowerCase();
@@ -603,7 +707,7 @@ export const useProfile = () => {
 
   return {
     user, authUser, isAdmin, onLogout, isEditing, setIsEditing, toast, errors,
-    formData, setFormData, showPolicyModal, setShowPolicyModal, orderQuery, setOrderQuery,
+    formData, setFormData, showPolicyModal, setShowPolicyModal, showExpiredModal, setShowExpiredModal, expiredModalData, orderQuery, setOrderQuery,
     returnQuery, setReturnQuery, avatarUrl, showAvatarMenu, setShowAvatarMenu, fileInputRef,
     activeTab, setActiveTab, orderView, setOrderView, returnView, setReturnView,
     orderStatus, setOrderStatus, returnStatus, setReturnStatus, returnFormData, setReturnFormData,

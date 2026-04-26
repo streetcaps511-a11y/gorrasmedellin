@@ -3,7 +3,7 @@ import { FaArrowLeft } from 'react-icons/fa';
 import '../style/index.css';
 
 // ===== COMPONENTES COMPARTIDOS =====
-import { Alert, EntityTable, SearchInput, ConfirmDeleteModal, AnularOperacionModal, StatusPill } from '../../../shared/services';
+import { Alert, EntityTable, SearchInput, ConfirmDeleteModal, StatusPill } from '../../../shared/services';
 import CustomPagination from '../../../shared/components/admin/CustomPagination';
 
 import CategoryFilter from '../components/CategoryFilter';
@@ -103,17 +103,13 @@ const ProductosPage = () => {
     mostrarLista,
     mostrarFormulario,
     handleSubmit,
-    handleDesactivar,
-    handleReactivar,
     openDeleteModal,
     closeDeleteModal,
     handleDelete,
-    toggleModal,
-    confirmToggleStatus,
-    closeToggleModal,
     handleInputChange,
     handleVerDetalle,
-    handleEditarProducto
+    handleEditarProducto,
+    handleToggleStatus
   } = useProductosLogic();
 
   return (
@@ -136,16 +132,7 @@ const ProductosPage = () => {
         loading={loading}
       />
 
-      <AnularOperacionModal
-        isOpen={toggleModal.isOpen}
-        onClose={closeToggleModal}
-        onConfirm={confirmToggleStatus}
-        operationType="Producto"
-        operationData={toggleModal.producto}
-        confirmButtonText={toggleModal.targetStatus ? "Sí, reactivar" : "Sí, desactivar"}
-        cancelButtonText="No, mantener"
-        loading={loading}
-      />
+
 
       <div className="productos-container">
         {/* HEADER */}
@@ -216,12 +203,10 @@ const ProductosPage = () => {
                 columns={columns}
                 onView={handleVerDetalle}
                 onEdit={handleEditarProducto}
-                onAnular={handleDesactivar}
-                onReactivar={handleReactivar}
                 onDelete={openDeleteModal}
-                showAnularButton={true}
+                onAnular={handleToggleStatus}
+                onReactivar={handleToggleStatus}
                 showDeleteButton={true}
-                showReactivarButton={true}
                 idField="id"
                 estadoField="isActive"
                 actionIconSize={18}

@@ -2,7 +2,7 @@ import '../style/index.css';
 import React, { useMemo } from 'react';
 
 // ===== COMPONENTES COMPARTIDOS =====
-import { Alert, EntityTable, SearchInput, UniversalModal, ConfirmDeleteModal, AnularOperacionModal, CustomPagination, StatusPill } from '../../../shared/services';
+import { Alert, EntityTable, SearchInput, UniversalModal, ConfirmDeleteModal, CustomPagination, StatusPill } from '../../../shared/services';
 
 // ===== COMPONENTES LOCALES =====
 import StatusFilter from '../components/StatusFilter';
@@ -34,18 +34,15 @@ const UsersPage = () => {
     closeModal,
     handleInputChange,
     handleSave,
-    handleToggleStatus,
-    confirmToggleStatus,
-    closeAnularModal,
     openDeleteModal,
     closeDeleteModal,
     handleDelete,
     viewUserDetails,
     closeDetails,
-    anularModal,
     isAdministrador,
     availableStatuses,
-    availableRoles
+    availableRoles,
+    handleToggleStatus
   } = useUsersLogic();
 
   // Definir columnas dentro del componente para acceder a las funciones del hook
@@ -72,11 +69,31 @@ const UsersPage = () => {
       header: 'Rol',
       field: 'rol',
       width: '130px',
-      render: (item) => (
-        <span className={`user-role-text ${item.rol === 'Administrador' ? 'admin' : ''}`}>
-          {item.rol}
-        </span>
-      )
+      render: (item) => {
+        const googleBadge = item.googleId || item.authProvider === 'google' || item.proveedor === 'google';
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <span className={`user-role-text ${item.rol === 'Administrador' ? 'admin' : ''}`}>
+              {item.rol}
+            </span>
+            {googleBadge && (
+              <span style={{
+                fontSize: '0.65rem',
+                fontWeight: '700',
+                color: '#3b82f6',
+                background: 'rgba(59,130,246,0.12)',
+                border: '1px solid rgba(59,130,246,0.3)',
+                borderRadius: '4px',
+                padding: '1px 6px',
+                display: 'inline-block',
+                letterSpacing: '0.3px'
+              }}>
+                Google
+              </span>
+            )}
+          </div>
+        );
+      }
     },
     {
       header: 'Estado',
@@ -84,7 +101,7 @@ const UsersPage = () => {
       width: '100px',
       render: (item) => <StatusPill status={item.isActive} />
     },
-  ], [isAdministrador, handleToggleStatus]);
+  ], [isAdministrador]);
 
   const isFormView = isModalOpen || isDetailsOpen;
 
@@ -108,16 +125,6 @@ const UsersPage = () => {
           loading={loading}
         />
 
-        <AnularOperacionModal
-          isOpen={anularModal.isOpen}
-          onClose={closeAnularModal}
-          onConfirm={confirmToggleStatus}
-          title={anularModal.user?.isActive ? 'Confirmar Desactivación' : 'Confirmar Activación'}
-          operationType="usuario"
-          operationData={anularModal.user}
-          confirmButtonText={anularModal.user?.isActive ? 'Desactivar' : 'Activar'}
-          cancelButtonText="Cancelar"
-        />
       </>
 
       <div className="users-container">
@@ -165,7 +172,6 @@ const UsersPage = () => {
               onDelete={openDeleteModal}
               onAnular={handleToggleStatus}
               onReactivar={handleToggleStatus}
-              showAnularButton={true}
               moduleType="usuarios"
               idField="id"
               estadoField="isActive"
@@ -185,11 +191,11 @@ const UsersPage = () => {
         </div>
       </div>
 
-      {/* MODAL DE FORMULARIO (Registrar / Editar) */}
       <UniversalModal
         isOpen={isModalOpen}
         onClose={closeModal}
         title={editingUser?.id ? 'Editar usuario' : 'Registrar usuario'}
+        subtitle={editingUser?.id ? "Modifique los datos de acceso y perfil del usuario" : "Complete el formulario para crear un nuevo acceso al sistema"}
         size="medium"
         onSave={handleSave}
         actions={[
@@ -210,11 +216,11 @@ const UsersPage = () => {
         </div>
       </UniversalModal>
 
-      {/* MODAL DE DETALLES (Igual al de Registrar/Editar pero ReadOnly) */}
       <UniversalModal
         isOpen={isDetailsOpen}
         onClose={closeDetails}
         title="Detalles del usuario"
+        subtitle="Información completa y permisos del usuario seleccionado"
         size="medium"
         actions={[
           { label: 'Cerrar', variant: 'primary', onClick: closeDetails }

@@ -10,7 +10,7 @@ export { default as StatusPill } from "../components/admin/StatusPill";
 export { default as ErrorBoundary } from "../components/admin/ErrorBoundary";
 export { default as UniversalModal } from "../components/admin/UniversalModal";
 export { default as ConfirmDeleteModal } from "../components/admin/ConfirmDeleteModal";
-export { default as AnularOperacionModal } from "../components/admin/AnularOperacionModal";
+
 export { default as EntityDetailsModal } from "../components/admin/EntityDetailsModal";
 export { default as BlurModalOverlay } from "../components/admin/BlurModalOverlay";
 export { default as EntityTable } from "../components/admin/EntityTable";

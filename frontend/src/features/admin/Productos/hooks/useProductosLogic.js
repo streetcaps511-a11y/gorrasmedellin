@@ -28,7 +28,6 @@ export const useProductosLogic = () => {
 
   const [alert, setAlert] = useState({ show: false, message: '', type: 'success' });
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, producto: null, customMessage: '' });
-  const [toggleModal, setToggleModal] = useState({ isOpen: false, producto: null, targetStatus: true });
 
   const [formData, setFormData] = useState({
     nombre: "", idCategoria: "", precioCompra: "0", precioVenta: "0", precioOferta: "0",
@@ -117,7 +116,6 @@ export const useProductosLogic = () => {
   };
 
   const closeDeleteModal = () => setDeleteModal({ isOpen: false, producto: null, customMessage: '' });
-  const closeToggleModal = () => setToggleModal({ isOpen: false, producto: null, targetStatus: true });
 
   const validateForm = () => {
     const newErrors = {};
@@ -198,33 +196,6 @@ export const useProductosLogic = () => {
     }
   };
 
-  const confirmToggleStatus = async () => {
-    const { producto, targetStatus } = toggleModal;
-    if (!producto) return;
-
-    // Actualización instantánea de la UI
-    setProductos(prev => prev.map(p => p.id === producto.id ? 
-      { ...p, isActive: targetStatus, estado: targetStatus ? "Activo" : "Inactivo" } : p));
-    
-    setToggleModal({ isOpen: false, producto: null, targetStatus: true });
-
-    // Invalida caché tienda y notifica a todas las pestañas
-    notifySync();
-
-    try {
-      showAlert(targetStatus ? 'Activado ✅' : 'Desactivado ⏸️'); // Alerta inmediata
-      await productosService.updateProducto(producto.id, { ...producto, isActive: targetStatus });
-      
-      // Actualizar caché local
-      const finalProductos = productos.map(p => p.id === producto.id ? 
-        { ...p, isActive: targetStatus, estado: targetStatus ? "Activo" : "Inactivo" } : p);
-      NitroCache.set(CACHE_KEY, finalProductos);
-    } catch (error) {
-      await fetchInitialData(); // Revertir solo si falla
-      showAlert("Error al cambiar estado", "error");
-    }
-  };
-
   const handleDelete = async () => {
     const producto = deleteModal.producto;
     if (!producto) return;
@@ -235,13 +206,11 @@ export const useProductosLogic = () => {
     closeDeleteModal();
 
     try {
-      showAlert('Eliminado exitosamente ✅'); 
       await productosService.deleteProducto(producto.id);
+      showAlert('Eliminado exitosamente ✅'); 
       
-      // Sincronizar con otras pestañas DESPUÉS de que el servidor confirme
-      const channel = new BroadcastChannel('app_sync');
-      channel.postMessage('productos_updated');
-      channel.close();
+      // Sincronizar con otras pestañas y la tienda DESPUÉS de que el servidor confirme
+      notifySync();
 
       // Actualizar caché
       const updated = previousProductos.filter(p => p.id !== producto.id);
@@ -251,6 +220,28 @@ export const useProductosLogic = () => {
       setProductos(previousProductos);
       const msg = error?.response?.data?.message || "No se pudo eliminar";
       showAlert(msg, "error");
+    }
+  };
+
+  const handleToggleStatus = async (producto) => {
+    const newStatus = !producto.isActive;
+    const previousProductos = [...productos];
+    
+    // 🚀 Actualización OPTIMISTA
+    setProductos(prev => prev.map(p => p.id === producto.id ? { ...p, isActive: newStatus } : p));
+    
+    try {
+      // Necesitamos pasar toda la data del producto pero con el estado invertido
+      await productosService.updateProducto(producto.id, { ...producto, isActive: newStatus });
+      showAlert(`Producto ${newStatus ? 'activado' : 'desactivado'} ✅`);
+      
+      // Actualizar caché
+      const updated = previousProductos.map(p => p.id === producto.id ? { ...p, isActive: newStatus } : p);
+      NitroCache.set(CACHE_KEY, updated);
+      notifySync();
+    } catch (error) {
+      setProductos(previousProductos);
+      showAlert("No se pudo cambiar el estado", "error");
     }
   };
 
@@ -266,16 +257,25 @@ export const useProductosLogic = () => {
     endIndex: Math.min(currentPage * itemsPerPage, filteredProductos.length),
     handleFilterSelect: (c) => { setCategoriaFiltro(c); setCurrentPage(1); },
     handleStatusSelect: (s) => { setFilterStatus(s); setCurrentPage(1); },
-    agregarTalla: () => setTallasStock(prev => [...prev, { talla: "", cantidad: 0 }]),
+    agregarTalla: () => setTallasStock(prev => [{ talla: "", cantidad: 0 }, ...prev]),
     eliminarTalla: (idx) => setTallasStock(prev => prev.length > 1 ? prev.filter((_, i) => i !== idx) : [{ talla: "", cantidad: 0 }]),
-    handleTallaChange: (idx, val) => { const n = [...tallasStock]; n[idx].talla = val; setTallasStock(n); },
+    handleTallaChange: (idx, val) => { 
+      const exists = tallasStock.some((item, i) => i !== idx && item.talla === val);
+      if (exists) {
+        showAlert(`La talla "${val}" ya está agregada`, "error");
+        return;
+      }
+      const n = [...tallasStock]; 
+      n[idx].talla = val; 
+      setTallasStock(n); 
+    },
     incrementarCantidad: (idx) => { const n = [...tallasStock]; n[idx].cantidad += 1; setTallasStock(n); },
     decrementarCantidad: (idx) => { const n = [...tallasStock]; if (n[idx].cantidad > 0) n[idx].cantidad -= 1; setTallasStock(n); },
     handleCantidadChange: (idx, val) => { const n = [...tallasStock]; n[idx].cantidad = parseInt(val) || 0; setTallasStock(n); },
-    agregarUrlImagen: () => urlsImagenes.length < 4 && setUrlsImagenes(prev => [...prev, '']),
+    agregarUrlImagen: () => urlsImagenes.length < 4 && setUrlsImagenes(prev => ['', ...prev]),
     eliminarUrlImagen: (idx) => urlsImagenes.length > 1 && setUrlsImagenes(prev => prev.filter((_, i) => i !== idx)),
     actualizarUrlImagen: (idx, val) => { const n = [...urlsImagenes]; n[idx] = val; setUrlsImagenes(n); },
-    agregarColor: () => coloresProducto.length < 2 && setColoresProducto(prev => [...prev, '']),
+    agregarColor: () => coloresProducto.length < 2 && setColoresProducto(prev => ['', ...prev]),
     eliminarColor: (idx) => coloresProducto.length > 1 && setColoresProducto(prev => prev.filter((_, i) => i !== idx)),
     actualizarColor: (idx, val) => { const n = [...coloresProducto]; n[idx] = val; setColoresProducto(n); },
     mostrarLista: () => { setModoVista("lista"); setErrors({}); },
@@ -298,12 +298,9 @@ export const useProductosLogic = () => {
     },
     mostrarDetalle: (p) => { setProductoViendo(p); setModoVista("detalle"); setErrors({}); },
     handleSubmit,
-    handleDesactivar: (p) => setToggleModal({ isOpen: true, producto: p, targetStatus: false }),
-    handleReactivar: (p) => setToggleModal({ isOpen: true, producto: p, targetStatus: true }),
     openDeleteModal: (p) => setDeleteModal({ isOpen: true, producto: p, customMessage: `¿Eliminar permanentemente "${p.nombre}"?` }),
     closeDeleteModal,
     handleDelete,
-    toggleModal, confirmToggleStatus, closeToggleModal,
     handleInputChange: (e) => { 
       const { name, value, type, checked } = e.target; 
       const finalValue = type === 'checkbox' ? checked : value;
@@ -331,6 +328,7 @@ export const useProductosLogic = () => {
         setUrlsImagenes(p.imagenes || ['']);
         setColoresProducto(p.colores || ['']);
         setModoVista("formulario");
-    }
+    },
+    handleToggleStatus
   };
 };

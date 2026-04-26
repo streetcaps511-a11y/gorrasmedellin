@@ -4,7 +4,7 @@ import { useAuth } from '../../shared/contexts/AuthContext';
 import { FaLock, FaEye, FaEyeSlash, FaSignOutAlt, FaShieldAlt } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import '../styles/ChangePasswordModal.css';
-import '../../shared/styles/AnularOperacionModal.css';
+
 
 const ChangePasswordModal = () => {
     const { user, updateUser, logout } = useAuth();
@@ -153,10 +153,10 @@ const ChangePasswordModal = () => {
                 </form>
             </div>
 
-            {/* MODAL DE ÉXITO: ESTILO ANULAR-MODAL */}
+            {/* MODAL DE ÉXITO: ESTILO PERSONALIZADO */}
             {showSuccessModal && (
-                <div className="anular-modal-backdrop" style={{ zIndex: 20000 }}>
-                    <div className="anular-modal-container" style={{ maxWidth: '400px', textAlign: 'center' }}>
+                <div className="cp-success-backdrop">
+                    <div className="cp-success-container">
                         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
                             <div className="success-icon-circle" style={{ 
                                 width: '80px', 
@@ -173,21 +173,18 @@ const ChangePasswordModal = () => {
                                 </svg>
                             </div>
                         </div>
-                        <h3 className="anular-modal-title" style={{ fontSize: '28px' }}>¡Clave Actualizada!</h3>
-                        <div className="anular-modal-message-container">
-                            <p className="anular-modal-message">
+                        <h3 className="cp-success-title">¡Clave Actualizada!</h3>
+                        <div className="cp-success-message-container">
+                            <p className="cp-success-message">
                                 Tu contraseña ha sido cambiada con éxito. Ya puedes usar el sistema.
                             </p>
                         </div>
-                        <div className="anular-modal-actions" style={{ marginTop: '20px' }}>
-                            <button 
-                                className="anular-modal-btn anular-modal-btn-confirm" 
-                                style={{ width: '120px', flex: 'none' }}
-                                onClick={handleFinalize}
-                            >
-                                OK
-                            </button>
-                        </div>
+                        <button 
+                            className="cp-success-btn" 
+                            onClick={handleFinalize}
+                        >
+                            ENTRAR AHORA
+                        </button>
                     </div>
                 </div>
             )}

@@ -213,12 +213,13 @@ const categoriaController = {
             }
 
             const productosAsociados = await Producto.count({
-                where: { idCategoria: id }
+                where: { idCategoria: id },
+                paranoid: false // Es vital incluir los borrados lógicamente para evitar error 500 de foreign key
             });
 
             if (productosAsociados > 0) {
                 return errorResponse(res, 
-                    `No se puede eliminar la categoría porque tiene ${productosAsociados} productos asociados.`, 
+                    `No se puede eliminar la categoría porque tiene ${productosAsociados} producto(s) asociado(s) (incluyendo eliminados o inactivos). Para borrarla, debes reasignar esos productos a otra categoría.`, 
                     400
                 );
             }

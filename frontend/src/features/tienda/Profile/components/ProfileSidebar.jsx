@@ -52,10 +52,34 @@ const ProfileSidebar = ({
             <button 
               onClick={() => setShowAvatarMenu(!showAvatarMenu)} 
               className="gm-camera-btn"
-              title="Cambiar foto de perfil"
+              title="Opciones de avatar"
             >
               <FaCamera size={16} />
             </button>
+            {showAvatarMenu && (
+              <div className="gm-avatar-menu">
+                <button 
+                  onClick={() => { setShowAvatarMenu(false); openFilePicker(); }}
+                  className="gm-avatar-menu-item"
+                >
+                  <FaCamera style={{ marginRight: '8px' }} /> Cambiar foto
+                </button>
+                {avatarUrl && (
+                  <button 
+                    onClick={() => { setShowAvatarMenu(false); removeAvatar(); }}
+                    className="gm-avatar-menu-item gm-avatar-menu-item-danger"
+                  >
+                    <FaTrash style={{ marginRight: '8px' }} /> Eliminar foto
+                  </button>
+                )}
+                <button 
+                  onClick={() => setShowAvatarMenu(false)}
+                  className="gm-avatar-menu-item"
+                >
+                  <FaTimes style={{ marginRight: '8px' }} /> Cancelar
+                </button>
+              </div>
+            )}
           </div>
           
           <div className="gm-user-info-text">
@@ -73,35 +97,6 @@ const ProfileSidebar = ({
           </button>
         </div>
 
-        {showAvatarMenu && (
-          <>
-            <div 
-              className="gm-avatar-dropdown-backdrop"
-              onClick={() => setShowAvatarMenu(false)} 
-            />
-            <div className="gm-avatar-dropdown">
-              <span className="gm-avatar-dropdown-title">Personalizar Foto</span>
-              
-              <button onClick={openFilePicker} className="gm-avatar-dropdown-item">
-                <FaPlus size={12} color="#FFC107" /> Elegir de Galería
-              </button>
-              
-              <button 
-                onClick={removeAvatar} 
-                className={`gm-avatar-dropdown-item ${!avatarUrl ? 'selected' : ''}`}
-                title="Dejar solo la letra inicial"
-              >
-                <FaUser size={12} color="#FFC107" /> Dejar Avatar (Letra)
-              </button>
-
-              {avatarUrl && (
-                <button onClick={removeAvatar} className="gm-avatar-dropdown-item danger">
-                  <FaTrash size={12} /> Eliminar Foto
-                </button>
-              )}
-            </div>
-          </>
-        )}
         <input ref={fileInputRef} type="file" onChange={onPickAvatar} style={{ display: "none" }} accept="image/*" />
       </div>
 

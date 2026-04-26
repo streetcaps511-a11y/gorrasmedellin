@@ -201,12 +201,13 @@ export const validateCliente = async (data, id = null) => {
         if (existing) errors.push('Ya existe un cliente con ese email');
     }
 
-    if (numeroDocumento !== undefined) {
-        if (numeroDocumento && !isNumeric(numeroDocumento)) {
+    if (numeroDocumento !== undefined && numeroDocumento) {
+        const cleanDoc = numeroDocumento.toString().replace(/\D/g, '');
+        if (cleanDoc && !isNumeric(cleanDoc)) {
             errors.push('El documento debe contener solo números');
-        } else {
+        } else if (cleanDoc) {
             const existing = await Cliente.findOne({ where: { 
-                numeroDocumento: numeroDocumento.toString().trim(),
+                numeroDocumento: cleanDoc.trim(),
                 ...(id && { id: { [Op.ne]: id } })
             }});
             if (existing) errors.push('Ya existe un cliente con ese documento');
@@ -215,8 +216,11 @@ export const validateCliente = async (data, id = null) => {
 
     if (telefono !== undefined && telefono) {
         const cleanPhone = telefono.toString().replace(/\D/g, '');
-        if (!isNumeric(cleanPhone)) errors.push('El teléfono debe contener solo números');
-        else if (cleanPhone.length !== 10) errors.push('El teléfono debe tener exactamente 10 dígitos');
+        // Solo validar si tiene contenido y no es una cadena informativa como "No registrado"
+        if (cleanPhone) {
+            if (!isNumeric(cleanPhone)) errors.push('El teléfono debe contener solo números');
+            else if (cleanPhone.length !== 10) errors.push('El teléfono debe tener exactamente 10 dígitos');
+        }
     }
 
     return errors;

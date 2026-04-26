@@ -256,6 +256,21 @@ const ProveedorFormFields = ({
           <div className="col">
             <RenderField
               {...commonFieldProps}
+              label="Dirección"
+              fieldName="address"
+              type="text"
+              required={true}
+              value={formData.address}
+              error={errors.address}
+              autoComplete="street-address"
+            />
+          </div>
+        </div>
+
+        <div className="form-row">
+          <div className="col">
+            <RenderField
+              {...commonFieldProps}
               label="Email"
               fieldName="email"
               type="email"
@@ -305,16 +320,7 @@ const ProveedorFormFields = ({
           </div>
         </div>
 
-        <RenderField
-          {...commonFieldProps}
-          label="Dirección"
-          fieldName="address"
-          type="text"
-          required={true}
-          value={formData.address}
-          error={errors.address}
-          autoComplete="street-address"
-        />
+
       </div>
     </div>
   );

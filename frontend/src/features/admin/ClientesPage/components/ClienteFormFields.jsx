@@ -6,15 +6,8 @@ export const ClienteFormFields = ({ modalState, formData, handleInputChange, err
 
   const renderField = (label, value) => (
     <div className="form-field">
-      <label className={`form-label ${isReadOnly ? 'readonly-field' : ''}`}>{label}:</label>
-      <div className={`form-input readonly-field disabled-field`} 
-           style={{ 
-             height: '30px', 
-             display: 'flex', 
-             alignItems: 'center',
-             background: '#0f172a',
-             border: '1px solid #1e293b'
-           }}>
+      <label className="form-field-label">{label}:</label>
+      <div className="form-field-display">
         {value || 'N/A'}
       </div>
     </div>

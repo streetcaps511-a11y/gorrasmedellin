@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import * as usersService from '../services/usersApi';
 import * as rolesService from '../../RolesPage/services/rolesApi';
 import { useAuth } from '../../../shared/contexts/AuthContext';
@@ -52,7 +52,7 @@ export const useUsersLogic = () => {
   const [formData, setFormData] = useState(initialFormState);
   const [errors, setErrors] = useState({});
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [anularModal, setAnularModal] = useState({ isOpen: false, user: null });
+  const firstInputRef = useRef(null); // Optional: if needed by some other part, but let's just keep state clean
 
   // ====== FETCH INICIAL ======
   const fetchData = useCallback(async () => {
@@ -297,38 +297,7 @@ export const useUsersLogic = () => {
     }
   };
 
-  const handleToggleStatus = async (user) => {
-    if (isAdministrador(user)) {
-      showAlert('El usuario "Administrador" siempre está activo', "error");
-      return;
-    }
-    setAnularModal({ isOpen: true, user });
-  };
 
-  const closeAnularModal = () => {
-    setAnularModal({ isOpen: false, user: null });
-  };
-
-  const confirmToggleStatus = async () => {
-    const user = anularModal.user;
-    if (!user) return;
-
-    setAnularModal({ isOpen: false, user: null });
-    
-    const targetStatus = !user.isActive;
-    
-    // 🚀 Optimistic Update
-    setUsers(prev => prev.map(u => u.id === user.id ? { ...u, isActive: targetStatus } : u));
-    showAlert(`Usuario ${targetStatus ? 'activado' : 'desactivado'} correctamente ✅`);
-
-    try {
-      await usersService.toggleUserStatus(user.id);
-      fetchData(); // Sync in background
-    } catch (error) {
-      fetchData(); // Revert on failure
-      showAlert('Error al actualizar estado del usuario', 'error');
-    }
-  };
 
   const openDeleteModal = (user) => {
     if (isAdministrador(user)) {
@@ -373,6 +342,31 @@ export const useUsersLogic = () => {
     }
   };
 
+  const handleToggleStatus = async (user) => {
+    if (isAdministrador(user)) {
+      showAlert('No se puede cambiar el estado del usuario Administrador', "error");
+      return;
+    }
+
+    const newStatus = !user.isActive;
+    const previousUsers = [...users];
+    
+    // 🚀 Actualización OPTIMISTA
+    setUsers(prev => prev.map(u => u.id === user.id ? { ...u, isActive: newStatus } : u));
+    
+    try {
+      await usersService.updateUser(user.id, { ...user, isActive: newStatus });
+      showAlert(`Usuario ${newStatus ? 'activado' : 'desactivado'} ✅`);
+      
+      // Sincronizar caché
+      const updated = previousUsers.map(u => u.id === user.id ? { ...u, isActive: newStatus } : u);
+      NitroCache.set('users_admin', updated);
+    } catch (error) {
+      setUsers(previousUsers);
+      showAlert("No se pudo cambiar el estado", "error");
+    }
+  };
+
   const viewUserDetails = (user) => {
     setSelectedUser(user);
     setIsDetailsOpen(true);
@@ -406,16 +400,12 @@ export const useUsersLogic = () => {
     closeModal,
     handleInputChange,
     handleSave,
-    handleToggleStatus,
-    confirmToggleStatus,
-    closeAnularModal,
-    anularModal,
-    openDeleteModal,
     closeDeleteModal,
     handleDelete,
     viewUserDetails,
     closeDetails,
     isAdministrador,
-    availableStatuses
+    availableStatuses,
+    handleToggleStatus
   };
 };
