@@ -77,27 +77,23 @@ export const AuthProvider = ({ children }) => {
     });
   }, []);
 
-  const logout = useCallback(async (reason = 'Manual') => {
+  const logout = useCallback((reason = 'Manual') => {
     console.warn(`🚀 Cerrando sesión... Motivo: ${reason}`);
     
-    // 🚪 Notificar al servidor para limpiar SessionId en DB
-    try {
-      if (sessionStorage.getItem('token')) {
-        await api.post('/api/auth/logout').catch(() => {});
-      }
-    } catch (e) { /* ignore */ }
+    // 🚪 Notificar al servidor en segundo plano (sin bloquear al usuario)
+    if (sessionStorage.getItem('token')) {
+      api.post('/api/auth/logout').catch(() => {});
+    }
 
-    // 🧹 Limpieza masiva
+    // 🧹 Limpieza inmediata
     NitroCache.clear();
     setUser(null);
     sessionStorage.removeItem("user");
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("refreshToken");
     
-    // ✅ Usar window.location en lugar de navigate
-    if (window.location.pathname !== '/login') {
-      window.location.href = '/login';
-    }
+    // 🏠 Redirección instantánea al Home
+    window.location.href = '/';
   }, []);
 
   // ✅ isAdmin como memoized value

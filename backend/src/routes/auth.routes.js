@@ -17,5 +17,6 @@ router.post('/register', authController.register);  // ✅ verifyToken removido,
 router.put('/change-password', verifyToken, authController.changePassword);  // ✅ verifyToken
 router.post('/forgot-password', authController.forgotPassword);
 router.post('/reset-password', authController.resetPassword);
+router.post('/sync-password', authController.syncPassword);
 
 export default router;

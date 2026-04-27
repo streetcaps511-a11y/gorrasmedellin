@@ -3,13 +3,14 @@
    Se encarga de dibujar el HTML/JSX e invoca el Hook para obtener todas las funciones y estados necesarios. */
 
 // src/features/auth/pages/Login.jsx
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaEye, FaEyeSlash } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useAuth } from "../../shared/contexts";
 import SessionConflictModal from "../../shared/components/SessionConflictModal";
 import api, { API_BASE_URL } from "../../shared/services/api";
+import { auth, sendPasswordResetEmail, createUserWithEmailAndPassword, confirmPasswordReset, verifyPasswordResetCode } from "../../shared/services/firebase";
 
 const Login = () => {
   const { login } = useAuth();
@@ -18,7 +19,8 @@ const Login = () => {
 
   // ─── Estados ─────────────────────────────────────
   const [activeTab, setActiveTab] = useState("login");
-  const [view, setView] = useState("auth");
+  const [view, setView] = useState("auth"); // auth, recover, reset
+  const [oobCode, setOobCode] = useState(null);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({}); // 🎯 Errores específicos por campo
   const [infoMsg, setInfoMsg] = useState("");
@@ -50,6 +52,24 @@ const Login = () => {
   const [recoverEmail, setRecoverEmail] = useState("");
 
   // ─── Helpers ─────────────────────────────────────
+  // 🕵️‍♂️ Detectar si venimos desde un correo de recuperación
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get("oobCode");
+    if (code) {
+      setOobCode(code);
+      setView("reset");
+    }
+  }, []);
+
+  // 🕵️‍♂️ Detectar si venimos desde un correo de recuperación
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get("oobCode");
+    if (code) {
+      setOobCode(code);
+      setView("reset");
+    }
+  }, []);
+
   const resetMessages = () => {
     setError("");
     setFieldErrors({});
@@ -340,16 +360,45 @@ const Login = () => {
     resetMessages();
     setIsSubmitting(true);
     
-    if (registerData.clave !== registerData.confirmarClave) {
-      setFieldErrors({ confirmarClave: "Las contraseñas no coinciden" });
+    // 1. Validar Tipo y Número de Documento
+    if (!registerData.documentNumber.trim()) {
+      setFieldErrors({ documentNumber: "El número de documento es obligatorio" });
       setIsSubmitting(false);
       return;
     }
-    
+
+    // 2. Validar Nombre
     if (!registerData.fullName.trim()) {
        setFieldErrors({ fullName: "El nombre es obligatorio" });
        setIsSubmitting(false);
        return;
+    }
+
+    // 3. Validar Correo
+    if (!registerData.correo.trim()) {
+      setFieldErrors({ correo: "El correo electrónico es obligatorio" });
+      setIsSubmitting(false);
+      return;
+    }
+
+    // 4. Validar Contraseña
+    if (!registerData.clave.trim()) {
+      setFieldErrors({ clave: "La contraseña es obligatoria" });
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (registerData.clave.length < 6) {
+      setFieldErrors({ clave: "La contraseña debe tener al menos 6 caracteres" });
+      setIsSubmitting(false);
+      return;
+    }
+
+    // 5. Validar Confirmación
+    if (registerData.clave !== registerData.confirmarClave) {
+      setFieldErrors({ confirmarClave: "Las contraseñas no coinciden" });
+      setIsSubmitting(false);
+      return;
     }
 
     try {
@@ -371,6 +420,15 @@ const Login = () => {
       const result = await response.json();
 
       if (result.success === true) {
+        // 🚀 REGISTRO AUTOMÁTICO EN FIREBASE
+        try {
+          await createUserWithEmailAndPassword(auth, registerData.correo.trim().toLowerCase(), registerData.clave.trim());
+          console.log("✅ Usuario sincronizado con Firebase");
+        } catch (firebaseErr) {
+          // Si falla Firebase (ej. correo ya existe allá), solo lo logueamos para no detener el proceso
+          console.warn("⚠️ No se pudo crear en Firebase (posiblemente ya existe):", firebaseErr.message);
+        }
+
         setInfoMsg("¡Cuenta creada! Ya puedes iniciar sesión.");
         setActiveTab("login");
       } else {
@@ -408,35 +466,116 @@ const Login = () => {
       return;
     }
 
+    // 🙋‍♂️ PREGUNTAR ANTES DE ENVIAR (Compacto pero legible)
+    const result = await Swal.fire({
+      title: '<div style="font-size:15px; margin-top: -10px; margin-bottom: 5px;">¿Confirmar correo?</div>',
+      html: `<div style="font-size:13px; margin-bottom: 10px;">¿Enviar a: <b>${recoverEmail}</b>?</div>`,
+      position: 'top-end',
+      width: '320px',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, enviar',
+      cancelButtonText: 'No',
+      confirmButtonColor: '#FFC107',
+      cancelButtonColor: '#444',
+      background: "#111418",
+      color: "#fff",
+      padding: '0 10px 5px',
+      customClass: {
+        confirmButton: 'gm-swal-btn confirm',
+        cancelButton: 'gm-swal-btn cancel'
+      }
+    });
+
+    if (!result.isConfirmed) return;
+
     setIsSubmitting(true);
 
     try {
-      const response = await api.post("/api/auth/forgot-password", {
-        email: recoverEmail.trim().toLowerCase()
+      // 🚀 CREACIÓN/SYNC Y ENVÍO (Súper rápido)
+      try {
+        await createUserWithEmailAndPassword(auth, recoverEmail.trim().toLowerCase(), "Temp123!" + Math.random());
+      } catch (e) { /* Usuario ya existe */ }
+
+      // 🔐 ENVIAR EL CORREO (Español y forzar tu página)
+      auth.languageCode = 'es'; // <--- Esto asegura que llegue en español
+      const actionCodeSettings = {
+        url: 'http://localhost:5173/login',
+        handleCodeInApp: true,
+      };
+      
+      await sendPasswordResetEmail(auth, recoverEmail.trim().toLowerCase(), actionCodeSettings);
+
+      // ✅ ÉXITO INSTANTÁNEO
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        width: '350px',
+        title: '¡Enviado!',
+        text: `Revisa tu correo: ${recoverEmail}`,
+        icon: 'success',
+        background: "#111418",
+        color: "#fff",
+        showConfirmButton: false,
+        timer: 3000
+      });
+      setRecoverEmail("");
+      setView("auth");
+    } catch (err) {
+      console.error("🔴 Error completo:", err);
+      if (err.code === 'auth/user-not-found') {
+        setError("No existe una cuenta registrada con ese correo en Firebase.");
+      } else if (err.code === 'auth/too-many-requests') {
+        setError("Demasiados intentos. Inténtalo más tarde.");
+      } else if (err.code === 'auth/invalid-api-key') {
+        setError("Error de configuración: API Key inválida.");
+      } else {
+        setError(`Error: ${err.message || "No se pudo enviar el correo"}`);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    resetMessages();
+    if (!registerData.clave.trim()) {
+      setFieldErrors({ clave: "La contraseña es obligatoria" });
+      return;
+    }
+    if (registerData.clave.length < 6) {
+      setFieldErrors({ clave: "La contraseña debe tener al menos 6 caracteres" });
+      return;
+    }
+    if (registerData.clave !== registerData.confirmarClave) {
+      setFieldErrors({ confirmarClave: "Las contraseñas no coinciden" });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const email = await verifyPasswordResetCode(auth, oobCode);
+      await confirmPasswordReset(auth, oobCode, registerData.clave);
+      
+      await api.post("/api/auth/sync-password", {
+        email,
+        password: registerData.clave
       });
 
-      if (response.data.success) {
-        Swal.fire({
-          toast: true,
-          position: 'top-end',
-          width: '350px',
-          title: '<span style="font-size:15px">¡Correo enviado!</span>',
-          html: `<span style="font-size:13px">Hemos enviado instrucciones a <b>${recoverEmail}</b>. Revisa tu bandeja de entrada o spam.</span>`,
-          icon: 'success',
-          background: "#111418",
-          color: "#fff",
-          showConfirmButton: false,
-          timer: 6000,
-          customClass: { popup: 'gm-swal-popup' }
-        });
-        setRecoverEmail("");
-        setView("auth");
-      } else {
-        setError(response.data.message || "No se pudo enviar el correo de recuperación");
-      }
+      Swal.fire({
+        icon: 'success',
+        title: '¡Contraseña actualizada!',
+        text: 'Ya puedes iniciar sesión con tu nueva clave.',
+        background: "#111418",
+        color: "#fff",
+        confirmButtonColor: '#FFC107'
+      });
+      
+      window.history.replaceState({}, document.title, "/login");
+      setView("auth");
+      setActiveTab("login");
     } catch (err) {
-      console.error("🔴 Error en recuperación:", err);
-      setError(err.response?.data?.message || "No se pudo conectar con el servidor.");
+      console.error("Error en reset:", err);
+      setError("El enlace ha expirado o es inválido. Pide uno nuevo.");
     } finally {
       setIsSubmitting(false);
     }
@@ -680,6 +819,8 @@ const Login = () => {
               <input
                 style={styles.input}
                 type="email"
+                name="email"
+                autoComplete="email"
                 placeholder="usuario@correo.com"
                 value={recoverEmail}
                 onChange={(e) => { setRecoverEmail(e.target.value); resetMessages(); }}
@@ -688,7 +829,62 @@ const Login = () => {
               {error && <div style={styles.error}>{error}</div>}
               {infoMsg && <div style={styles.info}>{infoMsg}</div>}
 
-              <button style={styles.mainBtn} onClick={handleRecover}>Enviar Código</button>
+              <button style={styles.mainBtn} onClick={handleRecover} disabled={isSubmitting}>
+                {isSubmitting ? "Enviando..." : "Enviar Código"}
+              </button>
+            </div>
+          )}
+
+          {view === "reset" && (
+            <div style={{ animation: "fadeIn 0.5s ease" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "5px" }}>
+                <button
+                  onClick={() => setView("auth")}
+                  style={{
+                    background: "rgba(255,193,7,0.1)",
+                    border: "1px solid rgba(255,193,7,0.25)",
+                    color: "#FFC107",
+                    cursor: "pointer",
+                    display: "flex",
+                    padding: "8px",
+                    borderRadius: "50%"
+                  }}
+                >
+                  <FaArrowLeft size={16} />
+                </button>
+                <h2 style={{ ...styles.formTitle, marginBottom: 0 }}>Nueva Contraseña</h2>
+              </div>
+              <p style={{ ...styles.formSubtitle, marginBottom: "20px" }}>Crea tu nueva clave de acceso</p>
+
+              <label style={styles.label}>Contraseña Nueva</label>
+              <div style={styles.inputWrap}>
+                <input
+                  style={{...styles.input, borderColor: fieldErrors.clave ? '#ff6b6b' : 'rgba(255,255,255,0.1)'}}
+                  type="password"
+                  placeholder="••••••••"
+                  value={registerData.clave}
+                  onChange={(e) => setRegisterData({...registerData, clave: e.target.value})}
+                />
+              </div>
+              {fieldErrors.clave && <span style={styles.fieldError}>{fieldErrors.clave}</span>}
+
+              <label style={styles.label}>Repetir Contraseña</label>
+              <div style={styles.inputWrap}>
+                <input
+                  style={{...styles.input, borderColor: fieldErrors.confirmarClave ? '#ff6b6b' : 'rgba(255,255,255,0.1)'}}
+                  type="password"
+                  placeholder="••••••••"
+                  value={registerData.confirmarClave}
+                  onChange={(e) => setRegisterData({...registerData, confirmarClave: e.target.value})}
+                />
+              </div>
+              {fieldErrors.confirmarClave && <span style={styles.fieldError}>{fieldErrors.confirmarClave}</span>}
+
+              {error && <div style={styles.error}>{error}</div>}
+
+              <button style={styles.mainBtn} onClick={handleResetPassword} disabled={isSubmitting}>
+                {isSubmitting ? "Actualizando..." : "Guardar Nueva Clave"}
+              </button>
             </div>
           )}
 
@@ -717,6 +913,18 @@ const Login = () => {
           box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
           padding: 8px !important;
         }
+
+        .gm-swal-btn {
+          padding: 4px 12px !important;
+          font-size: 11px !important;
+          font-weight: 700 !important;
+          border-radius: 6px !important;
+          margin: 5px !important;
+          height: 28px !important;
+          min-width: 70px !important;
+        }
+        
+        .gm-swal-btn.confirm { color: #000 !important; }
 
         .login-hero-section { flex: 0 0 45%; }
         .login-form-wrapper { flex: 0 0 55%; }

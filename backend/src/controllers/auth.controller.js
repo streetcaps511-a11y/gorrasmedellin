@@ -275,6 +275,22 @@ const authController = {
         }
     },
 
+    logout: async (req, res) => {
+        try {
+            if (req.usuario) {
+                const user = await Usuario.findByPk(req.usuario.id);
+                if (user) {
+                    user.sessionId = null;
+                    await user.save();
+                }
+            }
+            res.json({ success: true, message: 'Sesión cerrada correctamente' });
+        } catch (error) {
+            console.error('🔴 [ERROR LOGOUT]:', error);
+            res.status(500).json({ success: false, message: error.message });
+        }
+    },
+
     verify: async (req, res) => {
         try {
             // Re-buscamos para traer permisos actualizados
@@ -433,20 +449,30 @@ const authController = {
     },
 
     /**
-     * 🚪 Cerrar sesión y limpiar estado en DB
+     * 🔄 Sincronizar contraseña desde Firebase a SQL
      */
-    logout: async (req, res) => {
+    syncPassword: async (req, res) => {
         try {
-            const user = req.usuario;
-            if (user) {
-                user.sessionId = null;
-                user.lastActivity = null;
-                await user.save({ hooks: false });
+            const { email, password } = req.body;
+            if (!email || !password) {
+                return res.status(400).json({ success: false, message: 'Email y clave requeridos' });
             }
-            res.json({ success: true, message: 'Sesión cerrada exitosamente' });
+
+            const user = await Usuario.findOne({ where: { email: email.toLowerCase().trim() } });
+            if (!user) {
+                return res.status(404).json({ success: false, message: 'Usuario no encontrado en SQL' });
+            }
+
+            user.clave = password; // El hook beforeUpdate se encargará de encriptarla
+            user.resetPasswordToken = null;
+            user.resetPasswordExpires = null;
+            user.mustChangePassword = false;
+            await user.save();
+
+            res.json({ success: true, message: 'Contraseña sincronizada en SQL' });
         } catch (error) {
-            console.error('🔴 [AUTH LOGOUT]:', error);
-            res.status(500).json({ success: false, message: 'Error al cerrar sesión' });
+            console.error('🔴 [AUTH SYNC]:', error);
+            res.status(500).json({ success: false, message: 'Error al sincronizar clave' });
         }
     }
 };

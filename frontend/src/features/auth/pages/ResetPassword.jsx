@@ -8,11 +8,12 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaEye, FaEyeSlash, FaCheckCircle } from "react-icons/fa";
 import Swal from "sweetalert2";
 import api from "../../shared/services/api";
+import { auth, confirmPasswordReset, verifyPasswordResetCode } from "../../shared/services/firebase";
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const token = searchParams.get("token");
+  const oobCode = searchParams.get("oobCode"); // El código que envía Firebase
 
   // Estados
   const [clave, setClave] = useState("");
@@ -23,13 +24,13 @@ const ResetPassword = () => {
   const [error, setError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // Redirigir si no hay token
+  // Redirigir si no hay código de Firebase
   useEffect(() => {
-    if (!token) {
-      Swal.fire("Error", "Enlace de recuperación inválido", "error");
+    if (!oobCode) {
+      Swal.fire("Error", "El enlace de recuperación es inválido o ha expirado.", "error");
       navigate("/login");
     }
-  }, [token, navigate]);
+  }, [oobCode, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,9 +49,16 @@ const ResetPassword = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await api.post("/api/auth/reset-password", {
-        token,
-        clave
+      // 1. Obtener el correo del usuario a través del código de Firebase
+      const email = await verifyPasswordResetCode(auth, oobCode);
+      
+      // 2. Confirmar el cambio en Firebase
+      await confirmPasswordReset(auth, oobCode, clave);
+
+      // 3. Sincronizar con la base de datos SQL
+      const response = await api.post("/api/auth/sync-password", {
+        email,
+        password: clave
       });
 
       if (response.data.success) {
@@ -58,7 +66,7 @@ const ResetPassword = () => {
         Swal.fire({
           icon: 'success',
           title: '¡Contraseña actualizada!',
-          text: 'Ya puedes iniciar sesión con tu nueva clave.',
+          text: 'Se ha actualizado tu clave en todo el sistema. Ya puedes iniciar sesión.',
           confirmButtonColor: '#FFC107',
           background: "#111418",
           color: "#fff"
@@ -67,7 +75,14 @@ const ResetPassword = () => {
         });
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Ocurrió un error al restablecer la contraseña.");
+      console.error("Error en reset:", err);
+      if (err.code === 'auth/expired-action-code') {
+        setError("El enlace ha expirado. Por favor, solicita uno nuevo.");
+      } else if (err.code === 'auth/invalid-action-code') {
+        setError("El enlace ya no es válido.");
+      } else {
+        setError(err.response?.data?.message || "Ocurrió un error al restablecer la contraseña.");
+      }
     } finally {
       setIsSubmitting(false);
     }
