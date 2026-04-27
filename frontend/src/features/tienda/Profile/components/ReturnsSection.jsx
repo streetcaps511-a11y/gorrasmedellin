@@ -6,8 +6,9 @@ import React from 'react'; // Refined Return Form with Order Summary Support
 import { 
   FaExchangeAlt, FaSearch, FaTimes, FaChevronLeft, 
   FaChevronRight, FaArrowLeft, FaUser, FaCamera, FaTrash,
-  FaCheckCircle, FaArrowDown, FaShoppingBag
+  FaCheckCircle, FaArrowDown, FaShoppingBag, FaEye
 } from "react-icons/fa";
+import { RejectionReasonModal } from './ProfileModals';
 import '../styles/ReturnsSection.css';
 
 const StatusBadge = ({ status, color }) => (
@@ -36,6 +37,7 @@ const ReturnsSection = ({
 }) => {
   const [showBulkItems, setShowBulkItems] = React.useState(false);
   const [detailProdsPage, setDetailProdsPage] = React.useState(1);
+  const [showRejectionModal, setShowRejectionModal] = React.useState(false);
 
   React.useEffect(() => {
     setDetailProdsPage(1);
@@ -179,14 +181,34 @@ const ReturnsSection = ({
 
     return (
       <div className="gm-order-detail">
-        <div className="gm-detail-top-row">
-          <button onClick={() => setReturnView('list')} className="gm-back-btn" style={{ padding: '6px 12px', fontSize: '0.7rem' }}><FaArrowLeft /> Volver</button>
-          <div className="gm-header-right-group" style={{ gap: '15px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-              <h3 className="gm-section-title" style={{ fontSize: '0.95rem', margin: 0 }}>Solicitud {selectedReturn.id}</h3>
-              <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', fontFamily: '"Montserrat", sans-serif', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Vinculada al pedido: {selectedReturn.orderId}</span>
+        <div className="gm-detail-top-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <button onClick={() => setReturnView('list')} className="gm-back-btn-circle" title="Volver">
+              <FaArrowLeft />
+            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <h3 className="gm-section-title" style={{ fontSize: '1.1rem', margin: 0 }}>Solicitud {selectedReturn.id}</h3>
+              <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', fontFamily: '"Montserrat", sans-serif', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Vinculada al pedido: {selectedReturn.orderId}
+              </span>
             </div>
+          </div>
+
+          <div className="gm-header-right-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <StatusBadge status={selectedReturn.status} color={selectedReturn.statusColor} />
+            {(selectedReturn.status === "Rechazado" || selectedReturn.rejectionReason) && (
+              <button 
+                className="gm-ver-motivo-btn"
+                style={{ 
+                  borderColor: selectedReturn.statusColor || '#ef4444', 
+                  color: selectedReturn.statusColor || '#ef4444',
+                  height: '36px'
+                }}
+                onClick={() => setShowRejectionModal(true)}
+              >
+                <FaEye size={12} /> Ver motivo
+              </button>
+            )}
           </div>
         </div>
 
@@ -286,15 +308,11 @@ const ReturnsSection = ({
           </div>
         </div>
         
-        {selectedReturn.rejectionReason && (
-          <div className="gm-rejection-reason-banner">
-            <div className="gm-rejection-header">
-              SOLICITUD RECHAZADA - MOTIVO:
-            </div>
-            <div className="gm-rejection-content">
-              {selectedReturn.rejectionReason}
-            </div>
-          </div>
+        {showRejectionModal && (
+          <RejectionReasonModal 
+            reason={selectedReturn.rejectionReason || "No se especificó un motivo."} 
+            onClose={() => setShowRejectionModal(false)} 
+          />
         )}
       </div>
     );

@@ -277,7 +277,8 @@ const ProveedorFormFields = ({
               {...commonFieldProps}
               label="Email"
               fieldName="email"
-              type="email"
+              type="text"
+              inputMode="email"
               required={true}
               value={formData.email}
               error={errors.email}

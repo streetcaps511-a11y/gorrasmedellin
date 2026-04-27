@@ -165,4 +165,11 @@
   box-shadow: 0 4px 12px rgba(255, 195, 0, 0.3);
 }
 
+.gm-download-btn-premium:hover {
+  background-color: #1e293b !important;
+  border-color: #ffffff !important;
+  transform: translateY(-1px);
+}
+
 /* CSS Refresh */
+

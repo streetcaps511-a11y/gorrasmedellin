@@ -51,7 +51,8 @@ const RegisterForm = ({
       <div className="input-field-group">
         <label>Correo Electrónico</label>
         <input 
-          type="email" 
+          type="text" 
+          inputMode="email" 
           placeholder="tu@email.com" 
           required 
           value={registerData.email} 

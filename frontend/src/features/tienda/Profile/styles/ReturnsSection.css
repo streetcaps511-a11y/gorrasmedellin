@@ -116,7 +116,57 @@
     border-radius: 50%;
 }
 
+.gm-ver-motivo-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 1px solid #FFC107;
+    color: #FFC107;
+    padding: 6px 14px;
+    border-radius: 40px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Montserrat', sans-serif;
+    text-transform: none;
+}
+
+.gm-ver-motivo-btn:hover {
+    background: rgba(255, 193, 7, 0.1);
+    transform: translateY(-1px);
+}
+
+.gm-back-btn-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.gm-back-btn-circle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: #FFC107;
+  color: #FFC107;
+  transform: scale(1.05);
+}
+
+.gm-header-right-group {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
 .gm-return-name {
+
     font-weight: 500;
     font-size: 0.95rem;
     color: #fff;

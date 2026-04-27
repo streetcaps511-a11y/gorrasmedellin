@@ -153,3 +153,20 @@ export const ExpiredReturnModal = ({ onClose, periodDays, expiredDate, orderDate
     </div>
   </div>
 );
+
+export const RejectionReasonModal = ({ reason, onClose }) => (
+  <div className="gm-modal-overlay-p">
+    <div className="gm-rejection-modal">
+      <div className="gm-rejection-modal-header">
+        <h3 className="gm-rejection-modal-title">Motivo del Rechazo</h3>
+        <button className="gm-rejection-modal-close" onClick={onClose}>
+          <FaTimes size={18} />
+        </button>
+      </div>
+      <div className="gm-rejection-modal-content">
+        <p className="gm-rejection-text">{reason}</p>
+      </div>
+    </div>
+  </div>
+);
+

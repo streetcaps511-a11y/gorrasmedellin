@@ -14,8 +14,32 @@ export const mapBackendToFrontend = (v) => {
   // El nombre del estado ahora viene en IdEstado (mayúscula) o idEstado (minúscula) como string
   const estadoNombre = v.IdEstado || v.idEstado || v.Estado || v.estado || 'Pendiente';
   
-  // Extraer el nombre del cliente
-  const clienteNombre = v.clienteData?.Nombre || v.clienteData?.nombreCompleto || v.ClienteNombre || v.cliente || 'Desconocido';
+  // Extraer el objeto cliente completo de forma ultra-resiliente
+  const getClienteInfo = () => {
+    // 1. Intentar capturar el objeto cliente (puede venir anidado)
+    const data = v.clienteData || v.ClienteData || v.Cliente || (typeof v.cliente === 'object' ? v.cliente : null) || {};
+    const isObject = data && typeof data === 'object' && Object.keys(data).length > 0;
+
+    // 2. Extraer campos buscando en el objeto anidado Y en el objeto principal (por si viene plano)
+    const nombre = (isObject ? (data.nombreCompleto || data.Nombre || data.nombre || data.nombre_completo) : null) || 
+                   v.ClienteNombre || v.clienteNombre || v.NombreCompleto || (typeof v.cliente === 'string' ? v.cliente : null) || 'Desconocido';
+    
+    const doc = (isObject ? (data.numeroDocumento || data.Documento || data.NumeroDocumento || data.num_documento || data.documento) : null) || 
+                v.numeroDocumento || v.Documento || v.num_documento || v.documento || 'N/A';
+    
+    const correo = (isObject ? (data.email || data.Email || data.correo || data.correoElectronico) : null) || 
+                   v.email || v.Email || v.correo || 'S/C';
+    
+    const tel = (isObject ? (data.telefono || data.Telefono || data.tel || data.celular) : null) || 
+                v.telefono || v.Telefono || v.tel || 'N/A';
+
+    return {
+      nombre,
+      num_documento: doc,
+      correo,
+      telefono: tel
+    };
+  };
 
   // Manejar el comprobante (evidencia)
   const getEvidencia = () => {
@@ -39,7 +63,7 @@ export const mapBackendToFrontend = (v) => {
 
   return {
     id: v.id || v.IdVenta,
-    cliente: clienteNombre,
+    cliente: getClienteInfo(),
     idCliente: v.idCliente || v.IdCliente,
     fecha: (v.fecha || v.Fecha) ? new Date(v.fecha || v.Fecha).toLocaleDateString('es-CO') : '',
     total: parseFloat(v.total || v.Total || 0),

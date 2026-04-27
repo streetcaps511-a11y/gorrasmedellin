@@ -22,7 +22,7 @@ export const RecoverPasswordForm = ({
     <form onSubmit={handleRecover}>
       <div className="input-field-group">
         <label>Correo de recuperación</label>
-        <input type="email" placeholder="tu@email.com" required value={recoverTo} onChange={(e) => setRecoverTo(e.target.value)} />
+        <input type="text" inputMode="email" placeholder="tu@email.com" required value={recoverTo} onChange={(e) => setRecoverTo(e.target.value)} />
       </div>
       <button type="submit" className="button-main-auth" disabled={loading}>Enviar Código</button>
     </form>

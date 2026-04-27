@@ -134,6 +134,117 @@ const VentasPage = () => {
 
   const [detailSearch, setDetailSearch] = useState('');
 
+  const handleExportPDF = () => {
+    if (!ventaViendo) return;
+
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const saleId = ventaViendo.id;
+    const date = ventaViendo.fecha;
+    const items = (ventaViendo.productos || []).map(p => ({
+      name: p.nombre,
+      size: p.talla,
+      quantity: p.cantidad,
+      price: typeof p.precio === 'string' ? parseFloat(p.precio.replace(/[^0-9.]/g, '')) : p.precio,
+      subtotal: typeof p.subtotal === 'string' ? parseFloat(p.subtotal.replace(/[^0-9.]/g, '')) : p.subtotal
+    }));
+    const total = typeof ventaViendo.total === 'string' ? parseFloat(ventaViendo.total.replace(/[^0-9.]/g, '')) : (ventaViendo.total || 0);
+    
+    const cliente = ventaViendo.cliente;
+    const customerName = typeof cliente === 'object' ? cliente?.nombre : cliente;
+    const customerDoc = typeof cliente === 'object' ? cliente?.num_documento : 'N/A';
+    const customerEmail = typeof cliente === 'object' ? cliente?.correo : 'N/A';
+    const customerPhone = typeof cliente === 'object' ? cliente?.telefono : 'N/A';
+    const customerAddress = ventaViendo.direccionEnvio || 'Recogida en local';
+
+    // Header
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text("GORRAS MEDELLÍN", 105, 20, { align: 'center' });
+    
+    doc.setTextColor(100, 100, 100);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`COMPROBANTE DE VENTA No. ${saleId}`, 105, 28, { align: 'center' });
+    doc.text(`Fecha: ${date}`, 105, 33, { align: 'center' });
+
+    // Client Info
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text("DATOS DEL CLIENTE:", 20, 50);
+    
+    doc.setTextColor(50, 50, 50);
+    doc.setFontSize(10);
+    
+    const drawLine = (label, value, x, y) => {
+      doc.setFont('helvetica', 'bold');
+      doc.text(label, x, y);
+      const labelWidth = doc.getTextWidth(label);
+      doc.setFont('helvetica', 'normal');
+      doc.text(String(value), x + labelWidth, y);
+    };
+
+    drawLine("Nombre: ", customerName, 20, 57);
+    drawLine("Documento: ", customerDoc, 20, 62);
+    drawLine("Email: ", customerEmail, 20, 67);
+    drawLine("Teléfono: ", customerPhone, 20, 72);
+    drawLine("Dirección: ", customerAddress, 20, 77);
+    drawLine("Método de Pago: ", ventaViendo.metodoPago || 'N/A', 20, 82);
+
+    // Table Header
+    const tableTop = 100;
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.5);
+    doc.line(15, tableTop, 195, tableTop);
+    
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text("Producto", 20, tableTop + 7);
+    doc.text("Talla", 90, tableTop + 7);
+    doc.text("Cant.", 115, tableTop + 7);
+    doc.text("Precio", 135, tableTop + 7);
+    doc.text("Subtotal", 165, tableTop + 7);
+    
+    doc.setLineWidth(0.1);
+    doc.line(15, tableTop + 10, 195, tableTop + 10);
+
+    // Table Rows
+    let yPos = tableTop + 17;
+    items.forEach(item => {
+      doc.setFont('helvetica', 'normal');
+      doc.text(item.name.length > 30 ? item.name.substring(0, 30) + "..." : item.name, 20, yPos);
+      doc.text(String(item.size), 90, yPos);
+      doc.text(String(item.quantity), 115, yPos);
+      doc.text(`$${Number(item.price).toLocaleString('es-CO')}`, 135, yPos);
+      doc.text(`$${Number(item.subtotal).toLocaleString('es-CO')}`, 165, yPos);
+      yPos += 7;
+      
+      if (yPos > 270) {
+        doc.addPage();
+        yPos = 20;
+      }
+    });
+
+    // Totals
+    yPos += 10;
+    doc.setLineWidth(0.5);
+    doc.line(130, yPos, 195, yPos);
+    yPos += 10;
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text("TOTAL:", 135, yPos);
+    doc.text(`$${Number(total).toLocaleString('es-CO')}`, 165, yPos);
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(150, 150, 150);
+    doc.text("Gracias por su compra en Gorras Medellín. Comprobante generado por StreetCaps.", 20, yPos + 15);
+
+    doc.save(`Venta_${saleId}_GMCAPS.pdf`);
+  };
+
   return (
     <div className="ventas-page-wrapper">
       {alert.show && (
@@ -372,6 +483,30 @@ const VentasPage = () => {
                 disabled={loading}
               >
                 {loading ? 'Procesando...' : 'Guardar Venta'}
+              </button>
+            )}
+
+            {modoVista === "detalle" && (
+              <button 
+                onClick={handleExportPDF} 
+                className="gm-download-btn-premium"
+                style={{
+                  padding: '6px 16px',
+                  backgroundColor: '#0f172a',
+                  color: '#ffffff',
+                  border: '1px solid rgba(255,255,255,0.4)',
+                  borderRadius: '8px',
+                  fontSize: '0.75rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  height: '36px',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <FaDownload /> PDF
               </button>
             )}
           </div>

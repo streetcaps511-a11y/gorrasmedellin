@@ -199,17 +199,30 @@ const OrdersSection = ({
     doc.text(`No. INV-${invoiceNumber}`, 105, 33, { align: 'center' });
     doc.text(`Fecha: ${date}`, 105, 38, { align: 'center' });
 
+    const customerDocument = formData?.documentNumber || user?.Documento || user?.numeroDocumento || user?.numero_documento || 'N/A';
+
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.text("DATOS DEL CLIENTE:", 20, 55);
+    
     doc.setTextColor(50, 50, 50);
     doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Nombre: ${customerName}`, 20, 62);
-    doc.text(`Email: ${customerEmail}`, 20, 67);
-    doc.text(`Dirección: ${customerAddress}`, 20, 72);
-    doc.text(`Teléfono: ${customerPhone}`, 20, 77);
+    
+    const drawLine = (label, value, x, y) => {
+      doc.setFont('helvetica', 'bold');
+      doc.text(label, x, y);
+      const labelWidth = doc.getTextWidth(label);
+      doc.setFont('helvetica', 'normal');
+      doc.text(String(value), x + labelWidth, y);
+    };
+
+    drawLine("Nombre: ", customerName, 20, 62);
+    drawLine("Documento: ", customerDocument, 20, 67);
+    drawLine("Email: ", customerEmail, 20, 72);
+    drawLine("Teléfono: ", customerPhone, 20, 77);
+    drawLine("Dirección: ", customerAddress, 20, 82);
+    drawLine("Método de Pago: ", selectedOrder.paymentMethod || 'N/A', 20, 87);
     const tableTop = 103;
     const boxHeight = (items.length * 7) + 15;
     doc.setDrawColor(200, 200, 200);

@@ -48,7 +48,7 @@ const ventaController = {
 
             const { count, rows } = await Venta.findAndCountAll({
                 include: [
-                    { model: Cliente, as: 'clienteData', attributes: ['id', 'nombreCompleto'] },
+                    { model: Cliente, as: 'clienteData' },
                     { model: DetalleVenta, as: 'detalles', include: [{ model: Producto, as: 'producto', attributes: ['id', 'nombre', 'precioVenta'], paranoid: false }] }
                 ],
                 limit: parseInt(limit),
@@ -271,7 +271,7 @@ const ventaController = {
             // ⚠️ Corregido: Usamos 'Nombre' que es la columna real en la DB
             const ventaCompleta = await Venta.findByPk(nuevaVentaObj.id, {
                 include: [
-                    { association: 'clienteData', attributes: ['Nombre'] },
+                    { association: 'clienteData', attributes: ['id', 'nombreCompleto', 'numeroDocumento', 'email', 'telefono'] },
                     { association: 'detalles', include: [{ model: Producto, as: 'producto', paranoid: false }] }
                 ]
             });

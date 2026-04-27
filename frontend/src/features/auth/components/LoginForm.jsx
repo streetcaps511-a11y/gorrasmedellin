@@ -22,7 +22,8 @@ const LoginForm = ({
         <div className="input-decorated">
           <FaEnvelope className="deco-icon" />
           <input 
-            type="email" 
+            type="text" 
+            inputMode="email" 
             placeholder="ejemplo@correo.com" 
             required 
             value={loginData.email} 

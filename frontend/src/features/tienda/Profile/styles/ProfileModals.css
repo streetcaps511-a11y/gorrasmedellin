@@ -302,3 +302,64 @@
   cursor: not-allowed;
   filter: grayscale(1);
 }
+
+/* Rejection Modal Specific Styles */
+.gm-rejection-modal {
+  background-color: #0c1017;
+  width: 90%;
+  max-width: 450px;
+  border-radius: 12px;
+  border: 1px solid #FFC107;
+  padding: 25px;
+  position: relative;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  animation: modalScaleUpCenter 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gm-rejection-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 15px;
+}
+
+.gm-rejection-modal-title {
+  color: #FFC107;
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin: 0;
+  text-transform: none;
+}
+
+.gm-rejection-modal-close {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.gm-rejection-modal-close:hover {
+  color: #fff;
+  transform: rotate(90deg);
+}
+
+.gm-rejection-modal-content {
+  padding: 5px 0;
+}
+
+.gm-rejection-text {
+  color: #fff;
+  font-size: 1.1rem;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.6;
+  margin: 0;
+}
+

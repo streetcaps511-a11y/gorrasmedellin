@@ -620,7 +620,8 @@ const Login = () => {
                   <label style={styles.label}>Correo electrónico</label>
                   <input
                     style={{ ...styles.input, borderColor: fieldErrors.correo ? '#ff4d4d' : styles.input.border.split(' ')[2] }}
-                    type="email"
+                    type="text"
+                    inputMode="email"
                     placeholder="ejemplo@correo.com"
                     value={loginData.correo}
                     onChange={(e) => setLoginData({ ...loginData, correo: e.target.value })}
@@ -722,7 +723,8 @@ const Login = () => {
                   <label style={styles.label}>Correo electrónico</label>
                   <input
                     style={{ ...styles.input, borderColor: fieldErrors.correo ? '#ff4d4d' : styles.input.border.split(' ')[2] }}
-                    type="email"
+                    type="text"
+                    inputMode="email"
                     placeholder="tu@email.com"
                     value={registerData.correo}
                     onChange={(e) => setRegisterData({ ...registerData, correo: e.target.value })}
@@ -801,7 +803,8 @@ const Login = () => {
               <label style={styles.label}>Tu correo</label>
               <input
                 style={{...styles.input, borderColor: fieldErrors.recoverEmail ? '#ff6b6b' : 'rgba(255,193,7,0.15)'}}
-                type="email"
+                type="text"
+                inputMode="email"
                 name="email"
                 autoComplete="email"
                 placeholder="usuario@correo.com"
