@@ -457,19 +457,18 @@ const Login = () => {
   const handleRecover = async () => {
     resetMessages();
     if (!recoverEmail?.trim()) {
-      setError("Por favor, ingresa tu correo electrónico.");
+      setFieldErrors({ recoverEmail: "Debes llenar este campo" });
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(recoverEmail)) {
-      setError("Por favor ingresa un correo con formato válido.");
+      setFieldErrors({ recoverEmail: "Correo no válido" });
       return;
     }
 
-    // 🙋‍♂️ PREGUNTAR ANTES DE ENVIAR (Compacto pero legible)
     const result = await Swal.fire({
-      title: '<div style="font-size:15px; margin-top: -10px; margin-bottom: 5px;">¿Confirmar correo?</div>',
-      html: `<div style="font-size:13px; margin-bottom: 10px;">¿Enviar a: <b>${recoverEmail}</b>?</div>`,
+      title: '<div style="font-size:15px; margin-top: -10px; margin-bottom: 5px; color: #fff;">¿Confirmar correo?</div>',
+      html: `<div style="font-size:13px; margin-bottom: 10px; color: #aaa;">¿Enviar a: <b>${recoverEmail}</b>?</div>`,
       position: 'top-end',
       width: '320px',
       showCancelButton: true,
@@ -479,11 +478,7 @@ const Login = () => {
       cancelButtonColor: '#444',
       background: "#111418",
       color: "#fff",
-      padding: '0 10px 5px',
-      customClass: {
-        confirmButton: 'gm-swal-btn confirm',
-        cancelButton: 'gm-swal-btn cancel'
-      }
+      padding: '0 10px 5px'
     });
 
     if (!result.isConfirmed) return;
@@ -491,46 +486,33 @@ const Login = () => {
     setIsSubmitting(true);
 
     try {
-      // 🚀 CREACIÓN/SYNC Y ENVÍO (Súper rápido)
-      try {
-        await createUserWithEmailAndPassword(auth, recoverEmail.trim().toLowerCase(), "Temp123!" + Math.random());
-      } catch (e) { /* Usuario ya existe */ }
-
-      // 🔐 ENVIAR EL CORREO (Español y forzar tu página)
-      auth.languageCode = 'es'; // <--- Esto asegura que llegue en español
-      const actionCodeSettings = {
-        url: 'http://localhost:5173/login',
-        handleCodeInApp: true,
-      };
-      
-      await sendPasswordResetEmail(auth, recoverEmail.trim().toLowerCase(), actionCodeSettings);
-
-      // ✅ ÉXITO INSTANTÁNEO
-      Swal.fire({
-        toast: true,
-        position: 'top-end',
-        width: '350px',
-        title: '¡Enviado!',
-        text: `Revisa tu correo: ${recoverEmail}`,
-        icon: 'success',
-        background: "#111418",
-        color: "#fff",
-        showConfirmButton: false,
-        timer: 3000
+      // 🚀 LLAMADA AL BACKEND (Usará Brevo para el diseño bonito)
+      const response = await api.post("/api/auth/forgot-password", {
+        email: recoverEmail.trim().toLowerCase()
       });
-      setRecoverEmail("");
-      setView("auth");
-    } catch (err) {
-      console.error("🔴 Error completo:", err);
-      if (err.code === 'auth/user-not-found') {
-        setError("No existe una cuenta registrada con ese correo en Firebase.");
-      } else if (err.code === 'auth/too-many-requests') {
-        setError("Demasiados intentos. Inténtalo más tarde.");
-      } else if (err.code === 'auth/invalid-api-key') {
-        setError("Error de configuración: API Key inválida.");
-      } else {
-        setError(`Error: ${err.message || "No se pudo enviar el correo"}`);
+
+      if (response.data.success) {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          width: '350px',
+          title: '<span style="color: #000; font-weight: 800;">¡Enviado!</span>',
+          html: `<span style="color: #333;">Revisa tu correo: <br/><b>${recoverEmail}</b></span>`,
+          icon: 'success',
+          background: "#fff", // Fondo blanco
+          showConfirmButton: false,
+          timer: 4000,
+          timerProgressBar: true,
+          showClass: {
+            popup: 'animate__animated animate__fadeInRight animate__faster'
+          }
+        });
+        setRecoverEmail("");
+        setView("auth");
       }
+    } catch (err) {
+      console.error("🔴 Error en recuperación:", err.message);
+      setError(err.response?.data?.message || "No se pudo enviar el correo. Intenta más tarde.");
     } finally {
       setIsSubmitting(false);
     }
@@ -684,7 +666,7 @@ const Login = () => {
                         fontWeight: "600",
                         textDecoration: "underline"
                       }}
-                      onClick={() => setView("recover")}
+                      onClick={() => { setView("recover"); resetMessages(); }}
                     >
                       ¿Olvidaste tu contraseña?
                     </button>
@@ -794,10 +776,11 @@ const Login = () => {
           )}
 
           {view === "recover" && (
-            <div onChange={resetMessages}>
+            <form onSubmit={(e) => { e.preventDefault(); handleRecover(); }} style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "5px" }}>
                 <button
-                  onClick={() => setView("auth")}
+                  type="button"
+                  onClick={() => { setView("auth"); resetMessages(); }}
                   style={{
                     background: "rgba(255,193,7,0.1)",
                     border: "1px solid rgba(255,193,7,0.25)",
@@ -813,11 +796,11 @@ const Login = () => {
                 </button>
                 <h2 style={{ ...styles.formTitle, marginBottom: 0 }}>Recuperar Cuenta</h2>
               </div>
-              <p style={styles.formSubtitle}>Te enviaremos un código de seguridad</p>
+              <p style={styles.formSubtitle}>Te enviaremos un correo de recuperación</p>
 
               <label style={styles.label}>Tu correo</label>
               <input
-                style={styles.input}
+                style={{...styles.input, borderColor: fieldErrors.recoverEmail ? '#ff6b6b' : 'rgba(255,193,7,0.15)'}}
                 type="email"
                 name="email"
                 autoComplete="email"
@@ -825,21 +808,22 @@ const Login = () => {
                 value={recoverEmail}
                 onChange={(e) => { setRecoverEmail(e.target.value); resetMessages(); }}
               />
+              {fieldErrors.recoverEmail && <div style={{...styles.error, marginTop: '5px', marginBottom: '10px', textAlign: 'left', fontSize: '12px'}}>{fieldErrors.recoverEmail}</div>}
 
               {error && <div style={styles.error}>{error}</div>}
               {infoMsg && <div style={styles.info}>{infoMsg}</div>}
 
-              <button style={styles.mainBtn} onClick={handleRecover} disabled={isSubmitting}>
-                {isSubmitting ? "Enviando..." : "Enviar Código"}
+              <button type="submit" style={styles.mainBtn} disabled={isSubmitting}>
+                {isSubmitting ? "Enviando..." : "Enviar Correo"}
               </button>
-            </div>
+            </form>
           )}
 
           {view === "reset" && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "5px" }}>
                 <button
-                  onClick={() => setView("auth")}
+                  onClick={() => { setView("auth"); resetMessages(); }}
                   style={{
                     background: "rgba(255,193,7,0.1)",
                     border: "1px solid rgba(255,193,7,0.25)",

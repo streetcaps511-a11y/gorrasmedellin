@@ -110,8 +110,31 @@ const authService = {
      * @param {string} email 
      */
     async forgotPassword(email) {
-        const usuario = await Usuario.findOne({ where: { email: email.toLowerCase().trim() } });
-        if (!usuario) throw new Error('No existe una cuenta con ese correo electrónico');
+        const searchEmail = email.toLowerCase().trim();
+        let usuario = await Usuario.findOne({ where: { email: searchEmail } });
+        
+        // 🛠️ AUTO-REPARACIÓN: Si no existe en Usuarios, buscamos si existe en la tabla de Clientes
+        if (!usuario) {
+            const { Cliente, Rol } = await import('../models/index.js');
+            const cliente = await Cliente.findOne({ where: { email: searchEmail } });
+            
+            if (cliente) {
+                // Si existe como cliente, le creamos su acceso automáticamente
+                let rolCliente = await Rol.findOne({ where: { nombre: 'Cliente' } });
+                usuario = await Usuario.create({
+                    nombre: cliente.nombreCompleto,
+                    email: searchEmail,
+                    clave: crypto.randomBytes(8).toString('hex'), // Clave temporal aleatoria
+                    estado: 'activo',
+                    idRol: rolCliente?.id || 2,
+                    mustChangePassword: true
+                });
+            }
+        }
+
+        if (!usuario) {
+            throw new Error('No existe una cuenta registrada con este correo electrónico. Por favor, regístrate primero.');
+        }
 
         // Generar token único de 20 caracteres
         const token = crypto.randomBytes(20).toString('hex');

@@ -419,7 +419,7 @@ const authController = {
                 message: 'Se han enviado las instrucciones de recuperación a tu correo electrónico.' 
             });
         } catch (error) {
-            console.error('🔴 [AUTH FORGOT PASSWORD]:', error);
+            console.error('⚠️ [AUTH FORGOT PASSWORD]:', error.message);
             res.status(400).json({ success: false, message: error.message });
         }
     },

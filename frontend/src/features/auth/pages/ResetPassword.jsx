@@ -13,7 +13,8 @@ import { auth, confirmPasswordReset, verifyPasswordResetCode } from "../../share
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const oobCode = searchParams.get("oobCode"); // El código que envía Firebase
+  const oobCode = searchParams.get("oobCode"); 
+  const backendToken = searchParams.get("token"); 
 
   // Estados
   const [clave, setClave] = useState("");
@@ -24,13 +25,13 @@ const ResetPassword = () => {
   const [error, setError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // Redirigir si no hay código de Firebase
+  // Redirigir si no hay código de recuperación
   useEffect(() => {
-    if (!oobCode) {
+    if (!oobCode && !backendToken) {
       Swal.fire("Error", "El enlace de recuperación es inválido o ha expirado.", "error");
       navigate("/login");
     }
-  }, [oobCode, navigate]);
+  }, [oobCode, backendToken, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -49,24 +50,35 @@ const ResetPassword = () => {
     setIsSubmitting(true);
 
     try {
-      // 1. Obtener el correo del usuario a través del código de Firebase
-      const email = await verifyPasswordResetCode(auth, oobCode);
-      
-      // 2. Confirmar el cambio en Firebase
-      await confirmPasswordReset(auth, oobCode, clave);
+      if (backendToken) {
+        const response = await api.post("/api/auth/reset-password", {
+          token: backendToken,
+          clave: clave
+        });
 
-      // 3. Sincronizar con la base de datos SQL
-      const response = await api.post("/api/auth/sync-password", {
-        email,
-        password: clave
-      });
+        if (response.data.success) {
+          setIsSuccess(true);
+          Swal.fire({
+            icon: 'success',
+            title: '¡Contraseña actualizada!',
+            text: 'Tu clave ha sido actualizada con éxito. Ya puedes iniciar sesión.',
+            confirmButtonColor: '#FFC107',
+            background: "#111418",
+            color: "#fff"
+          }).then(() => {
+            navigate("/login");
+          });
+        }
+      } else if (oobCode) {
+        const email = await verifyPasswordResetCode(auth, oobCode);
+        await confirmPasswordReset(auth, oobCode, clave);
+        await api.post("/api/auth/sync-password", { email, password: clave });
 
-      if (response.data.success) {
         setIsSuccess(true);
         Swal.fire({
           icon: 'success',
           title: '¡Contraseña actualizada!',
-          text: 'Se ha actualizado tu clave en todo el sistema. Ya puedes iniciar sesión.',
+          text: 'Se ha actualizado tu clave. Ya puedes iniciar sesión.',
           confirmButtonColor: '#FFC107',
           background: "#111418",
           color: "#fff"
@@ -76,19 +88,13 @@ const ResetPassword = () => {
       }
     } catch (err) {
       console.error("Error en reset:", err);
-      if (err.code === 'auth/expired-action-code') {
-        setError("El enlace ha expirado. Por favor, solicita uno nuevo.");
-      } else if (err.code === 'auth/invalid-action-code') {
-        setError("El enlace ya no es válido.");
-      } else {
-        setError(err.response?.data?.message || "Ocurrió un error al restablecer la contraseña.");
-      }
+      setError(err.response?.data?.message || "El enlace ha expirado o es inválido. Solicita uno nuevo.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Estilos (Copiados del tema de Login para consistencia)
+  // 🎨 Estilos unificados con Login.jsx
   const styles = {
     container: {
       display: "flex",
@@ -108,48 +114,100 @@ const ResetPassword = () => {
       background: "linear-gradient(to right, rgba(0,0,0,0.85), rgba(0,0,0,0.2))",
       zIndex: 1
     },
-    formWrapper: {
+    heroSection: {
+      flex: 1,
       display: "flex",
       flexDirection: "column",
       justifyContent: "center",
       alignItems: "center",
-      width: "100%",
-      zIndex: 2
+      textAlign: "center",
+      zIndex: 2,
+      padding: "40px",
+      animation: "fadeIn 1s ease"
+    },
+    logoImg: {
+      width: "240px",
+      height: "auto",
+      marginBottom: "15px",
+      filter: "drop-shadow(0 4px 15px rgba(0,0,0,0.6))"
+    },
+    bannerTitle: {
+      fontSize: "26px",
+      fontWeight: "800",
+      color: "#FFC107",
+      letterSpacing: "1px",
+      margin: "0",
+      textShadow: "0 2px 10px rgba(0,0,0,0.8)"
+    },
+    bannerSubtitle: {
+      fontSize: "17px",
+      color: "#fff",
+      maxWidth: "360px",
+      marginTop: "15px",
+      lineHeight: "1.4",
+      textShadow: "0 2px 8px rgba(0,0,0,0.8)"
+    },
+    formWrapper: {
+      flex: 1,
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 2,
+      paddingRight: "40px",
+      position: "relative"
+    },
+    backLink: {
+      position: "absolute",
+      top: "30px",
+      left: "40px",
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+      color: "#FFC107",
+      textDecoration: "none",
+      fontSize: "15px",
+      opacity: 0.9,
+      transition: "0.2s",
+      zIndex: 10
     },
     formCard: {
-      width: "90%",
+      width: "100%",
       maxWidth: "400px",
       backgroundColor: "rgba(15,17,21,0.96)",
-      padding: "35px",
+      padding: "25px 35px",
       borderRadius: "14px",
       border: "1px solid rgba(255,193,7,0.15)",
       boxShadow: "0 20px 50px rgba(0,0,0,0.8)",
-      textAlign: "center"
+      animation: "slideInRight 0.8s ease"
     },
+    formTitle: { fontSize: "28px", fontWeight: "800", marginBottom: "5px" },
+    formSubtitle: { fontSize: "14px", color: "#888", marginBottom: "25px" },
     label: {
       display: "block",
       fontSize: "12px",
       color: "#aaa",
-      textAlign: "left",
       marginBottom: "7px",
-      marginTop: "15px"
+      letterSpacing: "0.5px",
+      textAlign: "left"
     },
-    inputWrap: { position: "relative", width: "100%" },
     input: {
       width: "100%",
-      padding: "10px 12px",
+      padding: "10px 14px",
       borderRadius: "8px",
       backgroundColor: "#171a21",
-      border: "1px solid rgba(255,255,255,0.1)",
+      border: "1px solid rgba(255,193,7,0.15)",
       color: "#fff",
       fontSize: "14px",
       outline: "none",
+      marginBottom: "12px",
       boxSizing: "border-box"
     },
+    inputWrap: { position: "relative", width: "100%" },
     eyeBtn: {
       position: "absolute",
-      right: "12px",
-      top: "50%",
+      right: "14px",
+      top: "22px",
       transform: "translateY(-50%)",
       border: "none",
       background: "none",
@@ -166,13 +224,14 @@ const ResetPassword = () => {
       fontSize: "14px",
       fontWeight: "800",
       cursor: "pointer",
-      marginTop: "25px",
+      marginTop: "10px",
       transition: "0.3s"
     },
     error: {
       color: "#ff6b6b",
-      fontSize: "13px",
-      marginTop: "15px"
+      fontSize: "12px",
+      marginBottom: "15px",
+      textAlign: "center"
     }
   };
 
@@ -180,14 +239,41 @@ const ResetPassword = () => {
     <div style={styles.container}>
       <div style={styles.overlay} />
       
+      <Link to="/" style={styles.backLink}>
+        <FaArrowLeft size={15} color="#FFC107" /> Volver a la tienda
+      </Link>
+
+      <div style={styles.heroSection}>
+        <img src="/logo.png" alt="GM Caps" style={styles.logoImg} />
+        <h1 style={styles.bannerTitle}>Gorras Medellín Caps</h1>
+        <p style={styles.bannerSubtitle}>
+          Recupera el acceso a tu cuenta para seguir disfrutando de lo mejor en estilo.
+        </p>
+      </div>
+      
       <div style={styles.formWrapper}>
         <div style={styles.formCard}>
-          <img src="/logo.png" alt="Logo" style={{ width: "120px", display: "block", margin: "0 auto 20px" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "15px" }}>
+            <button
+              onClick={() => navigate("/login")}
+              style={{
+                background: "rgba(255,193,7,0.1)",
+                border: "1px solid rgba(255,193,7,0.25)",
+                color: "#FFC107",
+                cursor: "pointer",
+                display: "flex",
+                padding: "8px",
+                borderRadius: "50%"
+              }}
+            >
+              <FaArrowLeft size={16} />
+            </button>
+            <h2 style={{ ...styles.formTitle, marginBottom: 0, fontSize: "24px" }}>Nueva Clave</h2>
+          </div>
           
           {!isSuccess ? (
             <>
-              <h2 style={{ fontSize: "24px", fontWeight: "800", marginBottom: "5px" }}>Nueva Contraseña</h2>
-              <p style={{ fontSize: "14px", color: "#888", marginBottom: "20px" }}>Ingresa tu nueva clave de acceso</p>
+              <p style={styles.formSubtitle}>Ingresa tu nueva contraseña para actualizar tu acceso</p>
 
               <form onSubmit={handleSubmit}>
                 <label style={styles.label}>Contraseña Nueva</label>
@@ -228,13 +314,13 @@ const ResetPassword = () => {
               </form>
             </>
           ) : (
-            <div style={{ padding: "40px 0" }}>
+            <div style={{ padding: "20px 0", textAlign: "center" }}>
               <FaCheckCircle size={60} color="#FFC107" style={{ marginBottom: "20px" }} />
               <h2 style={{ fontSize: "24px", fontWeight: "800" }}>¡Todo listo!</h2>
-              <p style={{ color: "#888", marginTop: "10px" }}>Tu contraseña ha sido actualizada.</p>
-              <Link to="/login" style={{ ...styles.mainBtn, display: "block", textDecoration: "none", lineHeight: "12px", marginTop: "30px" }}>
+              <p style={{ color: "#888", marginTop: "10px" }}>Tu contraseña ha sido actualizada correctamente.</p>
+              <button onClick={() => navigate("/login")} style={styles.mainBtn}>
                 Ir al Login
-              </Link>
+              </button>
             </div>
           )}
         </div>
