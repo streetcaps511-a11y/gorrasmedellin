@@ -403,25 +403,6 @@ const authController = {
     /**
      * 📧 Solicitar recuperación de contraseña (usando Brevo)
      */
-    checkEmail: async (req, res) => {
-        try {
-            const { email } = req.body;
-            if (!email) return res.status(400).json({ success: false, message: 'Email requerido' });
-            
-            console.log(`🔍 [AUTH]: Verificando existencia de: ${email}`);
-            const user = await Usuario.findOne({ where: { email: email.toLowerCase().trim() } });
-            
-            if (!user) {
-                console.log(`ℹ️ [AUTH]: Usuario no encontrado: ${email}`);
-                return res.status(404).json({ success: false, message: 'Usuario no registrado' });
-            }
-            
-            return res.json({ success: true, message: 'Usuario verificado' });
-        } catch (error) {
-            return res.status(500).json({ success: false, message: 'Error interno' });
-        }
-    },
-
     forgotPassword: async (req, res) => {
         try {
             const { email, correo } = req.body;
@@ -431,7 +412,6 @@ const authController = {
                 return res.status(400).json({ success: false, message: 'El correo electrónico es requerido' });
             }
 
-            console.log(`🔍 [AUTH]: Buscando usuario para recuperación: ${searchEmail}`);
             await authService.forgotPassword(searchEmail);
             
             res.json({ 
@@ -439,8 +419,8 @@ const authController = {
                 message: 'Se han enviado las instrucciones de recuperación a tu correo electrónico.' 
             });
         } catch (error) {
-            console.log(`ℹ️ [AUTH]: Usuario no registrado: ${req.body.email}`);
-            res.status(404).json({ success: false, message: 'Este correo no está registrado en nuestra tienda.' });
+            console.error('🔴 [AUTH FORGOT PASSWORD]:', error);
+            res.status(400).json({ success: false, message: error.message });
         }
     },
 
@@ -478,11 +458,9 @@ const authController = {
                 return res.status(400).json({ success: false, message: 'Email y clave requeridos' });
             }
 
-            // 🔍 Usamos el nombre del atributo definido en el modelo (email)
             const user = await Usuario.findOne({ where: { email: email.toLowerCase().trim() } });
             if (!user) {
-                // Proceso silencioso: solo informamos
-                return res.json({ success: true, message: 'Actualización finalizada (F)' });
+                return res.status(404).json({ success: false, message: 'Usuario no encontrado en SQL' });
             }
 
             user.clave = password; // El hook beforeUpdate se encargará de encriptarla

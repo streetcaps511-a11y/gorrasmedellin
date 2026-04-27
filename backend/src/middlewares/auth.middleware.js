@@ -67,10 +67,18 @@ export const verifyToken = async (req, res, next) => {
       });
     }
 
-    // 🔍 Consulta ultra-rápida para el Admin (sin cargar datos pesados de cliente)
+    // 🔍 Buscar usuario por el ID del token (usando IdUsuario que es la PK)
     const usuario = await Usuario.findByPk(decoded.id, {
       include: [
-        { model: Rol, as: 'rolData' }
+        {
+          model: Rol,
+          as: 'rolData'
+        },
+        {
+          model: Cliente,
+          as: 'clienteData',
+          attributes: ['id', 'direccion', 'ciudad', 'departamento', 'avatarUrl']
+        }
       ]
     });
 
@@ -109,16 +117,9 @@ export const verifyToken = async (req, res, next) => {
       });
     }
 
-    // 🚀 OPTIMIZACIÓN: Solo actualizar actividad si pasaron más de 5 minutos
-    // Esto evita miles de escrituras innecesarias en SQL y acelera la navegación
-    const ahora = new Date();
-    const ultimaActividad = usuario.lastActivity ? new Date(usuario.lastActivity) : new Date(0);
-    const diferenciaMinutos = (ahora - ultimaActividad) / (1000 * 60);
-
-    if (diferenciaMinutos > 5) {
-      usuario.lastActivity = ahora;
-      await usuario.save({ hooks: false }); // Solo guardamos si es necesario
-    }
+    // Actualizar última actividad para mantener la sesión viva
+    usuario.lastActivity = new Date();
+    await usuario.save({ hooks: false }); // Evitar hooks para mayor velocidad
 
     // ✅ Inyectar para que el controlador lo reciba directamente
     req.usuario = usuario;

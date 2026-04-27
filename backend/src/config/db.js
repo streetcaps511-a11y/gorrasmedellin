@@ -21,10 +21,15 @@ export const sequelize = new Sequelize({
         connectTimeout: 30000, // 30 segundos para conectar (Aiven puede ser lento)
         keepAlive: true
     },
-    logging: false, // 🧹 Terminal limpio: No mostrar consultas SQL
+    logging: (msg) => {
+        // Filtro supremo: Solo mostrar consultas a la tabla de Usuarios (para tu prueba)
+        if (msg.includes('"Usuarios"')) {
+            console.log(msg);
+        }
+    }, // Solo loggear lo relacionado con Usuarios
     pool: {
-        max: 10,             // Más conexiones para el admin
-        min: 2,              // Siempre 2 conexiones listas para responder YA
+        max: 5,              // Aumentado a 5 para mejor concurrencia
+        min: 1,              // Mantener 1 conexión caliente para respuesta rápida
         acquire: 30000,
         idle: 30000,         // 30 segundos de inactividad
         evict: 15000         // Revisar cada 15 segundos
