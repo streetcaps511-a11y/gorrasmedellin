@@ -1,0 +1,7 @@
+{
+  "status": 401,
+  "data": {
+    "success": false,
+    "message": "Token inválido o expirado"
+  }
+}
