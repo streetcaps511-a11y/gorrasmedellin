@@ -201,145 +201,48 @@ const dashboardController = {
      */
     getDashboardStats: async (req, res) => {
         try {
-            // 📦 EJECUCIÓN TOTAL EN PARALELO (Velocidad Extrema)
-            const safeCount = async (model) => { try { return await model.count(); } catch (e) { return 0; } };
-            const safeSum = async (model, col, where) => { try { return await model.sum(col, { where }) || 0; } catch (e) { return 0; } };
-            const safeFind = async (model, options) => { try { return await model.findAll(options); } catch (e) { return []; } };
+            // 🚀 CÁLCULO ULTRA-RÁPIDO (Solo lo que se ve en pantalla)
+            const safeSum = async (model, col, where) => { 
+                try { 
+                    const result = await model.sum(col, { where }) || 0; 
+                    return Number(result);
+                } catch (e) { 
+                    console.error(`Error sumando ${col}:`, e);
+                    return 0; 
+                } 
+            };
 
-            const tresAniosAtras = new Date(new Date().setFullYear(new Date().getFullYear() - 3));
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            
+            const primerDiaMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
-            const [
-                totalCategorias, totalProductos, totalProveedores, totalCompras, totalClientes,
-                totalVentas, totalDevoluciones, totalUsuarios, ultimosProductosReg, ultimosProveedoresReg,
-                ventasHoy, ventasMes, comprasMes, productosStockBajo, ultimasVentas, ventasPorMes, comprasPorMes,
-                topProductos, topClientes
-            ] = await Promise.all([
-                safeCount(Categoria),
-                safeCount(Producto),
-                safeCount(Proveedor),
-                safeCount(Compra),
-                safeCount(Cliente),
-                safeCount(Venta),
-                safeCount(Devolucion),
-                safeCount(Usuario),
-                safeFind(Producto, { limit: 5, order: [['createdAt', 'DESC']] }),
-                safeFind(Proveedor, { limit: 5, order: [['createdAt', 'DESC']] }),
+            const [ventasHoy, ventasMes, comprasMes, totalVentasHistorico] = await Promise.all([
                 safeSum(Venta, 'total', {
-                    fecha: { [Op.gte]: new Date(new Date().setHours(0, 0, 0, 0)) },
+                    fecha: { [Op.gte]: hoy },
                     idEstado: 'Completada'
                 }),
                 safeSum(Venta, 'total', {
-                    fecha: { [Op.gte]: new Date(new Date().getFullYear(), new Date().getMonth(), 1) },
+                    fecha: { [Op.gte]: primerDiaMes },
                     idEstado: 'Completada'
                 }),
                 safeSum(Compra, 'total', {
-                    fecha: { [Op.gte]: new Date(new Date().getFullYear(), new Date().getMonth(), 1) }
+                    fecha: { [Op.gte]: primerDiaMes }
                 }),
-                safeFind(Producto, { where: { stock: { [Op.lt]: 10 } }, limit: 5 }),
-                safeFind(Venta, { limit: 5, order: [['fecha', 'DESC']], include: [{ model: Cliente, as: 'clienteData', attributes: ['nombreCompleto'] }] }),
-                Venta.findAll({
-                    attributes: [
-                        [sequelize.fn('to_char', sequelize.col('Fecha'), 'YYYY-MM'), 'mes'],
-                        [sequelize.fn('COUNT', sequelize.col('IdVenta')), 'cantidad'],
-                        [sequelize.literal('SUM(COALESCE("Total", 0))::numeric'), 'total']
-                    ],
-                    where: { fecha: { [Op.gte]: tresAniosAtras }, idEstado: { [Op.iLike]: 'Completada' } },
-                    group: [sequelize.literal("to_char(\"Fecha\", 'YYYY-MM')")],
-                    order: [[sequelize.literal("to_char(\"Fecha\", 'YYYY-MM')"), 'ASC']]
-                }).catch(() => []),
-                Compra.findAll({
-                    attributes: [
-                        [sequelize.fn('to_char', sequelize.col('Fecha'), 'YYYY-MM'), 'mes'],
-                        [sequelize.fn('COUNT', sequelize.col('IdCompra')), 'cantidad'],
-                        [sequelize.literal('SUM(COALESCE("Total", 0))::numeric'), 'total']
-                    ],
-                    where: { fecha: { [Op.gte]: tresAniosAtras } },
-                    group: [sequelize.literal("to_char(\"Fecha\", 'YYYY-MM')")],
-                    order: [[sequelize.literal("to_char(\"Fecha\", 'YYYY-MM')"), 'ASC']]
-                }).catch(() => []),
-                DetalleVenta.findAll({
-                    attributes: ['idProducto', [sequelize.fn('SUM', sequelize.col('DetalleVenta.Cantidad')), 'total_vendido'], [sequelize.fn('SUM', sequelize.col('DetalleVenta.Subtotal')), 'total_ingresos']],
-                    include: [{ model: Producto, as: 'producto', attributes: ['nombre'] }, { model: Venta, as: 'venta', attributes: [], where: { idEstado: { [Op.iLike]: 'Completada' } } }],
-                    group: ['idProducto', 'producto.IdProducto', 'producto.Nombre'],
-                    order: [[sequelize.literal('total_vendido'), 'DESC']],
-                    limit: 5
-                }).catch(() => []),
-                Venta.findAll({
-                    attributes: ['idCliente', [sequelize.fn('COUNT', sequelize.col('IdVenta')), 'total_compras'], [sequelize.fn('SUM', sequelize.col('Total')), 'total_gastado']],
-                    where: { idEstado: { [Op.iLike]: 'Completada' } },
-                    include: [{ model: Cliente, as: 'clienteData', attributes: ['nombreCompleto', 'email'] }],
-                    group: ['Venta.IdCliente', 'clienteData.IdCliente', 'clienteData.Nombre', 'clienteData.Email'],
-                    order: [[sequelize.literal('total_gastado'), 'DESC']],
-                    limit: 5
-                }).catch(() => [])
+                safeSum(Venta, 'total', { 
+                    idEstado: 'Completada' 
+                })
             ]);
-
-            // 📊 ESTADO DE CAJA
-            const caja = {
-                ventasHoy,
-                ventasMes,
-                comprasMes,
-                balanceMes: ventasMes - comprasMes
-            };
 
             res.json({
                 success: true,
                 data: {
-                    conteos: {
-                        categorias: totalCategorias,
-                        productos: totalProductos,
-                        proveedores: totalProveedores,
-                        compras: totalCompras,
-                        clientes: totalClientes,
-                        ventas: totalVentas,
-                        devoluciones: totalDevoluciones,
-                        usuarios: totalUsuarios
-                    },
-                    caja,
-                    stockBajo: productosStockBajo.map(p => ({
-                        IdProducto: p.id,
-                        Nombre: p.nombre,
-                        Stock: p.stock
-                    })),
-                    ultimasVentas: ultimasVentas.map(v => ({
-                        IdVenta: v.id,
-                        Cliente: v.clienteData?.nombreCompleto,
-                        Total: parseFloat(v.total || 0),
-                        Fecha: v.fecha,
-                        Estado: v.idEstado
-                    })),
-                    ventasPorMes: ventasPorMes.map(v => ({
-                        mes: v.dataValues.mes,
-                        cantidad: parseInt(v.dataValues.cantidad),
-                        total: parseFloat(v.dataValues.total || 0)
-                    })),
-                    comprasPorMes: comprasPorMes.map(v => ({
-                        mes: v.dataValues.mes,
-                        cantidad: parseInt(v.dataValues.cantidad),
-                        total: parseFloat(v.dataValues.total || 0)
-                    })),
-                    topProductos: topProductos.map(p => ({
-                        nombre: p.producto?.nombre || 'Producto desconocido',
-                        imagen: p.producto?.imagenes?.[0] || null,
-                        cantidad: parseInt(p.dataValues.total_vendido || 0),
-                        total: parseFloat(p.dataValues.total_ingresos || 0)
-                    })),
-                    topClientes: topClientes.map(c => ({
-                        nombre: c.clienteData?.nombreCompleto || 'Cliente desconocido',
-                        correo: c.clienteData?.email,
-                        cantidad: parseInt(c.dataValues.total_compras || 0),
-                        total: parseFloat(c.dataValues.total_gastado || 0)
-                    })),
-                    ultimosProductos: ultimosProductosReg.map(p => ({
-                        id: p.id,
-                        nombre: p.nombre,
-                        fecha: p.createdAt
-                    })),
-                    ultimosProveedores: ultimosProveedoresReg.map(p => ({
-                        id: p.id,
-                        nombre: p.companyName || p.contactName,
-                        fecha: p.createdAt
-                    }))
+                    caja: {
+                        ventasHoy,
+                        ventasMes,
+                        balanceMes: ventasMes - comprasMes,
+                        totalVentas: totalVentasHistorico
+                    }
                 }
             });
 
