@@ -280,16 +280,16 @@ const clienteController = {
                 return res.status(404).json({ success: false, message: 'Cliente no encontrado' });
             }
 
-            const ventasAsociadas = await Venta.count({ where: { idCliente: id } });
-            if (ventasAsociadas > 0) {
-                await transaction.rollback();
-                return res.status(400).json({ 
-                    success: false, 
-                    message: `No se puede eliminar permanentemente al cliente "${cliente.nombreCompleto}" porque tiene historial de compras. Se recomienda solo desactivarlo.` 
-                });
-            }
+            // 1. Desvincular ventas sin perder el nombre (Historial)
+            await Venta.update(
+                { 
+                    idCliente: null, 
+                    clienteNombreHistorico: cliente.nombreCompleto 
+                },
+                { where: { idCliente: id }, transaction }
+            );
 
-            // 1. Eliminar Usuario vinculado si existe
+            // 2. Eliminar Usuario vinculado si existe
             if (cliente.email) {
                 await Usuario.destroy({
                     where: { email: { [Op.iLike]: cliente.email } },
@@ -297,14 +297,14 @@ const clienteController = {
                 });
             }
 
-            // 2. Eliminar Cliente permanente
+            // 3. Eliminar Cliente permanentemente
             await cliente.destroy({ transaction });
 
             await transaction.commit();
 
             res.status(200).json({ 
                 success: true, 
-                message: 'Cliente eliminado permanentemente de la base de datos ✅' 
+                message: 'Cliente y su acceso eliminados permanentemente ✅ El historial de ventas se conservó con su nombre.' 
             });
 
 

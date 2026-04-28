@@ -156,13 +156,13 @@ const authController = {
             let isValid = isRecovery;
             if (!isRecovery) {
                 if (!user.clave || user.clave.trim() === '') {
-                    console.log(`⚠️ [LOGIN FAIL] El usuario ${searchEmail} no tiene una contraseña válida en BD`);
+                    // console.log(`⚠️ [LOGIN FAIL] El usuario ${searchEmail} no tiene una contraseña válida en BD`);
                     isValid = false;
                 } else {
                     try {
                         isValid = await user.validarClave(rawPassword);
                     } catch (bcryptErr) {
-                        console.error('⚠️ [LOGIN BCRYPT ERROR]:', bcryptErr);
+                        // console.error('⚠️ [LOGIN BCRYPT ERROR]:', bcryptErr);
                         isValid = false;
                     }
                 }

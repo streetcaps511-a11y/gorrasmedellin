@@ -17,12 +17,17 @@ const Venta = sequelize.define('Venta', {
     },
     idCliente: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true, // 🔓 Permitir NULL para poder borrar clientes
         field: 'IdCliente',
         references: {
             model: 'Clientes',
             key: 'IdCliente'
         }
+    },
+    clienteNombreHistorico: { // 📝 Guardar nombre para el historial si se borra el cliente
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        field: 'ClienteNombreHistorico'
     },
     idEstado: {
         type: DataTypes.STRING(50),

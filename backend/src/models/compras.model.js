@@ -10,8 +10,13 @@ const Compra = sequelize.define('Compra', {
     },
     idProveedor: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         field: 'IdProveedor'
+    },
+    proveedorNombreHistorico: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        field: 'ProveedorNombreHistorico'
     },
     fecha: {
         type: DataTypes.DATEONLY,

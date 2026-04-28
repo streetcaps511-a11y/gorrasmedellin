@@ -50,9 +50,22 @@ const compraController = {
                 ]
             });
 
+            const rowsFormateadas = rows.map(c => {
+                const json = c.toJSON();
+                // Si el proveedor fue borrado, usar el nombre histórico
+                if (!json.proveedorData && json.proveedorNombreHistorico) {
+                    json.proveedorData = { 
+                        companyName: json.proveedorNombreHistorico, 
+                        documentNumber: 'Proveedor Eliminado',
+                        isDeleted: true 
+                    };
+                }
+                return json;
+            });
+
             res.json({
                 success: true,
-                data: rows,
+                data: rowsFormateadas,
                 pagination: {
                     totalItems: count,
                     currentPage: parseInt(page),
@@ -104,7 +117,18 @@ const compraController = {
                 ]
             });
             if (!compra) return res.status(404).json({ success: false, message: 'Compra no encontrada' });
-            res.json({ success: true, data: compra });
+            
+            const json = compra.toJSON();
+            // Fallback para proveedor borrado en vista individual
+            if (!json.proveedorData && json.proveedorNombreHistorico) {
+                json.proveedorData = { 
+                    companyName: json.proveedorNombreHistorico, 
+                    documentNumber: 'Proveedor Eliminado',
+                    isDeleted: true
+                };
+            }
+            
+            res.json({ success: true, data: json });
         } catch (error) {
             res.status(500).json({ success: false, message: error.message });
         }

@@ -407,28 +407,18 @@ const productoController = {
                 return res.status(404).json({ success: false, message: 'Producto no encontrado' });
             }
 
-            // 🔍 VALIDACIÓN DE STOCK ROBUSTA
-            // Calculamos el stock actual real desde las tallas por si la columna 'stock' está desincronizada
-            let actualStock = 0;
-            try {
-                const tallas = (typeof producto.tallasStock === 'string') 
-                    ? JSON.parse(producto.tallasStock) 
-                    : (producto.tallasStock || []);
-                actualStock = tallas.reduce((acc, curr) => acc + (Number(curr.cantidad) || 0), 0);
-            } catch (e) {
-                actualStock = Number(producto.stock) || 0;
-            }
+            // 🚀 BORRADO TOTALMENTE LIBRE
+            // Ya no bloqueamos por stock. Si el usuario borra, nosotros limpiamos.
+            const tallasVacias = (producto.tallasStock || []).map(t => ({ ...t, cantidad: 0 }));
+            
+            await producto.update({ 
+                stock: 0, 
+                tallasStock: tallasVacias,
+                isActive: false,
+                enInventario: false 
+            }, { transaction });
 
-            if (actualStock > 0) {
-                await transaction.rollback();
-                return res.status(400).json({ 
-                    success: false, 
-                    message: `No se puede borrar: tiene ${actualStock} unidades en stock.` 
-                });
-            }
-
-            // Si el stock es 0, procedemos al borrado lógico (Soft Delete)
-            // Esto permite que el producto desaparezca del catálogo activo pero se mantenga en el historial de ventas/compras.
+            // Borrado lógico (Soft Delete)
             await producto.destroy({ transaction });
             await transaction.commit();
 

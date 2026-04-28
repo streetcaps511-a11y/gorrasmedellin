@@ -33,7 +33,10 @@ const app = express();
 
 // Middlewares globales
 app.use(cors());
-app.use(morgan('dev'));
+app.use(morgan('dev', {
+  // 🤐 No loguear 401 en el login para mantener terminal limpia
+  skip: (req, res) => res.statusCode === 401 && req.originalUrl.includes('/login')
+}));
 app.use(compression());
 
 app.use(express.json({ limit: '20mb' }));

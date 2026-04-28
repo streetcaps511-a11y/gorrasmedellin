@@ -20,12 +20,26 @@ const startServer = async () => {
         await sequelize.query("UPDATE \"Ventas\" SET \"IdEstado\" = 'Pendiente' WHERE \"IdEstado\" = '2'");
         await sequelize.query("UPDATE \"Ventas\" SET \"IdEstado\" = 'Rechazada' WHERE \"IdEstado\" = '3'");
         
-        // 🚀 MIGRACIÓN PARA PAGO PARCIAL EN VENTAS
+        // 🚀 MIGRACIÓN PARA PAGO PARCIAL Y BORRADO DE CLIENTES EN VENTAS
         try {
             await sequelize.query('ALTER TABLE "Ventas" ADD COLUMN IF NOT EXISTS "Comprobante2" VARCHAR(500)');
             await sequelize.query('ALTER TABLE "Ventas" ADD COLUMN IF NOT EXISTS "MontoPagado" DECIMAL(10, 2) DEFAULT 0');
             await sequelize.query('ALTER TABLE "Ventas" ADD COLUMN IF NOT EXISTS "Monto1" DECIMAL(10, 2) DEFAULT 0');
             await sequelize.query('ALTER TABLE "Ventas" ADD COLUMN IF NOT EXISTS "Monto2" DECIMAL(10, 2) DEFAULT 0');
+            
+            // Permitir NULL en IdCliente y añadir Nombre Historico
+            await sequelize.query('ALTER TABLE "Ventas" ALTER COLUMN "IdCliente" DROP NOT NULL');
+            await sequelize.query('ALTER TABLE "Ventas" ADD COLUMN IF NOT EXISTS "ClienteNombreHistorico" VARCHAR(255)');
+
+            // 🚀 MIGRACIÓN PARA COMPRAS (BORRADO DE PROVEEDORES)
+            await sequelize.query('ALTER TABLE "Compras" ALTER COLUMN "IdProveedor" DROP NOT NULL');
+            await sequelize.query('ALTER TABLE "Compras" ADD COLUMN IF NOT EXISTS "ProveedorNombreHistorico" VARCHAR(255)');
+
+            // 🚀 MIGRACIÓN PARA DETALLE VENTAS (PERSISTENCIA DE NOMBRES)
+            await sequelize.query('ALTER TABLE "DetalleVentas" ADD COLUMN IF NOT EXISTS "NombreProducto" VARCHAR(255)');
+
+            // 🚀 MIGRACIÓN PARA PRODUCTOS (BORRADO LÓGICO)
+            await sequelize.query('ALTER TABLE "Productos" ADD COLUMN IF NOT EXISTS "DeletedAt" TIMESTAMP WITH TIME ZONE');
 
         } catch (e) {
             console.warn('⚠️ No se pudieron añadir columnas extra a Ventas:', e.message);

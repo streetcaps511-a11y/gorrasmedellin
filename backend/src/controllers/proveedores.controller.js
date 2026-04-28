@@ -352,23 +352,28 @@ const proveedorController = {
                 });
             }
 
-            // Verificar si tiene compras asociadas
-            const tieneCompras = await proveedor.tieneCompras();
-            if (tieneCompras) {
-                await transaction.rollback();
-                return res.status(400).json({
-                    success: false,
-                    message: 'No se puede eliminar el proveedor porque tiene compras asociadas'
-                });
-            }
+            // 🛡️ DESVINCULAR COMPRAS Y GUARDAR NOMBRE HISTÓRICO
+            // Esto permite borrar el proveedor sin perder el historial de a quién se le compró
+            const companyName = proveedor.companyName || proveedor.Nombre;
+            
+            await Compra.update(
+                { 
+                    idProveedor: null, 
+                    proveedorNombreHistorico: companyName 
+                }, 
+                { 
+                    where: { idProveedor: id },
+                    transaction 
+                }
+            );
 
-            // Eliminar permanentemente si no tiene compras
+            // Eliminar permanentemente
             await proveedor.destroy({ transaction });
             await transaction.commit();
 
             res.status(200).json({
                 success: true,
-                message: 'Proveedor eliminado permanentemente'
+                message: 'Proveedor eliminado permanentemente (compras desvinculadas con historial)'
             });
 
         } catch (error) {

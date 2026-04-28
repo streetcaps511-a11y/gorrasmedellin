@@ -56,7 +56,29 @@ const ventaController = {
                 order: [['fecha', 'DESC']]
             });
 
-            res.json({ success: true, data: rows, pagination: { totalItems: count, currentPage: parseInt(page), totalPages: Math.ceil(count / limit) } });
+            const rowsFormateadas = rows.map(v => {
+                const json = v.toJSON();
+                // 🛡️ Fallback para cliente borrado
+                if (!json.clienteData && json.clienteNombreHistorico) {
+                    json.clienteData = { 
+                        nombreCompleto: json.clienteNombreHistorico, 
+                        email: 'Cliente Eliminado',
+                        isDeleted: true 
+                    };
+                }
+                // 🛡️ Fallback para productos borrados en detalles
+                if (json.detalles) {
+                    json.detalles = json.detalles.map(d => {
+                        if (!d.producto && d.nombreProducto) {
+                            d.producto = { nombre: d.nombreProducto, isDeleted: true };
+                        }
+                        return d;
+                    });
+                }
+                return json;
+            });
+
+            res.json({ success: true, data: rowsFormateadas, pagination: { totalItems: count, currentPage: parseInt(page), totalPages: Math.ceil(count / limit) } });
         } catch (error) {
             res.status(500).json({ success: false, message: error.message });
         }
@@ -68,7 +90,27 @@ const ventaController = {
                 include: ['clienteData', { model: DetalleVenta, as: 'detalles', include: [{ model: Producto, as: 'producto', paranoid: false }] }] 
             });
             if (!venta) return res.status(404).json({ success: false, message: 'Venta no encontrada' });
-            res.json({ success: true, data: venta });
+            
+            const json = venta.toJSON();
+            // 🛡️ Fallback para cliente borrado
+            if (!json.clienteData && json.clienteNombreHistorico) {
+                json.clienteData = { 
+                    nombreCompleto: json.clienteNombreHistorico, 
+                    email: 'Cliente Eliminado',
+                    isDeleted: true
+                };
+            }
+            // 🛡️ Fallback para productos borrados en detalles
+            if (json.detalles) {
+                json.detalles = json.detalles.map(d => {
+                    if (!d.producto && d.nombreProducto) {
+                        d.producto = { nombre: d.nombreProducto, isDeleted: true };
+                    }
+                    return d;
+                });
+            }
+            
+            res.json({ success: true, data: json });
         } catch (error) {
             res.status(500).json({ success: false, message: error.message });
         }
@@ -192,6 +234,7 @@ const ventaController = {
 
                 detallesData.push({
                     idProducto: productId,
+                    nombreProducto: item.nombre || producto.nombre,
                     cantidad: item.cantidad,
                     precio: item.precio,
                     subtotal: subtotal,
@@ -334,7 +377,16 @@ const ventaController = {
 
             await venta.update({ idEstado: 'Anulada' }, { transaction });
             await transaction.commit();
-            res.json({ success: true, message: 'Venta anulada correctamente' });
+
+            // Recuperar la venta final actualizada
+            const ventaFinal = await Venta.findByPk(req.params.id, {
+                include: [
+                    { association: 'clienteData', attributes: ['id', 'nombreCompleto', 'numeroDocumento', 'email', 'telefono'] },
+                    { association: 'detalles', include: [{ model: Producto, as: 'producto', paranoid: false }] }
+                ]
+            });
+
+            res.json({ success: true, data: ventaFinal, message: 'Venta anulada correctamente' });
         } catch (error) {
             await transaction.rollback();
             res.status(400).json({ success: false, message: error.message });
