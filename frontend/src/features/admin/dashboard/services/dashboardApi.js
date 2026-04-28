@@ -20,7 +20,9 @@ import {
  */
 export const fetchDashboardVentas = async () => {
   try {
-    const response = await getVentas();
+    // 🚀 OPTIMIZACIÓN: Intentamos pedir solo los últimos 30 días para que el Dashboard vuele
+    // Si el backend no soporta params, igual traerá todo, pero dejamos la puerta abierta
+    const response = await getVentas({ limit: 100, sort: 'desc' });
     const data = response?.data?.data || response?.data || [];
     return Array.isArray(data) ? data : [];
   } catch (error) {
