@@ -217,7 +217,7 @@ const dashboardController = {
             
             const primerDiaMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
-            const [ventasHoy, ventasMes, comprasMes, totalVentasHistorico] = await Promise.all([
+            const [ventasHoy, ventasMes, comprasMes, totalVentasHistorico, countProductos, countClientes, countProveedores, countCategorias] = await Promise.all([
                 safeSum(Venta, 'total', {
                     fecha: { [Op.gte]: hoy },
                     idEstado: 'Completada'
@@ -231,12 +231,22 @@ const dashboardController = {
                 }),
                 safeSum(Venta, 'total', { 
                     idEstado: 'Completada' 
-                })
+                }),
+                Producto.count(),
+                Cliente.count(),
+                Proveedor.count(),
+                Categoria.count()
             ]);
 
             res.json({
                 success: true,
                 data: {
+                    conteos: {
+                        productos: countProductos,
+                        clientes: countClientes,
+                        proveedores: countProveedores,
+                        categorias: countCategorias
+                    },
                     caja: {
                         ventasHoy,
                         ventasMes,
