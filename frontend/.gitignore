@@ -1,0 +1,12 @@
+# Dependencias
+node_modules/
+
+# Archivos de build
+dist/
+build/
+
+# Archivos de configuración
+.env
+
+# Otros
+4.txt
