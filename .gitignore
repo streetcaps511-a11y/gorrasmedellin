@@ -1,6 +1,12 @@
+# Dependencias
 node_modules/
-# frontend/ (eliminado para poder subirlo a GitHub)
 
+# Archivos de build
+dist/
+build/
+
+# Archivos de configuración
 .env
-*.log
-.DS_Store
+
+# Otros
+4.txt
