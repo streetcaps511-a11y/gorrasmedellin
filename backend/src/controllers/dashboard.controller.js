@@ -211,6 +211,18 @@ const dashboardController = {
             const totalDevoluciones = await Devolucion.count();
             const totalUsuarios = await Usuario.count();
 
+            // 🆕 ÚLTIMOS PRODUCTOS REGISTRADOS
+            const ultimosProductosReg = await Producto.findAll({
+                limit: 5,
+                order: [['createdAt', 'DESC']]
+            });
+
+            // 🆕 ÚLTIMOS PROVEEDORES REGISTRADOS
+            const ultimosProveedoresReg = await Proveedor.findAll({
+                limit: 5,
+                order: [['createdAt', 'DESC']]
+            });
+
             // 💰 TOTALES DE VENTAS Y COMPRAS
             const ventasHoy = await Venta.sum('total', {
                 where: {
@@ -419,6 +431,16 @@ const dashboardController = {
                         correo: c.clienteData?.email,
                         cantidad: parseInt(c.dataValues.total_compras || 0),
                         total: parseFloat(c.dataValues.total_gastado || 0) // Para que coincida con c.total en el Front
+                    })),
+                    ultimosProductos: ultimosProductosReg.map(p => ({
+                        id: p.id,
+                        nombre: p.nombre,
+                        fecha: p.createdAt
+                    })),
+                    ultimosProveedores: ultimosProveedoresReg.map(p => ({
+                        id: p.id,
+                        nombre: p.companyName || p.contactName,
+                        fecha: p.createdAt
                     }))
                 }
             });

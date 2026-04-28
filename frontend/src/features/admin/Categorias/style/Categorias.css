@@ -420,7 +420,7 @@
   margin-bottom: 2px;
   display: block;
   opacity: 0.8;
-  text-transform: uppercase !important; /* Kept uppercase for Categories */
+  text-transform: none !important; /* Cambiado de uppercase a none como solicitó el usuario */
 }
 
 .form-field__label--required::after {

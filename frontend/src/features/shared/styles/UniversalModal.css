@@ -76,8 +76,8 @@
 .modal-subtitle-text {
   color: #94A3B8;
   font-size: 0.78rem;
-  margin: 2px 0 0 0; /* Reducido al mínimo */
-  line-height: 1.1;
+  margin: 6px 0 0 0; /* Aumentado para despegar un poco del título */
+  line-height: 1.2;
 }
 
 .modal-footer-actions {

@@ -124,7 +124,17 @@ export const getSizes = async () => {
 };
 
 export const fetchAllProductos = async () => {
-  const res = await getProductos();
-  const data = res.data?.data || res.data;
-  return Array.isArray(data) ? data : [];
+  try {
+    const res = await getProductos();
+    const raw = res.data?.data || res.data;
+    // El backend devuelve { products: [...], count: ... } cuando se usa todos=true
+    const data = Array.isArray(raw) 
+      ? raw 
+      : (raw.products || raw.rows || []);
+    
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error('Error fetching productos for compras:', error);
+    return [];
+  }
 };

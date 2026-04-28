@@ -19,7 +19,7 @@ import {
 } from '../hooks';
 
 // Componentes
-import { SalesChart, PurchasesChart, TopProductsList, FrequentCustomersList } from '../components';
+import { SalesChart, PurchasesChart, TopProductsList, FrequentCustomersList, StatsCards } from '../components';
 
 /**
  * Página principal del dashboard del admin
@@ -42,7 +42,7 @@ const AdminDashboard = () => {
   } = useDashboardFilters();
 
   // Datos del dashboard desde API
-  const { ventas, compras, loading, error } = useDashboardData();
+  const { ventas, compras, estadisticas, loading, error } = useDashboardData();
 
   // Datos procesados para gráficos (Filtrados por Año, Mes y Día)
   const salesByMonth = useSalesByMonth(ventas, selectedYear, selectedMonth, selectedDay);
@@ -98,6 +98,9 @@ const AdminDashboard = () => {
           onClose={() => {}} 
         />
       )}
+      
+      {/* TARJETAS DE ESTADÍSTICAS (PRODUCTOS, PROVEEDORES, ETC) */}
+      <StatsCards stats={estadisticas} />
 
       {/* GRÁFICOS PRINCIPALES */}
       <div className="main-visual-grid">
@@ -110,6 +113,34 @@ const AdminDashboard = () => {
         <FrequentCustomersList customers={frequentCustomers} />
         <TopProductsList products={topProducts} />
       </div>
+
+      {/* ÚLTIMOS REGISTROS */}
+      {estadisticas && (
+        <div className="main-visual-grid">
+          <div className="chart-visual-box">
+            <h3 className="chart-header-dark">ÚLTIMOS PRODUCTOS REGISTRADOS</h3>
+            <div className="recent-list">
+              {estadisticas.ultimosProductos?.map(p => (
+                <div key={p.id} className="recent-item">
+                  <span className="item-name">{p.nombre}</span>
+                  <span className="item-date">{new Date(p.fecha).toLocaleDateString()}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="chart-visual-box">
+            <h3 className="chart-header-dark">ÚLTIMOS PROVEEDORES REGISTRADOS</h3>
+            <div className="recent-list">
+              {estadisticas.ultimosProveedores?.map(p => (
+                <div key={p.id} className="recent-item">
+                  <span className="item-name">{p.nombre}</span>
+                  <span className="item-date">{new Date(p.fecha).toLocaleDateString()}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
