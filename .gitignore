@@ -1,5 +1,6 @@
 node_modules/
-frontend/
+# frontend/ (eliminado para poder subirlo a GitHub)
+
 .env
 *.log
 .DS_Store
