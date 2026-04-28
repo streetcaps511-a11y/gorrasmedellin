@@ -10,3 +10,6 @@ build/
 
 # Local Frontend
 frontend/
+
+# Public Uploads
+public/
