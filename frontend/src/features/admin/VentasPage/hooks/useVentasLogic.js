@@ -27,19 +27,18 @@ const getInitialSupportData = (key, defaultVal = []) => {
 
 export const useVentasLogic = (initialAvailableProducts = [], initialAvailableCustomers = [], initialAvailableSizes = []) => {
   const initialVentas = getInitialVentas();
-  const [ventas, setVentas] = useState(initialVentas);
+  const [ventas, setVentas] = useState([]);
   const [availableStatuses, setAvailableStatuses] = useState(['Pendiente', 'Completada', 'Rechazada', 'Anulada']);
-  const [availablePaymentMethods, setAvailablePaymentMethods] = useState(getInitialSupportData('ventas_pay_methods'));
-  const [availableSizes, setAvailableSizes] = useState(getInitialSupportData('ventas_sizes', ['Ajustable', '7', '7/1/4', '7/1/8']));
-  const [availableCustomers, setAvailableCustomers] = useState(getInitialSupportData('ventas_customers'));
-  const [availableProducts, setAvailableProducts] = useState(getInitialSupportData('ventas_products'));
+  const [availablePaymentMethods, setAvailablePaymentMethods] = useState([]);
+  const [availableSizes, setAvailableSizes] = useState(['Ajustable', '7', '7/1/4', '7/1/8']);
+  const [availableCustomers, setAvailableCustomers] = useState([]);
+  const [availableProducts, setAvailableProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('Todos');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 7;
 
-  // ⚡ Solo mostramos cargando si NO tenemos nada en memoria
-  const [loading, setLoading] = useState(initialVentas.length === 0);
+  const [loading, setLoading] = useState(true);
   const [alert, setAlert] = useState({ show: false, message: '', type: 'success' });
   
   const [modoVista, setModoVista] = useState("lista"); // "lista", "formulario", "detalle"
@@ -71,19 +70,18 @@ export const useVentasLogic = (initialAvailableProducts = [], initialAvailableCu
 
     // Si no hay datos previos, mostramos cargando
     const current = getInitialVentas();
-    if (current.length === 0) setLoading(true);
-
     try {
       const salesData = await ventasService.getSales();
       setVentas(salesData);
-      NitroCache.set('ventas', salesData);
 
       if (loadAll) {
-        const statuses = await ventasService.getStatuses();
-        const methods = await ventasService.getPaymentMethods();
-        const sizes = await ventasService.getSizes();
-        const customers = await ventasService.getCustomers();
-        const products = await productosService.getProductos();
+        const [statuses, methods, sizes, customers, products] = await Promise.all([
+          ventasService.getStatuses(),
+          ventasService.getPaymentMethods(),
+          ventasService.getSizes(),
+          ventasService.getCustomers(),
+          productosService.getProductos()
+        ]);
 
         const mappedStatuses = statuses.map(s => typeof s === 'string' ? s : (s.nombre || s.Nombre));
         const mappedMethods = methods.map(m => typeof m === 'string' ? m : (m.nombre || m.Nombre));
@@ -95,16 +93,10 @@ export const useVentasLogic = (initialAvailableProducts = [], initialAvailableCu
         setAvailableSizes(mappedSizes);
         setAvailableCustomers(customers);
         setAvailableProducts(activeProducts);
-
-        NitroCache.set('ventas_statuses', mappedStatuses);
-        NitroCache.set('ventas_pay_methods', mappedMethods);
-        NitroCache.set('ventas_sizes', mappedSizes);
-        NitroCache.set('ventas_customers', customers);
-        NitroCache.set('ventas_products', activeProducts);
       }
 
     } catch (error) {
-      console.error("❌ [NITRO] Error fetchData:", error);
+      console.error("Error fetchData:", error);
     } finally {
       setLoading(false);
     }

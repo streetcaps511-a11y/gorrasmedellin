@@ -25,24 +25,14 @@ const getCache = () => {
  * Solo hace peticiones reales si el caché tiene más de 2 minutos de antigüedad.
  */
 export const useDashboardData = () => {
-  const cached = getCache();
-
-  const [ventas, setVentas] = useState(cached?.ventas || []);
-  const [compras, setCompras] = useState(cached?.compras || []);
-  const [clientes, setClientes] = useState(cached?.clientes || []);
-  const [estadisticas, setEstadisticas] = useState(cached?.estadisticas || null);
-  // ⚡ Solo mostramos spinner si NO hay nada de caché.
-  // Si el caché está vencido, cargamos en segundo plano sin bloquear la vista.
-  const [loading, setLoading] = useState(!cached);
+  const [ventas, setVentas] = useState([]);
+  const [compras, setCompras] = useState([]);
+  const [clientes, setClientes] = useState([]);
+  const [estadisticas, setEstadisticas] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Si el caché está fresco (<2 min), no volvemos a pedir
-    if (NitroCache.isFresh('dashboard_admin', DASHBOARD_TTL)) {
-      setLoading(false);
-      return;
-    }
-
     let mounted = true;
 
     const loadDashboardData = async () => {
@@ -75,81 +65,22 @@ export const useDashboardData = () => {
         const hasClientes = hasPermission('clientes');
         const hasDashboard = hasPermission('dashboard');
 
-        // 🚀 PROCESO DE CARGA INDIVIDUAL (No bloqueante)
-        // Actualizamos cada estado en cuanto su promesa se resuelve para una UI más rápida
-        
-        const processVentas = async () => {
-          if (!hasVentas) return;
-          try {
-            const data = await fetchDashboardVentas();
-            if (mounted) {
-              setVentas(data);
-              // Actualizar caché parcial
-              updateNitroCache('ventas', data);
-            }
-          } catch (e) { console.error("Error en ventas:", e); }
-        };
-
-        const processCompras = async () => {
-          if (!hasCompras) return;
-          try {
-            const data = await fetchDashboardCompras();
-            if (mounted) {
-              setCompras(data);
-              updateNitroCache('compras', data);
-            }
-          } catch (e) { console.error("Error en compras:", e); }
-        };
-
-        const processClientes = async () => {
-          if (!hasClientes) return;
-          try {
-            const data = await fetchDashboardClientes();
-            if (mounted) {
-              setClientes(data);
-              updateNitroCache('clientes', data);
-            }
-          } catch (e) { console.error("Error en clientes:", e); }
-        };
-
-        const processStats = async () => {
-          if (!hasDashboard) return;
-          try {
-            const data = await fetchDashboardStats();
-            if (mounted) {
-              setEstadisticas(data);
-              updateNitroCache('estadisticas', data);
-            }
-          } catch (e) { console.error("Error en stats:", e); }
-        };
-
-        // Función auxiliar para actualizar el caché de forma incremental
-        const updateNitroCache = (key, value) => {
-          const current = NitroCache.get('dashboard_admin')?.data || {};
-          NitroCache.set('dashboard_admin', {
-            ...current,
-            [key]: value,
-            _savedAt: Date.now()
-          });
-        };
-
-        // Ejecutar todas en paralelo pero sin esperar (Promise.all)
-        // Esto permite que la UI se actualice conforme llega cada respuesta
-        Promise.allSettled([
-          processVentas(),
-          processCompras(),
-          processClientes(),
-          processStats()
-        ]).then(() => {
-          if (mounted) setLoading(false);
-        });
+        // 🚀 Carga paralela sin caché
+        await Promise.allSettled([
+          hasVentas ? fetchDashboardVentas().then(d => mounted && setVentas(d)) : Promise.resolve(),
+          hasCompras ? fetchDashboardCompras().then(d => mounted && setCompras(d)) : Promise.resolve(),
+          hasClientes ? fetchDashboardClientes().then(d => mounted && setClientes(d)) : Promise.resolve(),
+          hasDashboard ? fetchDashboardStats().then(d => mounted && setEstadisticas(d)) : Promise.resolve(),
+        ]);
 
       } catch (err) {
         console.error('Error loading dashboard data:', err);
         if (mounted) setError(err.message || 'Error al cargar los datos');
+      } finally {
         if (mounted) setLoading(false);
       }
     };
+
 
 
     loadDashboardData();

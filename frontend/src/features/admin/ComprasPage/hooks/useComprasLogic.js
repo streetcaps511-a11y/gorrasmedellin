@@ -27,15 +27,15 @@ const getInitialProv = () => {
     const cached = NitroCache.get('compras_prov');
     return cached?.data || [];
 };
-
+// // 🧠 MEMORIA GLOBAL
 let localCache = {
   isInitialized: false
 };
 
 export const useComprasLogic = (location) => {
   const [modoVista, setModoVista] = useState("lista");
-  const [compras, setCompras] = useState(getInitialCompras());
-  const [proveedores, setProveedores] = useState(getInitialProv());
+  const [compras, setCompras] = useState([]);
+  const [proveedores, setProveedores] = useState([]);
   const [availableStatuses, setAvailableStatuses] = useState(['Todos', 'Pendiente', 'Completada', 'Anulada']);
   const [availablePaymentMethods, setAvailablePaymentMethods] = useState(['Efectivo', 'Transferencia']);
   const [availableSizes, setAvailableSizes] = useState([
@@ -59,8 +59,7 @@ export const useComprasLogic = (location) => {
   const [productos, setProductos] = useState([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   
-  // ⚡ Solo mostramos cargando si NO tenemos nada en memoria
-  const [loading, setLoading] = useState(getInitialCompras().length === 0);
+  const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionLoadingText, setActionLoadingText] = useState('Procesando...');
 
@@ -91,10 +90,12 @@ export const useComprasLogic = (location) => {
     }));
   }, [proveedores]);
 
-  // ✅ CARGA RÁPIDA (Nitro Sync)
   const fetchData = useCallback(async () => {
     const token = sessionStorage.getItem('token');
-    if (!token) return;
+    if (!token) {
+        setLoading(false);
+        return;
+    }
 
     try {
         const [cData, pData, methods, prData] = await Promise.all([
@@ -104,14 +105,11 @@ export const useComprasLogic = (location) => {
             fetchAllProductos()
         ]);
 
-        const sorted = [...cData].sort((a, b) => (parseInt(b.numCompra) || 0) - (parseInt(a.numCompra) || 0));
-        
-        // 💾 PERSISTENCIA NITRO
-        NitroCache.set('compras_v2', sorted);
-        NitroCache.set('compras_prov', pData);
+        const sorted = [...(cData || [])].sort((a, b) => (parseInt(b.numCompra) || 0) - (parseInt(a.numCompra) || 0));
         
         setCompras(sorted);
-        setProveedores(pData);
+        setProveedores(pData || []);
+        
         if (Array.isArray(methods)) {
             setAvailablePaymentMethods(methods.map(m => typeof m === 'string' ? m : (m.Nombre || m.nombre)));
         }

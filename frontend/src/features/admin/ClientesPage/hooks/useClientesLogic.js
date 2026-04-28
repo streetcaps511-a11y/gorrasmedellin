@@ -32,14 +32,14 @@ const getInitialDepts = () => {
 
 export const useClientesLogic = () => {
   const initialClientes = getInitialClientes();
-  const [clientes, setClientes] = useState(initialClientes);
+  const [clientes, setClientes] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('Todos');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 7;
   const [alert, setAlert] = useState({ show: false, message: '', type: 'success' });
   const [departamentos, setDepartamentos] = useState(getInitialDepts());
-  const [loading, setLoading] = useState(initialClientes.length === 0);
+  const [loading, setLoading] = useState(true);
   const [modalState, setModalState] = useState({
     isOpen: false,
     mode: 'view',
@@ -87,13 +87,7 @@ export const useClientesLogic = () => {
 
   const loadClientes = async () => {
     try {
-      const current = getInitialClientes();
-      if (current.length === 0) setLoading(true);
-      
       const data = await fetchAllClientes();
-      
-      // 💾 GUARDAR EN NITRO CACHE PERSISTENTE
-      NitroCache.set('clientes', data);
       setClientes(data);
     } catch (error) {
       console.error("Error loading clientes:", error);
@@ -101,6 +95,7 @@ export const useClientesLogic = () => {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     loadClientes();
