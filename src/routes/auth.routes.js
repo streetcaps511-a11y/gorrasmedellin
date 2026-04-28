@@ -9,6 +9,24 @@ import { verifyToken } from '../middlewares/auth.middleware.js';  // ✅ verifyT
 
 const router = Router();
 
+// Root route for auth to avoid 404
+router.get('/', (req, res) => {
+  res.json({
+    module: 'Autenticación',
+    status: 'Active',
+    endpoints: [
+      '/registro',
+      '/login',
+      '/verify',
+      '/register',
+      '/change-password',
+      '/forgot-password',
+      '/reset-password',
+      '/sync-password'
+    ]
+  });
+});
+
 router.post('/registro', authController.registro);
 router.post('/login', authController.login);
 router.post('/logout', verifyToken, authController.logout);

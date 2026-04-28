@@ -266,7 +266,7 @@ app.get('/', (req, res) => {
 });
 
 // Ruta de salud
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
     uptime: process.uptime(),
