@@ -16,11 +16,11 @@
 
 .sc-container {
   background: #0f172a;
-  border: 1px solid #F5C81B; /* Borde más fino como la imagen */
-  border-radius: 12px; /* Redondez similar a la imagen */
-  max-width: 550px;
+  border: 1px solid #F5C81B; 
+  border-radius: 12px;
+  max-width: 450px; /* Más delgado */
   width: 90%;
-  padding: 50px 40px;
+  padding: 30px 25px; /* Menos espacio interno */
   text-align: center;
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
   animation: modalAppear 0.3s ease-out;
@@ -32,39 +32,21 @@
   to { transform: scale(1); opacity: 1; }
 }
 
-.sc-icon-header {
+.sc-header-row {
   display: flex;
-  justify-content: center;
-  margin-bottom: 25px;
-}
-
-.sc-icon-pulse {
-  background: rgba(245, 200, 27, 0.1);
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
   align-items: center;
-  position: relative;
-}
-
-.sc-icon-pulse::after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border: 2px solid #F5C81B;
-  border-radius: 50%;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
 .sc-title {
   color: #fff;
-  font-size: 24px;
+  font-size: 18px; /* Texto un poco más pequeño para que quepa en una línea */
   font-weight: 700;
-  margin-bottom: 15px;
+  margin: 0;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
 .sc-description {

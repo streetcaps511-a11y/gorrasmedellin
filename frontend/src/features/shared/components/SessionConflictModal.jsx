@@ -36,18 +36,25 @@ const SessionConflictModal = ({
   return (
     <div className="sc-overlay">
       <div className="sc-container">
-        <div className="sc-icon-header">
-          <FaUserShield size={32} color="#F5C81B" />
+        <div className="sc-header-row">
+          <FaUserShield size={24} color="#F5C81B" />
+          <h2 className="sc-title">SESIÓN ACTIVA EN OTRO LUGAR</h2>
         </div>
-        
-        <h2 className="sc-title">SESIÓN ACTIVA EN OTRO LUGAR</h2>
         
         <p className="sc-description">Tu cuenta se ha abierto en otro dispositivo o navegador.</p>
 
         <div className="sc-actions">
           <button className="sc-btn sc-btn-secondary" onClick={handleClose}>
-            <span>Entendido</span>
+            <FaSignOutAlt size={14} />
+            <span>Cerrar</span>
           </button>
+
+          {showUseHere && (
+            <button className="sc-btn sc-btn-primary" onClick={handleUseHere}>
+              <FaRocket size={14} />
+              <span>Usar aquí</span>
+            </button>
+          )}
         </div>
 
       </div>
