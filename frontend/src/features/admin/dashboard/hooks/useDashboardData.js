@@ -25,17 +25,32 @@ const getCache = () => {
  * Solo hace peticiones reales si el caché tiene más de 2 minutos de antigüedad.
  */
 export const useDashboardData = () => {
-  const [ventas, setVentas] = useState([]);
-  const [compras, setCompras] = useState([]);
-  const [clientes, setClientes] = useState([]);
-  const [estadisticas, setEstadisticas] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const DASHBOARD_TTL = 5 * 60 * 1000; // 5 minutos exactos
+
+  const getCache = () => {
+    const cached = NitroCache.get('dashboard_admin');
+    if (cached && NitroCache.isFresh('dashboard_admin', DASHBOARD_TTL)) return cached.data;
+    return null;
+  };
+
+  const cachedData = getCache();
+  const [ventas, setVentas] = useState(cachedData?.ventas || []);
+  const [compras, setCompras] = useState(cachedData?.compras || []);
+  const [clientes, setClientes] = useState(cachedData?.clientes || []);
+  const [estadisticas, setEstadisticas] = useState(cachedData?.estadisticas || null);
+  const [loading, setLoading] = useState(!cachedData);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     let mounted = true;
 
     const loadDashboardData = async () => {
+      // Si el caché está fresco, no cargamos nada
+      if (NitroCache.isFresh('dashboard_admin', DASHBOARD_TTL)) {
+        if (mounted) setLoading(false);
+        return;
+      }
+
       const user = JSON.parse(sessionStorage.getItem('user') || 'null');
       const token = sessionStorage.getItem('token');
 
@@ -49,35 +64,39 @@ export const useDashboardData = () => {
           if (!user) return false;
           const userRolId = Number(user.idRol || user.IdRol || 0);
           const rolName = String(user.rol || user.Rol || user.rolData?.nombre || '').toUpperCase().trim();
-
           if (userRolId === 1 || rolName === 'ADMINISTRADOR' || rolName === 'ADMIN') return true;
           if (!user.permisos || !Array.isArray(user.permisos)) return false;
-
           return user.permisos.some(p => {
             const pStr = (typeof p === 'string' ? p : (p.nombre || p.id || p.modulo || '')).toLowerCase();
-            const normalized = pStr.replace('perm_', '').replace('ver_', '').trim();
-            return normalized === moduleName.toLowerCase();
+            return pStr.includes(moduleName.toLowerCase());
           });
         };
 
-        const hasVentas = hasPermission('ventas');
-        const hasCompras = hasPermission('compras');
-        const hasClientes = hasPermission('clientes');
-        const hasDashboard = hasPermission('dashboard');
-
-        // 🚀 Carga paralela sin caché
-        await Promise.allSettled([
-          hasVentas ? fetchDashboardVentas().then(d => mounted && setVentas(d)) : Promise.resolve(),
-          hasCompras ? fetchDashboardCompras().then(d => mounted && setCompras(d)) : Promise.resolve(),
-          hasClientes ? fetchDashboardClientes().then(d => mounted && setClientes(d)) : Promise.resolve(),
-          hasDashboard ? fetchDashboardStats().then(d => mounted && setEstadisticas(d)) : Promise.resolve(),
+        const [rVentas, rCompras, rClientes, rStats] = await Promise.all([
+          hasPermission('ventas') ? fetchDashboardVentas() : Promise.resolve([]),
+          hasPermission('compras') ? fetchDashboardCompras() : Promise.resolve([]),
+          hasPermission('clientes') ? fetchDashboardClientes() : Promise.resolve([]),
+          hasPermission('dashboard') ? fetchDashboardStats() : Promise.resolve(null),
         ]);
+
+        if (mounted) {
+          const allData = { ventas: rVentas, compras: rCompras, clientes: rClientes, estadisticas: rStats };
+          
+          setVentas(rVentas);
+          setCompras(rCompras);
+          setClientes(rClientes);
+          setEstadisticas(rStats);
+          
+          NitroCache.set('dashboard_admin', allData);
+          setLoading(false);
+        }
 
       } catch (err) {
         console.error('Error loading dashboard data:', err);
-        if (mounted) setError(err.message || 'Error al cargar los datos');
-      } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setError(err.message || 'Error al cargar los datos');
+          setLoading(false);
+        }
       }
     };
 
