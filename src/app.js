@@ -73,33 +73,17 @@ app.use('/api/imagenes', imagenesRoutes);
 app.use('/api/colores', coloresRoutes);
 
 // ============================================
-// PÁGINA PRINCIPAL - REVERTIDA A LISTA SIMPLE
+// PÁGINA PRINCIPAL - SIN SCROLL Y SIN /API/ EN NOMBRES
 // ============================================
 app.get('/', (req, res) => {
   const baseUrl = `${req.protocol}://${req.get('host')}`;
   
   const modulos = [
-    'dashboard',
-    'auth',
-    'productos',
-    'categorias',
-    'proveedores',
-    'compras',
-    'detallecompras',
-    'devoluciones',
-    'clientes',
-    'ventas',
-    'detalleventas',
-    'usuarios',
-    'roles',
-    'permisos',
-    'detallepermisos',
-    'estados',
-    'tallas',
-    'imagenes',
-    'pedidos',
-    'colores',
-    'health'
+    'dashboard', 'auth', 'productos', 'categorias',
+    'proveedores', 'compras', 'detallecompras', 'devoluciones',
+    'clientes', 'ventas', 'detalleventas', 'usuarios',
+    'roles', 'permisos', 'detallepermisos', 'estados',
+    'tallas', 'imagenes', 'pedidos', 'colores', 'health'
   ];
 
   const html = `
@@ -109,15 +93,43 @@ app.get('/', (req, res) => {
       <meta charset="UTF-8">
       <title>StreetCaps API</title>
       <style>
-        body { margin: 20px; font-family: sans-serif; line-height: 1.6; }
-        a { color: #2563eb; text-decoration: none; display: block; margin-bottom: 5px; }
-        a:hover { text-decoration: underline; }
-        h1 { font-size: 1.5rem; margin-bottom: 20px; }
+        body { 
+          margin: 0; 
+          padding: 20px;
+          font-family: sans-serif; 
+          height: 100vh;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          background: #fdfdfd;
+        }
+        h1 { font-size: 1.2rem; color: #333; margin-bottom: 20px; text-align: center; }
+        .grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 10px;
+          max-width: 800px;
+          margin: 0 auto;
+        }
+        a { 
+          color: #2563eb; 
+          text-decoration: none; 
+          padding: 8px;
+          border: 1px solid #e5e7eb;
+          border-radius: 4px;
+          text-align: center;
+          font-size: 0.9rem;
+          background: white;
+          transition: background 0.2s;
+        }
+        a:hover { background: #f3f4f6; }
       </style>
     </head>
     <body>
       <h1>StreetCaps API Index</h1>
-      ${modulos.map(m => `<a href="${baseUrl}/api/${m}" target="_blank">/api/${m}</a>`).join('')}
+      <div class="grid">
+        ${modulos.map(m => `<a href="${baseUrl}/api/${m}" target="_blank">${m}</a>`).join('')}
+      </div>
     </body>
     </html>
   `;
