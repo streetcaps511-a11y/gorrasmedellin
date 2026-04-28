@@ -73,7 +73,7 @@ app.use('/api/imagenes', imagenesRoutes);
 app.use('/api/colores', coloresRoutes);
 
 // ============================================
-// PÁGINA PRINCIPAL - SIN SCROLL Y SIN /API/ EN NOMBRES
+// PÁGINA PRINCIPAL - STREETCAPS (SIN SCROLL)
 // ============================================
 app.get('/', (req, res) => {
   const baseUrl = `${req.protocol}://${req.get('host')}`;
@@ -95,38 +95,37 @@ app.get('/', (req, res) => {
       <style>
         body { 
           margin: 0; 
-          padding: 20px;
-          font-family: sans-serif; 
+          padding: 40px 20px;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
           height: 100vh;
           overflow: hidden;
           display: flex;
           flex-direction: column;
-          background: #fdfdfd;
+          align-items: center;
+          background: #ffffff;
         }
-        h1 { font-size: 1.2rem; color: #333; margin-bottom: 20px; text-align: center; }
+        h1 { font-size: 2rem; color: #111; margin-bottom: 30px; font-weight: 800; letter-spacing: -1px; }
         .grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 10px;
-          max-width: 800px;
-          margin: 0 auto;
+          gap: 15px;
+          max-width: 900px;
+          width: 100%;
         }
         a { 
-          color: #2563eb; 
+          color: #3b82f6; 
           text-decoration: none; 
-          padding: 8px;
-          border: 1px solid #e5e7eb;
-          border-radius: 4px;
-          text-align: center;
-          font-size: 0.9rem;
-          background: white;
-          transition: background 0.2s;
+          padding: 12px;
+          border-bottom: 1px solid #f3f4f6;
+          font-size: 1rem;
+          transition: all 0.2s;
+          display: block;
         }
-        a:hover { background: #f3f4f6; }
+        a:hover { background: #f9fafb; color: #1d4ed8; }
       </style>
     </head>
     <body>
-      <h1>StreetCaps API Index</h1>
+      <h1>StreetCaps</h1>
       <div class="grid">
         ${modulos.map(m => `<a href="${baseUrl}/api/${m}" target="_blank">${m}</a>`).join('')}
       </div>
