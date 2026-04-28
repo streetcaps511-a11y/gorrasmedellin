@@ -61,35 +61,10 @@ const authController = {
 
             await t.commit();
             
-            // 🔐 GENERAR TOKEN PARA ENTRADA AUTOMÁTICA (Ideal para Apps Móviles)
-            const newSessionId = crypto.randomUUID();
-            user.sessionId = newSessionId;
-            user.lastActivity = new Date();
-            await user.save();
-
-            const token = generateToken({
-                id: user.id,
-                email: user.email,
-                idRol: user.idRol,
-                rol: rolCliente.nombre || 'Cliente',
-                mustChangePassword: false,
-                sessionId: newSessionId
-            });
-
             res.status(201).json({ 
                 success: true, 
-                message: 'Registro exitoso.',
-                data: { 
-                    token,
-                    usuario: {
-                        id: user.id,
-                        nombre: user.nombre,
-                        email: user.email,
-                        rol: rolCliente.nombre || 'Cliente',
-                        estado: user.estado,
-                        permisos: rolCliente.nombre === 'Cliente' ? ['tienda'] : [] // Permiso básico
-                    }
-                }
+                message: 'Registro exitoso. Ya puedes iniciar sesión.',
+                data: { id: user.id, email: user.email, estado: user.estado }
             });
         } catch (error) {
             if (t) await t.rollback();
