@@ -75,45 +75,82 @@ export const useDashboardData = () => {
         const hasClientes = hasPermission('clientes');
         const hasDashboard = hasPermission('dashboard');
 
-        // 🚀 Solo pedir lo que el usuario tiene permiso de ver
-        const [ventasResult, comprasResult, clientesResult, statsResult] = await Promise.allSettled([
-          hasVentas ? fetchDashboardVentas() : Promise.resolve([]),
-          hasCompras ? fetchDashboardCompras() : Promise.resolve([]),
-          hasClientes ? fetchDashboardClientes() : Promise.resolve([]),
-          hasDashboard ? fetchDashboardStats() : Promise.resolve(null),
-        ]);
-
-        if (!mounted) return;
-
-        const newVentas = ventasResult.status === 'fulfilled' ? ventasResult.value : (cached?.ventas || []);
-        const newCompras = comprasResult.status === 'fulfilled' ? comprasResult.value : (cached?.compras || []);
-        const newClientes = clientesResult.status === 'fulfilled' ? clientesResult.value : (cached?.clientes || []);
-        const newEstadisticas = statsResult.status === 'fulfilled' ? statsResult.value : (cached?.estadisticas || null);
-
-        // 💾 Guardar con timestamp para controlar frescura
-        const toCache = {
-          ventas: newVentas,
-          compras: newCompras,
-          clientes: newClientes,
-          estadisticas: newEstadisticas,
-          _savedAt: Date.now()
+        // 🚀 PROCESO DE CARGA INDIVIDUAL (No bloqueante)
+        // Actualizamos cada estado en cuanto su promesa se resuelve para una UI más rápida
+        
+        const processVentas = async () => {
+          if (!hasVentas) return;
+          try {
+            const data = await fetchDashboardVentas();
+            if (mounted) {
+              setVentas(data);
+              // Actualizar caché parcial
+              updateNitroCache('ventas', data);
+            }
+          } catch (e) { console.error("Error en ventas:", e); }
         };
-        // Cache persistence disabled to avoid StorageFull errors and ensure fresh data
-        // NitroCache.set('dashboard_admin', toCache);
 
-        setVentas(newVentas);
-        setCompras(newCompras);
-        setClientes(newClientes);
-        setEstadisticas(newEstadisticas);
-        setError(null);
+        const processCompras = async () => {
+          if (!hasCompras) return;
+          try {
+            const data = await fetchDashboardCompras();
+            if (mounted) {
+              setCompras(data);
+              updateNitroCache('compras', data);
+            }
+          } catch (e) { console.error("Error en compras:", e); }
+        };
+
+        const processClientes = async () => {
+          if (!hasClientes) return;
+          try {
+            const data = await fetchDashboardClientes();
+            if (mounted) {
+              setClientes(data);
+              updateNitroCache('clientes', data);
+            }
+          } catch (e) { console.error("Error en clientes:", e); }
+        };
+
+        const processStats = async () => {
+          if (!hasDashboard) return;
+          try {
+            const data = await fetchDashboardStats();
+            if (mounted) {
+              setEstadisticas(data);
+              updateNitroCache('estadisticas', data);
+            }
+          } catch (e) { console.error("Error en stats:", e); }
+        };
+
+        // Función auxiliar para actualizar el caché de forma incremental
+        const updateNitroCache = (key, value) => {
+          const current = NitroCache.get('dashboard_admin')?.data || {};
+          NitroCache.set('dashboard_admin', {
+            ...current,
+            [key]: value,
+            _savedAt: Date.now()
+          });
+        };
+
+        // Ejecutar todas en paralelo pero sin esperar (Promise.all)
+        // Esto permite que la UI se actualice conforme llega cada respuesta
+        Promise.allSettled([
+          processVentas(),
+          processCompras(),
+          processClientes(),
+          processStats()
+        ]).then(() => {
+          if (mounted) setLoading(false);
+        });
 
       } catch (err) {
         console.error('Error loading dashboard data:', err);
         if (mounted) setError(err.message || 'Error al cargar los datos');
-      } finally {
         if (mounted) setLoading(false);
       }
     };
+
 
     loadDashboardData();
     return () => { mounted = false; };
