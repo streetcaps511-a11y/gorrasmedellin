@@ -624,8 +624,8 @@ const Login = () => {
                   <label style={styles.label}>Correo electrónico</label>
                   <input
                     style={{ ...styles.input, borderColor: fieldErrors.correo ? '#ff4d4d' : styles.input.border.split(' ')[2] }}
-                    type="text"
-                    inputMode="email"
+                    type="email"
+                    autoComplete="off"
                     placeholder="ejemplo@correo.com"
                     value={loginData.correo}
                     onChange={(e) => setLoginData({ ...loginData, correo: e.target.value })}

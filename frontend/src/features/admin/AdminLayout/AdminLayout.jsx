@@ -49,53 +49,7 @@ const menuConfig = [
   }
 ];
 
-// ===== COMPONENTE DE BIENVENIDA =====
-const WelcomeDashboard = ({ user }) => {
-  const currentDate = new Date().toLocaleDateString('es-CO', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-  });
-
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "¡Buenos días!";
-    if (hour < 18) return "¡Buenas tardes!";
-    return "¡Buenas noches!";
-  };
-
-  const userName = user?.nombre || user?.Nombre || user?.name || 'Administrador';
-  const userRole = user?.rol || user?.role || user?.Rol || user?.userType || 'Administrador';
-
-  return (
-    <div className="al-welcome">
-      <div className="al-welcome-inner">
-        <div className="al-avatar">
-          <FaUserTie size={50} color="#000" />
-        </div>
-
-        <h1 className="al-greeting">{getGreeting()}</h1>
-        <h2 className="al-username">{userName}</h2>
-
-        <div className="al-role-badge">
-          <span>{userRole}</span>
-        </div>
-
-        <div className="al-date-row">
-          <FaCalendarAlt color="#F5C81B" size={16} />
-          <span>{currentDate}</span>
-        </div>
-
-        <p className="al-welcome-text">
-          Bienvenido al panel de <strong>GM Caps</strong>.<br />
-          {userRole === 'Administrador'
-            ? 'Tienes acceso completo a todos los módulos del sistema.'
-            : userRole === 'Vendedor'
-            ? 'Gestiona ventas, clientes y productos disponibles.'
-            : 'Accede a los módulos asignados para tu rol.'}
-        </p>
-      </div>
-    </div>
-  );
-};
+// ===== COMPONENTE DE BIENVENIDA ELIMINADO =====
 
 // ===== COMPONENTE PRINCIPAL =====
 const AdminLayoutClean = () => {
@@ -328,7 +282,7 @@ const AdminLayoutClean = () => {
 
       {/* ===== CONTENIDO PRINCIPAL ===== */}
       <main className="al-main">
-        {isBaseAdminRoute ? <WelcomeDashboard user={user} /> : <Outlet />}
+        <Outlet />
       </main>
     </div>
   );
