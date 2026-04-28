@@ -1,0 +1,5 @@
+/* index.css - Centraliza los estilos de DevolucionesPage */
+@import './layout.css';
+@import './form.css';
+@import './evidence.css';
+@import './premium_actions.css';
