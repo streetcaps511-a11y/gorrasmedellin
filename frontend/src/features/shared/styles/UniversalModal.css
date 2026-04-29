@@ -1,0 +1,192 @@
+.universal-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: flex-start; /* Subido */
+  justify-content: center;
+  z-index: 999999;
+  padding: 5vh 10px 10px; /* Margen superior para subirlo */
+  backdrop-filter: blur(4px);
+  animation: modal-fadeIn 0.2s ease-out;
+  overflow: hidden;
+}
+
+.universal-modal-container {
+  background-color: #000000;
+  border-radius: 12px;
+  width: min(95%, 365px);
+  max-height: 92vh; /* Reduced slightly to ensure it fits well */
+  height: auto;
+  min-height: 0; /* Important for flex child scrolling */
+  overflow: hidden; /* Prevent container itself from scrolling */
+  padding: 20px 20px 24px; /* Aumentado arriba y abajo */
+  position: relative;
+  border: 1px solid rgba(245, 200, 27, 0.8);
+  display: flex;
+  flex-direction: column;
+  animation: modal-scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  margin: auto;
+}
+
+.modal-large {
+  width: min(95%, 600px);
+}
+
+.modal-medium {
+  width: min(95%, 440px); /* Un ancho equilibrado */
+}
+
+.modal-small {
+  width: min(95%, 320px);
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.3rem;
+  cursor: pointer;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  z-index: 10;
+}
+
+.modal-header-section {
+  margin-bottom: 20px; /* Más espacio bajo el título */
+  padding-right: 28px;
+  padding-top: 0;
+}
+
+.modal-title-main {
+  color: #F5C81B;
+  font-size: 1.25rem; /* Slightly larger */
+  font-weight: 800;
+  margin: 0;
+  line-height: 1;
+}
+
+.modal-subtitle-text {
+  color: #94A3B8;
+  font-size: 0.78rem;
+  margin: 12px 0 0 0; /* Aumentado a 12px por petición del usuario */
+  line-height: 1.2;
+}
+
+.modal-footer-actions {
+  margin-top: 25px; /* Más espacio sobre los botones */
+  padding-top: 0;
+  border-top: none;
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px; /* Más separación entre botones */
+  flex-shrink: 0;
+}
+
+.btn-modal-base {
+  padding: 0 16px;
+  font-size: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: all 0.2s;
+  height: 38px; /* Botones un poco más grandes y cómodos */
+}
+
+.btn-modal-cancel {
+  background: transparent;
+  border: 1px solid #F5C81B;
+  color: #F5C81B;
+}
+
+.btn-modal-cancel:hover {
+  background-color: rgba(245, 200, 27, 0.1);
+}
+
+.btn-modal-confirm {
+  background: transparent;
+  border: 1px solid #FFC300;
+  color: #FFC300;
+  padding: 0 24px;
+  text-transform: none;
+}
+
+.btn-modal-confirm:hover {
+  background: rgba(245, 200, 27, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 200, 27, 0.2);
+}
+
+/* Estilos para inputs dentro del modal */
+.modal-content-scroll input,
+.modal-content-scroll textarea,
+.modal-content-scroll select {
+  background-color: #1E293B !important;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: #f1f5f9;
+  font-size: 12px;
+  width: 100%;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  outline: none;
+  transition: all 0.2s;
+  height: 26px;
+}
+
+.modal-content-scroll textarea {
+  height: auto;
+  min-height: 60px;
+}
+
+.modal-content-scroll input:focus,
+.modal-content-scroll textarea:focus,
+.modal-content-scroll select:focus {
+  border-color: #F5C81B !important;
+  background-color: #1E293B !important;
+  box-shadow: 0 0 0 2px rgba(245, 200, 27, 0.15);
+}
+
+.modal-content-scroll label {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 10px;
+  display: block;
+  margin-bottom: 0px;
+  margin-top: 1px;
+  text-transform: none;
+}
+
+.modal-content-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+.modal-content-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.modal-content-scroll::-webkit-scrollbar-thumb {
+  background: rgba(245, 200, 27, 0.2);
+  border-radius: 10px;
+}
+.modal-content-scroll {
+  padding-bottom: 2px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0; /* Crucial para que flex y scroll funcionen juntos */
+}
+.modal-content-scroll::-webkit-scrollbar-thumb:hover {
+  background: #F5C81B;
+}
+
+.readonly-field {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+

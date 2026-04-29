@@ -31,6 +31,9 @@ import { notFound, errorHandler } from './middlewares/error.middleware.js';
 
 const app = express();
 
+// Trust Render Proxy
+app.set('trust proxy', true);
+
 // Middlewares globales
 app.use(cors());
 app.use(morgan('dev', {
@@ -70,33 +73,17 @@ app.use('/api/imagenes', imagenesRoutes);
 app.use('/api/colores', coloresRoutes);
 
 // ============================================
-// PÁGINA PRINCIPAL - EN COLUMNA SIN SLASH
+// PÁGINA PRINCIPAL - STREETCAPS (SIN SCROLL)
 // ============================================
 app.get('/', (req, res) => {
   const baseUrl = `${req.protocol}://${req.get('host')}`;
   
   const modulos = [
-    'dashboard',
-    'auth',
-    'productos',
-    'categorias',
-    'proveedores',
-    'compras',
-    'detallecompras',
-    'devoluciones',
-    'clientes',
-    'ventas',
-    'detalleventas',
-    'usuarios',
-    'roles',
-    'permisos',
-    'detallepermisos',
-    'estados',
-    'tallas',
-    'imagenes',
-    'pedidos',
-    'colores',
-    'health'
+    'dashboard', 'auth', 'productos', 'categorias',
+    'proveedores', 'compras', 'detallecompras', 'devoluciones',
+    'clientes', 'ventas', 'detalleventas', 'usuarios',
+    'roles', 'permisos', 'detallepermisos', 'estados',
+    'tallas', 'imagenes', 'pedidos', 'colores', 'health'
   ];
 
   const html = `
@@ -104,21 +91,44 @@ app.get('/', (req, res) => {
     <html>
     <head>
       <meta charset="UTF-8">
+      <title>StreetCaps API</title>
       <style>
         body { 
-          margin: 20px; 
-          font-family: Arial;
+          margin: 0; 
+          padding: 40px 20px;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+          height: 100vh;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          background: #ffffff;
+        }
+        h1 { font-size: 2rem; color: #111; margin-bottom: 30px; font-weight: 800; letter-spacing: -1px; }
+        .grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 15px;
+          max-width: 900px;
+          width: 100%;
         }
         a { 
-          color: blue; 
-          text-decoration: underline;
+          color: #3b82f6; 
+          text-decoration: none; 
+          padding: 12px;
+          border-bottom: 1px solid #f3f4f6;
+          font-size: 1rem;
+          transition: all 0.2s;
           display: block;
-          margin-bottom: 8px;
         }
+        a:hover { background: #f9fafb; color: #1d4ed8; }
       </style>
     </head>
     <body>
-      ${modulos.map(m => `<a href="${baseUrl}/api/${m}" target="_blank">${m}</a>`).join('')}
+      <h1>StreetCaps</h1>
+      <div class="grid">
+        ${modulos.map(m => `<a href="${baseUrl}/api/${m}" target="_blank">${m}</a>`).join('')}
+      </div>
     </body>
     </html>
   `;
@@ -127,7 +137,7 @@ app.get('/', (req, res) => {
 });
 
 // Ruta de salud
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
     uptime: process.uptime(),
