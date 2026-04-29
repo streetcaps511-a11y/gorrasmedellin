@@ -620,11 +620,12 @@ const Login = () => {
               </div>
 
               {activeTab === "login" ? (
-                <form onSubmit={handleLogin} onChange={resetMessages}>
+                <form onSubmit={handleLogin} onChange={resetMessages} autoComplete="off">
                   <label style={styles.label}>Correo electrónico</label>
                   <input
                     style={{ ...styles.input, borderColor: fieldErrors.correo ? '#ff4d4d' : styles.input.border.split(' ')[2] }}
                     type="email"
+                    name="correo_login_unique"
                     autoComplete="off"
                     placeholder="ejemplo@correo.com"
                     value={loginData.correo}
@@ -637,6 +638,8 @@ const Login = () => {
                       <input
                         style={{ ...styles.input, paddingRight: '40px', borderColor: fieldErrors.clave ? '#ff4d4d' : styles.input.border.split(' ')[2] }}
                         type={showLoginPass ? "text" : "password"}
+                        name="clave_login_unique"
+                        autoComplete="new-password"
                         placeholder="••••••••"
                         value={loginData.clave}
                         onChange={(e) => setLoginData({ ...loginData, clave: e.target.value })}
