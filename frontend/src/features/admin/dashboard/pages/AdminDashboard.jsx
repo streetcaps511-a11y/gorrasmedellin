@@ -89,6 +89,9 @@ const AdminDashboard = () => {
         </div>
       </div>
 
+      {/* 🚀 TARJETAS DE ESTADÍSTICAS (Sincronizadas con API) */}
+      <StatsCards stats={estadisticas} />
+
       {/* ESTADO DE CARGA SILENCIOSO (Solo error) */}
 
       {error && (
