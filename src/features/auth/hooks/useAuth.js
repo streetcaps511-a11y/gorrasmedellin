@@ -7,6 +7,7 @@
 // ── Hook de autenticación ──
 import { useState, useCallback } from "react";
 import { loginUser } from "shared/services/authApi";
+import { NitroCache } from "shared/utils/NitroCache";
 
 export const useAuth = () => {
   const [loading, setLoading] = useState(false);
@@ -34,6 +35,7 @@ export const useAuth = () => {
   const logout = useCallback(() => {
     sessionStorage.removeItem("user");
     sessionStorage.removeItem("token");
+    NitroCache.clear(); // 🧹 Limpiar toda la caché de la aplicación
     window.location.href = "/login";
   }, []);
 

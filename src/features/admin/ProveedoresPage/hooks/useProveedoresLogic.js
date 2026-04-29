@@ -267,11 +267,17 @@ export const useProveedoresLogic = () => {
     closeModal();
 
     try {
+      let finalProveedores = [];
       if (isEdit) {
         await proveedoresService.updateProveedor(payload.id, payload);
+        finalProveedores = oldProveedores.map(p => p.id === payload.id ? { ...p, ...payload } : p);
       } else {
-        await proveedoresService.createProveedor(payload);
+        const result = await proveedoresService.createProveedor(payload);
+        finalProveedores = [result, ...oldProveedores.filter(p => !p.isOptimistic)];
       }
+      
+      setProveedores(finalProveedores);
+      NitroCache.set('proveedores_admin', finalProveedores);
     } catch (error) {
       setProveedores(oldProveedores);
       const resp = error.response?.data;
