@@ -102,6 +102,16 @@ const Usuario = sequelize.define('Usuario', {
     type: DataTypes.DATE,
     allowNull: true,
     field: 'LastActivity'
+  },
+  sessionIdApp: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    field: 'SessionIdApp'
+  },
+  lastActivityApp: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'LastActivityApp'
   }
 }, {
   tableName: 'Usuarios',

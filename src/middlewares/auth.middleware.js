@@ -107,22 +107,30 @@ export const verifyToken = async (req, res, next) => {
       });
     }
 
-    // 🔍 BLOQUEO DE DOBLE ACCESO: Validar SessionId
-    if (usuario.sessionId && decoded.sessionId !== usuario.sessionId) {
-      console.log(`⚠️ Sessión invalidada para ${usuario.email}: El ID del token no coincide con el de la DB.`);
+    // 🔍 BLOQUEO DE DOBLE ACCESO: Validar SessionId según plataforma
+    const platform = decoded.platform || 'web';
+    const dbSessionId = platform === 'app' ? usuario.sessionIdApp : usuario.sessionId;
+
+    if (dbSessionId && decoded.sessionId !== dbSessionId) {
+      console.log(`⚠️ Sesión invalidada para ${usuario.email} en ${platform}: El ID del token no coincide.`);
       return res.status(401).json({
         success: false,
         isSessionInvalidated: true,
-        message: 'Tu sesión ha sido abierta en otro dispositivo. Por seguridad, debes volver a ingresar.'
+        message: `Tu sesión ha sido abierta en otro ${platform === 'app' ? 'dispositivo (App)' : 'navegador (Web)'}.`
       });
     }
 
     // Actualizar última actividad para mantener la sesión viva
-    usuario.lastActivity = new Date();
-    await usuario.save({ hooks: false }); // Evitar hooks para mayor velocidad
+    if (platform === 'app') {
+      usuario.lastActivityApp = new Date();
+    } else {
+      usuario.lastActivity = new Date();
+    }
+    await usuario.save({ hooks: false });
 
     // ✅ Inyectar para que el controlador lo reciba directamente
     req.usuario = usuario;
+    req.platform = platform; // 🔑 Inyectar plataforma
     req.rol = usuario.rolData;
     req.usuarioId = usuario.id;
 

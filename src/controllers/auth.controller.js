@@ -176,24 +176,39 @@ const authController = {
                 return res.status(403).json({ success: false, message: 'Cuenta pendiente de aprobación' });
             }
 
-            // 🔐 BLOQUEO DE DOBLE ACCESO (SESIÓN ÚNICA)
-            const { force } = req.body;
+            // 🔐 MANEJO DE PLATAFORMAS (Web vs App)
+            const { force, platform = 'web' } = req.body;
             const now = new Date();
-            const lastActivity = user.lastActivity ? new Date(user.lastActivity) : null;
-            const isRecentlyActive = lastActivity && (now - lastActivity) < 60000; // REDUCIDO A 1 MINUTO
-
-            if (user.sessionId && isRecentlyActive && !force) {
-                return res.status(409).json({ 
-                    success: false, 
-                    message: 'Ya hay una sesión activa en otro dispositivo.',
-                    needsForce: true 
-                });
-            }
-
-            // Generar nuevo identificador de sesión
             const newSessionId = crypto.randomUUID();
-            user.sessionId = newSessionId;
-            user.lastActivity = now;
+            
+            if (platform === 'app') {
+                const lastActivity = user.lastActivityApp ? new Date(user.lastActivityApp) : null;
+                const isRecentlyActive = lastActivity && (now - lastActivity) < 60000; // 1 minuto de gracia
+                
+                if (user.sessionIdApp && isRecentlyActive && !force) {
+                    return res.status(409).json({ 
+                        success: false, 
+                        message: 'Ya hay una sesión activa en la Aplicación.',
+                        needsForce: true 
+                    });
+                }
+                user.sessionIdApp = newSessionId;
+                user.lastActivityApp = now;
+            } else {
+                // Por defecto: Web
+                const lastActivity = user.lastActivity ? new Date(user.lastActivity) : null;
+                const isRecentlyActive = lastActivity && (now - lastActivity) < 60000;
+                
+                if (user.sessionId && isRecentlyActive && !force) {
+                    return res.status(409).json({ 
+                        success: false, 
+                        message: 'Ya hay una sesión activa en el Navegador Web.',
+                        needsForce: true 
+                    });
+                }
+                user.sessionId = newSessionId;
+                user.lastActivity = now;
+            }
             await user.save();
 
             // 🛡️ REGLA DE SEGURIDAD REDUNDANTE (Sincronización Crítica en Login)
@@ -256,7 +271,8 @@ const authController = {
                 idRol: user.idRol,
                 rol: userJSON.rol,
                 mustChangePassword: userJSON.mustChangePassword,
-                sessionId: newSessionId // 🔑 Incluir en el JWT
+                sessionId: newSessionId,
+                platform: platform || 'web' // 🔑 Incluir plataforma en el JWT
             });
 
             // console.log(`🎉 [DEBUG LOGIN] Acceso exitoso: ${searchEmail}. Permisos: ${uniquePerms.join(', ')}`);
@@ -280,7 +296,12 @@ const authController = {
             if (req.usuario) {
                 const user = await Usuario.findByPk(req.usuario.id);
                 if (user) {
-                    user.sessionId = null;
+                    // Limpiar la sesión según la plataforma del token
+                    if (req.platform === 'app') {
+                        user.sessionIdApp = null;
+                    } else {
+                        user.sessionId = null;
+                    }
                     await user.save();
                 }
             }
