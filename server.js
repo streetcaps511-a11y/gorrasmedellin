@@ -57,8 +57,18 @@ const startServer = async () => {
         }
 
 
+        // 🚀 MIGRACIÓN PARA USUARIOS (SESSION ID)
+        try {
+            await sequelize.query('ALTER TABLE "Usuarios" ADD COLUMN IF NOT EXISTS "SessionId" VARCHAR(255)');
+            await sequelize.query('ALTER TABLE "Usuarios" ADD COLUMN IF NOT EXISTS "LastActivity" TIMESTAMP WITH TIME ZONE');
+            await sequelize.query('ALTER TABLE "Usuarios" ADD COLUMN IF NOT EXISTS "SessionIdApp" VARCHAR(255)');
+            await sequelize.query('ALTER TABLE "Usuarios" ADD COLUMN IF NOT EXISTS "LastActivityApp" TIMESTAMP WITH TIME ZONE');
+        } catch (e) {
+            console.warn('⚠️ No se pudieron añadir columnas de sesión a Usuarios:', e.message);
+        }
+
     } catch (e) {
-        console.log('⚠️ La base de datos ya estaba sincronizada o requiere ajustes manuales en Ventas/Devoluciones.');
+        console.log('⚠️ La base de datos ya estaba sincronizada o requiere ajustes manuales.');
     }
 
     // 🚀 AUTO-MIGRACIÓN DE COLORES
