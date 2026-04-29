@@ -5,6 +5,18 @@
 
 const CACHE_PREFIX = 'nitro_cache_v1_';
 
+// 🧹 LIMPIEZA DE GHOSTS: Elimina rastros de localStorage de versiones anteriores
+try {
+  const oldPrefixes = ['nitro_cache_v1_', 'gm_cat_v2_'];
+  Object.keys(localStorage).forEach(k => {
+    if (oldPrefixes.some(p => k.startsWith(p))) {
+      localStorage.removeItem(k);
+    }
+  });
+} catch (e) {
+  // Silenciar si hay problemas con localStorage (ej: modo incógnito)
+}
+
 export const NitroCache = {
   /**
    * Guarda datos en la caché persistente (ahora en sessionStorage)

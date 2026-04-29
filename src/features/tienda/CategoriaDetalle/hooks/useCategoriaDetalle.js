@@ -10,16 +10,12 @@ import { useCart } from "../../../shared/contexts";
 import { NitroCache } from "../../../shared/utils/NitroCache";
 
 const getPersistentData = (catName) => {
-  try {
-    const data = localStorage.getItem(`gm_cat_v2_${catName}`);
-    return data ? JSON.parse(data) : null;
-  } catch { return null; }
+  const cached = NitroCache.get(`cat_v2_${catName}`);
+  return cached?.data || null;
 };
 
 const setPersistentData = (catName, data) => {
-  try {
-    localStorage.setItem(`gm_cat_v2_${catName}`, JSON.stringify(data));
-  } catch {}
+  NitroCache.set(`cat_v2_${catName}`, data);
 };
 
 const getCachedProducts = () => {
@@ -77,7 +73,7 @@ export const useCategoriaDetalle = () => {
   const [productos, setProductos] = useState(() => {
     const cat = decodeURIComponent(nombreCategoria || '').toLowerCase();
     const persistent = getPersistentData(cat);
-    // Si existe la key en LocalStorage (así sea []), la usamos y evitamos parpadeos
+    // Si existe la key en la caché, la usamos y evitamos parpadeos
     if (persistent !== null) return persistent;
 
     const cached = getCachedProducts();
@@ -97,7 +93,7 @@ export const useCategoriaDetalle = () => {
   const [loading, setLoading] = useState(() => {
     const cat = decodeURIComponent(nombreCategoria || '').toLowerCase();
     const persistent = getPersistentData(cat);
-    // Si la key existe en localStorage (incluso si es un array vacío []), no mostramos loader
+    // Si la key existe en la caché, no mostramos loader
     if (persistent !== null) return false;
     
     const cached = getCachedProducts();
@@ -182,7 +178,7 @@ export const useCategoriaDetalle = () => {
           return prev;
         });
 
-        // Guardar persistente (LocalStorage)
+        // Guardar en caché persistente de sesión
         setPersistentData(categoria, filtrados);
 
         // Guardar en cache compartido
