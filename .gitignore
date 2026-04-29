@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-@
-=======
->>>>>>> bb0a2ea29ef31bb2002d5c6db9d452633f6775c5
 node_modules/
 .env
 .env.local
@@ -13,9 +9,4 @@ build/
 
 # Local Frontend
 frontend/
-<<<<<<< HEAD
-=======
 
-# Public Uploads (if not using Cloudinary yet, but we are switching)
-# public/uploads/
->>>>>>> bb0a2ea29ef31bb2002d5c6db9d452633f6775c5

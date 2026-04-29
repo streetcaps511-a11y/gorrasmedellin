@@ -31,12 +31,9 @@ import { notFound, errorHandler } from './middlewares/error.middleware.js';
 
 const app = express();
 
-<<<<<<< HEAD
-=======
 // Trust Render Proxy
 app.set('trust proxy', true);
 
->>>>>>> bb0a2ea29ef31bb2002d5c6db9d452633f6775c5
 // Middlewares globales
 app.use(cors());
 app.use(morgan('dev', {
@@ -76,45 +73,17 @@ app.use('/api/imagenes', imagenesRoutes);
 app.use('/api/colores', coloresRoutes);
 
 // ============================================
-<<<<<<< HEAD
-// PÁGINA PRINCIPAL - EN COLUMNA SIN SLASH
-=======
 // PÁGINA PRINCIPAL - STREETCAPS (SIN SCROLL)
->>>>>>> bb0a2ea29ef31bb2002d5c6db9d452633f6775c5
 // ============================================
 app.get('/', (req, res) => {
   const baseUrl = `${req.protocol}://${req.get('host')}`;
   
   const modulos = [
-<<<<<<< HEAD
-    'dashboard',
-    'auth',
-    'productos',
-    'categorias',
-    'proveedores',
-    'compras',
-    'detallecompras',
-    'devoluciones',
-    'clientes',
-    'ventas',
-    'detalleventas',
-    'usuarios',
-    'roles',
-    'permisos',
-    'detallepermisos',
-    'estados',
-    'tallas',
-    'imagenes',
-    'pedidos',
-    'colores',
-    'health'
-=======
     'dashboard', 'auth', 'productos', 'categorias',
     'proveedores', 'compras', 'detallecompras', 'devoluciones',
     'clientes', 'ventas', 'detalleventas', 'usuarios',
     'roles', 'permisos', 'detallepermisos', 'estados',
     'tallas', 'imagenes', 'pedidos', 'colores', 'health'
->>>>>>> bb0a2ea29ef31bb2002d5c6db9d452633f6775c5
   ];
 
   const html = `
@@ -122,23 +91,6 @@ app.get('/', (req, res) => {
     <html>
     <head>
       <meta charset="UTF-8">
-<<<<<<< HEAD
-      <style>
-        body { 
-          margin: 20px; 
-          font-family: Arial;
-        }
-        a { 
-          color: blue; 
-          text-decoration: underline;
-          display: block;
-          margin-bottom: 8px;
-        }
-      </style>
-    </head>
-    <body>
-      ${modulos.map(m => `<a href="${baseUrl}/api/${m}" target="_blank">${m}</a>`).join('')}
-=======
       <title>StreetCaps API</title>
       <style>
         body { 
@@ -177,7 +129,6 @@ app.get('/', (req, res) => {
       <div class="grid">
         ${modulos.map(m => `<a href="${baseUrl}/api/${m}" target="_blank">${m}</a>`).join('')}
       </div>
->>>>>>> bb0a2ea29ef31bb2002d5c6db9d452633f6775c5
     </body>
     </html>
   `;
@@ -186,11 +137,7 @@ app.get('/', (req, res) => {
 });
 
 // Ruta de salud
-<<<<<<< HEAD
-app.get('/health', (req, res) => {
-=======
 app.get('/api/health', (req, res) => {
->>>>>>> bb0a2ea29ef31bb2002d5c6db9d452633f6775c5
   res.status(200).json({ 
     status: 'OK', 
     uptime: process.uptime(),

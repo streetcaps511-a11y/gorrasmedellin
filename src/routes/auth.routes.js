@@ -9,8 +9,6 @@ import { verifyToken } from '../middlewares/auth.middleware.js';  // ✅ verifyT
 
 const router = Router();
 
-<<<<<<< HEAD
-=======
 // Root route for auth to avoid 404
 router.get('/', (req, res) => {
   res.json({
@@ -29,7 +27,6 @@ router.get('/', (req, res) => {
   });
 });
 
->>>>>>> bb0a2ea29ef31bb2002d5c6db9d452633f6775c5
 router.post('/registro', authController.registro);
 router.post('/login', authController.login);
 router.post('/logout', verifyToken, authController.logout);
