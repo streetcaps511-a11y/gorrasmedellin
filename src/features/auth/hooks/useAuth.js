@@ -6,7 +6,7 @@
 // src/modules/auth/hooks/useAuth.js
 // ── Hook de autenticación ──
 import { useState, useCallback } from "react";
-import { loginUser } from "shared/services/authApi";
+import { loginUser, logoutUser } from "shared/services/authApi";
 import { NitroCache } from "shared/utils/NitroCache";
 
 export const useAuth = () => {
@@ -32,11 +32,20 @@ export const useAuth = () => {
     }
   }, []);
 
-  const logout = useCallback(() => {
-    sessionStorage.removeItem("user");
-    sessionStorage.removeItem("token");
-    NitroCache.clear(); // 🧹 Limpiar toda la caché de la aplicación
-    window.location.href = "/login";
+  const logout = useCallback(async () => {
+    try {
+      // 📡 Notificar al backend para limpiar la sesión en el servidor
+      await logoutUser();
+    } catch (err) {
+      console.warn("Error al cerrar sesión en el servidor:", err);
+    } finally {
+      // 🧹 Limpiar localmente sin importar si el servidor falló
+      sessionStorage.removeItem("user");
+      sessionStorage.removeItem("token");
+      sessionStorage.clear(); // Limpieza total de seguridad
+      NitroCache.clear(); 
+      window.location.href = "/login";
+    }
   }, []);
 
   return { login, logout, loading, error };
