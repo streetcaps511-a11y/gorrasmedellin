@@ -89,9 +89,6 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* TARJETAS DE ESTADÍSTICAS */}
-      <StatsCards stats={stats} />
-
       {/* SECCIÓN DE GRÁFICOS Y LISTAS (DISEÑO ORIGINAL) */}
       <div className="dashboard-content-row">
         <SalesChart data={salesByMonth} />

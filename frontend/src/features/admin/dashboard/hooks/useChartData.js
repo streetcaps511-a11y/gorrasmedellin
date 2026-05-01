@@ -152,7 +152,7 @@ export const useTopProducts = (ventas, productSearch, selectedYear, selectedMont
       .map(([nombre, cantidad]) => ({ nombre, cantidad }))
       .filter(p => p.nombre.toLowerCase().includes(productSearch.toLowerCase()))
       .sort((a, b) => b.cantidad - a.cantidad)
-      .slice(0, 5);
+      .slice(0, 24);
   }, [ventas, productSearch, selectedYear, selectedMonth, selectedDay]);
 };
 
@@ -188,6 +188,6 @@ export const useTopCustomers = (ventas, customerSearch, selectedYear, selectedMo
       .map(([nombre, cantidad]) => ({ nombre, cantidad }))
       .filter(c => c.nombre.toLowerCase().includes(customerSearch.toLowerCase()))
       .sort((a, b) => b.cantidad - a.cantidad)
-      .slice(0, 5);
+      .slice(0, 24);
   }, [ventas, customerSearch, selectedYear, selectedMonth, selectedDay]);
 };

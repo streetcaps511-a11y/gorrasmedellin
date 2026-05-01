@@ -25,7 +25,7 @@ const getCache = () => {
  * Solo hace peticiones reales si el caché tiene más de 2 minutos de antigüedad.
  */
 export const useDashboardData = () => {
-  const DASHBOARD_TTL = 1; // 1 ms para forzar carga siempre
+  const DASHBOARD_TTL = 2 * 60 * 1000; // 2 minutos para evitar saturación
 
   const getCache = () => {
     const cached = NitroCache.get('dashboard_admin');
@@ -52,12 +52,6 @@ export const useDashboardData = () => {
     let mounted = true;
 
     const loadDashboardData = async () => {
-      // Si el caché está fresco, no cargamos nada
-      if (NitroCache.isFresh('dashboard_admin', DASHBOARD_TTL)) {
-        if (mounted) setLoading(false);
-        return;
-      }
-
       const user = JSON.parse(sessionStorage.getItem('user') || 'null');
       const token = sessionStorage.getItem('token');
 
@@ -66,62 +60,58 @@ export const useDashboardData = () => {
         return;
       }
 
-      try {
-        const hasPermission = (moduleName) => {
-          if (!user) return false;
-          const userRolId = Number(user.idRol || user.IdRol || 0);
-          const rolName = String(user.rol || user.Rol || user.rolData?.nombre || '').toUpperCase().trim();
-          if (userRolId === 1 || rolName === 'ADMINISTRADOR' || rolName === 'ADMIN') return true;
-          if (!user.permisos || !Array.isArray(user.permisos)) return false;
-          return user.permisos.some(p => {
-            const pStr = (typeof p === 'string' ? p : (p.nombre || p.id || p.modulo || '')).toLowerCase();
-            return pStr.includes(moduleName.toLowerCase());
-          });
-        };
+      // Si el caché está fresco, no cargamos nada
+      if (NitroCache.isFresh('dashboard_admin', DASHBOARD_TTL)) {
+        if (mounted) setLoading(false);
+        return;
+      }
 
-        // 🚀 CARGA ULTRA-AGRESIVA (Prioridad: Mostrar Datos)
+      // Función auxiliar para cargar cada pieza de forma independiente
+      const loadPiece = async (fetchFn, setterFn, fallbackValue) => {
+        try {
+          const result = await fetchFn();
+          if (mounted) setterFn(result || fallbackValue);
+          return result || fallbackValue;
+        } catch (err) {
+          console.error(`Error cargando pieza del dashboard:`, err);
+          if (mounted) setterFn(fallbackValue);
+          return fallbackValue;
+        }
+      };
+
+      try {
+        if (mounted) setLoading(true);
+
+        // Disparamos todas las peticiones en paralelo pero sin esperar a todas juntas con await individual
         const [rVentas, rCompras, rClientes, rStats] = await Promise.all([
-          fetchDashboardVentas().catch(() => []),
-          fetchDashboardCompras().catch(() => []),
-          fetchDashboardClientes().catch(() => []),
-          fetchDashboardStats().catch(() => ({}))
+          loadPiece(fetchDashboardVentas, setVentas, []),
+          loadPiece(fetchDashboardCompras, setCompras, []),
+          loadPiece(fetchDashboardClientes, setClientes, []),
+          loadPiece(fetchDashboardStats, (data) => {
+             setStats({
+                ...data,
+                productosMasVendidos: data?.productosMasVendidos || [],
+                clientesRecurrentes: data?.clientesRecurrentes || []
+             });
+          }, {})
         ]);
 
         if (mounted) {
-          // 🚀 Los servicios ya devuelven el .data limpio, los usamos directamente
-          const statsData = rStats || {};
-          
-          // 🛡️ RE-SINCRONIZACIÓN DE LISTAS (Productos y Clientes)
-          // Si statsData tiene las listas, las usamos, si no, fallback a vacío
-          const allData = { 
-            ventas: Array.isArray(rVentas) ? rVentas : [], 
-            compras: Array.isArray(rCompras) ? rCompras : [], 
-            clientes: Array.isArray(rClientes) ? rClientes : [],
-            stats: {
-              ...statsData,
-              productosMasVendidos: statsData.productosMasVendidos || [],
-              clientesRecurrentes: statsData.clientesRecurrentes || []
-            }
-          };
-          
-          setVentas(allData.ventas);
-          setCompras(allData.compras);
-          setClientes(allData.clientes);
-          setStats(allData.stats);
-          
-          NitroCache.set('dashboard_admin', allData);
+          // Guardamos en caché lo que tengamos al final
+          NitroCache.set('dashboard_admin', { 
+            ventas: rVentas, 
+            compras: rCompras, 
+            clientes: rClientes, 
+            stats: rStats 
+          });
           setLoading(false);
         }
-
       } catch (err) {
-        console.error('Error loading dashboard data:', err);
-        // Reintento silencioso una vez si falla
+        console.error('❌ Error general en Dashboard:', err);
         if (mounted) {
-           setError(err.message || 'Error al conectar con el servidor');
-           setLoading(false);
+          setError('No se pudo sincronizar toda la información.');
+          setLoading(false);
         }
-      } finally {
-        if (mounted) setLoading(false);
       }
     };
 

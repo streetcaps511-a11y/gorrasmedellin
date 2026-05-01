@@ -40,7 +40,7 @@ const PaginationControls = ({ currentPage, totalPages, onPrev, onNext }) => {
  */
 export const TopProductsList = ({ products = [] }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
+  const itemsPerPage = 6;
   
   // Resetear página al cambiar los datos (filtros)
   useEffect(() => {
@@ -93,7 +93,7 @@ export const TopProductsList = ({ products = [] }) => {
  */
 export const FrequentCustomersList = ({ customers = [] }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
+  const itemsPerPage = 6;
   
   // Resetear página al cambiar los datos (filtros)
   useEffect(() => {
