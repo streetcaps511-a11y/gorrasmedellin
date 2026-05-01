@@ -173,12 +173,12 @@ const ProductModal = ({
           <div className="gm-price-row">
             <div className="gm-modal-price-container">
               <div className="gm-modal-price-main">
-                ${Math.round(currentPrice || 0).toLocaleString()}
+                ${Math.round(currentPrice || 0).toLocaleString('es-CO')}
               </div>
               {isOffer && (
                 <div className="gm-original-price-row">
                   <span className="gm-original-price">
-                     Antes: ${Math.round(product.precio).toLocaleString()}
+                     Antes: ${Math.round(product.precio).toLocaleString('es-CO')}
                   </span>
                   <span className="gm-discount-badge">
                     {Math.round(((product.precio - product.precioOferta) / product.precio) * 100)}% DCTO

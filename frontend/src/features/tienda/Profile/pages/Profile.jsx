@@ -165,7 +165,7 @@ const Profile = () => {
       {profile.toast.open && (
         <div className="gm-toast-top">
           <CheckCircle size={20} color="#FFC107" />
-          <span>{profile.toast.text}</span>
+          <span style={{ color: '#fff', fontWeight: 500 }}>{profile.toast.text}</span>
         </div>
       )}
     </div>

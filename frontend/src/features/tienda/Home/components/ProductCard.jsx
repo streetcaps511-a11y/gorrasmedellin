@@ -82,14 +82,14 @@ const ProductCard = ({ product, openModal }) => {
             {isOffer ? (
               <>
                 <div className="gm-price-main-row">
-                  <span className="gm-current-price">${Math.round(product.precioOferta).toLocaleString()}</span>
+                  <span className="gm-current-price">${Math.round(product.precioOferta).toLocaleString('es-CO')}</span>
                   {discountPct > 0 && <span className="gm-discount-tag">-{discountPct}%</span>}
                 </div>
-                <span className="gm-old-price">${Math.round(product.precio).toLocaleString()}</span>
-                <span className="gm-saving-pill">Ahorras ${Math.round(product.precio - product.precioOferta).toLocaleString()}</span>
+                <span className="gm-old-price">${Math.round(product.precio).toLocaleString('es-CO')}</span>
+                <span className="gm-saving-pill">Ahorras ${Math.round(product.precio - product.precioOferta).toLocaleString('es-CO')}</span>
               </>
             ) : (
-              <span className="gm-current-price">${Math.round(product.precio || 0).toLocaleString()}</span>
+              <span className="gm-current-price">${Math.round(product.precio || 0).toLocaleString('es-CO')}</span>
             )}
           </div>
           <button className="gm-btn-cart" onClick={(e) => { e.stopPropagation(); handleOpenDetail(); }} type="button">

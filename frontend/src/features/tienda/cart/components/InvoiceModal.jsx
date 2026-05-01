@@ -143,15 +143,13 @@ const InvoiceModal = ({ isOpen, onClose, invoiceData }) => {
         padding: '20px',
         position: 'relative'
       }}>
-        <div style={{ textAlign: 'center', marginBottom: '6px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '10px', marginTop: '-5px' }}>
           <img
             src="/logo.png"
             alt="Logo GM CAPS"
             style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '6px',
-              border: '1px solid #FFC107',
+              width: '45px',
+              height: '45px',
               objectFit: 'contain'
             }}
             onError={(e) => {
@@ -160,8 +158,8 @@ const InvoiceModal = ({ isOpen, onClose, invoiceData }) => {
           />
           <h3 style={{
             color: '#FFC107',
-            margin: '6px 0 0 0',
-            fontSize: '14px',
+            margin: '2px 0 0 0',
+            fontSize: '15px',
             fontWeight: 'bold'
           }}>
             ¡Compra Exitosa!

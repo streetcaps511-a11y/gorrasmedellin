@@ -163,7 +163,7 @@ const Cart = () => {
 
   // Renderizado: Carrito con productos
   return (
-    <div className="page-container" style={{ minHeight: '100vh', position: 'relative' }}>
+    <div className="page-container" style={{ minHeight: '100vh', position: 'relative', backgroundColor: '#0f172a' }}>
       <CartHero />
       
       <CustomConfirm 

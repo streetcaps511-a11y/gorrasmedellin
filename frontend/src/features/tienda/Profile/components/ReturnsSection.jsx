@@ -38,10 +38,68 @@ const ReturnsSection = ({
   const [showBulkItems, setShowBulkItems] = React.useState(false);
   const [detailProdsPage, setDetailProdsPage] = React.useState(1);
   const [showRejectionModal, setShowRejectionModal] = React.useState(false);
+  const [previewImage, setPreviewImage] = React.useState(null);
 
   React.useEffect(() => {
     setDetailProdsPage(1);
   }, [selectedReturn?.id]);
+
+  // Componente para ver la imagen en grande
+  const ImageLightbox = () => {
+    if (!previewImage) return null;
+    return (
+      <div 
+        style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          backgroundColor: 'transparent', 
+          zIndex: 9999,
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          paddingLeft: '250px', // Deja el espacio del menú
+          cursor: 'default'
+        }}
+        onClick={() => setPreviewImage(null)}
+      >
+        <div 
+          style={{ 
+            position: 'relative', 
+            display: 'inline-block',
+            marginTop: '80px'
+          }} 
+          onClick={e => e.stopPropagation()}
+        >
+          <button 
+            style={{ 
+              position: 'absolute', top: '15px', right: '15px', 
+              background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.4)', 
+              color: '#fff', cursor: 'pointer', width: '32px', height: '32px',
+              borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              zIndex: 10000
+            }}
+            onClick={() => setPreviewImage(null)}
+          >
+            <FaTimes size={16} />
+          </button>
+          <img 
+            src={previewImage} 
+            style={{ 
+              width: 'auto',
+              height: '75vh', // Grande pero con aire
+              maxWidth: '85vw', 
+              objectFit: 'contain', 
+              display: 'block',
+              userSelect: 'none',
+              borderRadius: '8px',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+              cursor: 'default' // Forzamos puntero normal
+            }} 
+            alt="Vista ampliada" 
+          />
+        </div>
+      </div>
+    );
+  };
 
   if (returnView === 'list') {
     return (
@@ -148,6 +206,7 @@ const ReturnsSection = ({
             <div style={{ color: "#64748b", textAlign: "center", padding: "60px" }}>No hay devoluciones registradas.</div>
           )}
         </div>
+        <ImageLightbox />
       </div>
     );
   }
@@ -300,9 +359,9 @@ const ReturnsSection = ({
             </div>
             
             <label className="gm-info-label-premium">Evidencia fotográfica:</label>
-            <div className="gm-receipt-container-premium">
+            <div className="gm-receipt-container-premium" onClick={() => setPreviewImage(selectedReturn.evidenceImage)} style={{ cursor: 'zoom-in' }}>
               <div className="gm-receipt-wrapper-premium">
-                <img src={selectedReturn.evidenceImage} alt="Evidencia" className="gm-receipt-img-premium" />
+                <img src={selectedReturn.evidenceImage} alt="Evidencia" className="gm-receipt-img-premium" style={{ objectFit: 'contain' }} />
               </div>
             </div>
           </div>
@@ -314,6 +373,7 @@ const ReturnsSection = ({
             onClose={() => setShowRejectionModal(false)} 
           />
         )}
+        <ImageLightbox />
       </div>
     );
   }
@@ -544,18 +604,37 @@ const ReturnsSection = ({
               {isBulkReturn ? "Sube una foto clara del pedido que recibiste" : "Sube una foto clara del producto para validar su estado."}
             </p>
             
-            <div className={`gm-premium-upload-zone-refined ${returnErrors.evidence ? 'error' : ''}`} style={{ height: '280px', border: '1px dashed #FFC107', borderRadius: '20px' }}>
+            <div 
+              className={`gm-premium-upload-zone-refined ${returnErrors.evidence ? 'error' : ''}`} 
+              style={{ 
+                minHeight: '280px', 
+                border: returnFormData.evidence ? 'none' : '1px solid #FFC107', 
+                borderRadius: '20px', 
+                overflow: 'hidden', 
+                cursor: returnFormData.evidence ? 'pointer' : 'default',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'transparent'
+              }}
+              onClick={() => returnFormData.evidence && setPreviewImage(returnFormData.evidence)}
+            >
               {returnFormData.evidence ? (
-                <div className="gm-upload-preview-overlay">
-                  <img src={returnFormData.evidence} alt="Evidencia" className="gm-upload-preview-fit" />
-                  <div className="gm-upload-preview-controls">
-                    <button onClick={() => setReturnFormData({...returnFormData, evidence: null})} className="gm-btn-change-photo">
-                      CAMBIAR FOTO
-                    </button>
-                  </div>
+                <div style={{ padding: '0', display: 'inline-block' }}>
+                  <img 
+                    src={returnFormData.evidence} 
+                    alt="Evidencia" 
+                    style={{ 
+                      maxWidth: '100%', 
+                      maxHeight: '400px', 
+                      borderRadius: '15px', 
+                      border: '2px solid #FFC107',
+                      display: 'block' 
+                    }} 
+                  />
                 </div>
               ) : (
-                <label className="gm-upload-label-minimal" style={{ cursor: 'pointer', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <label className="gm-upload-label-minimal" style={{ cursor: 'pointer', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }} onClick={e => e.stopPropagation()}>
                   <input 
                     type="file" 
                     accept="image/*" 
@@ -567,9 +646,32 @@ const ReturnsSection = ({
                 </label>
               )}
             </div>
+            
+            {returnFormData.evidence && (
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '15px' }}>
+                <button 
+                  onClick={(e) => { e.stopPropagation(); setReturnFormData({...returnFormData, evidence: null}); }} 
+                  className="gm-btn-change-photo"
+                  style={{ 
+                    background: 'transparent', 
+                    border: '1px solid #FFC107', 
+                    color: '#FFC107', 
+                    padding: '8px 20px', 
+                    borderRadius: '10px',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  CAMBIAR FOTO
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
+      <ImageLightbox />
     </div>
   );
 };

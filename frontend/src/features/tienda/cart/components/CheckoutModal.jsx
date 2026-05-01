@@ -148,16 +148,16 @@ const CheckoutModal = ({ isOpen, onClose, onConfirm, total, subtotal, selectedMe
 
             {/* QR Nequi */}
             {isNequi && (
-              <div style={{ textAlign: 'center', margin: '0 0 12px 0', padding: '12px', backgroundColor: '#fff', borderRadius: '12px' }}>
-                <p style={{ color: '#000', fontSize: '13px', fontWeight: 'bold', margin: '0 0 8px 0' }}>Escanea el QR para pagar con Nequi</p>
+              <div style={{ textAlign: 'center', margin: '0 0 12px 0', padding: '12px' }}>
+                <p style={{ color: '#fff', fontSize: '13px', fontWeight: 'bold', margin: '0 0 8px 0' }}>Escanea el QR para pagar con Nequi</p>
                 <img src={currentMethod.qr} alt="QR Nequi" style={{ width: '180px', height: '180px', objectFit: 'contain', borderRadius: '8px', display: 'block', margin: '0 auto' }} />
               </div>
             )}
 
             {/* QR Bancolombia */}
             {isBancolombia && (
-              <div style={{ textAlign: 'center', margin: '0 0 12px 0', padding: '12px', backgroundColor: '#fff', borderRadius: '12px' }}>
-                <p style={{ color: '#000', fontSize: '13px', fontWeight: 'bold', margin: '0 0 8px 0' }}>Escanea el QR para pagar con Bancolombia</p>
+              <div style={{ textAlign: 'center', margin: '0 0 12px 0', padding: '12px' }}>
+                <p style={{ color: '#fff', fontSize: '13px', fontWeight: 'bold', margin: '0 0 8px 0' }}>Escanea el QR para pagar con Bancolombia</p>
                 <img src={currentMethod.qr} alt="QR Bancolombia" style={{ width: '180px', height: '180px', objectFit: 'contain', borderRadius: '8px', display: 'block', margin: '0 auto' }} />
               </div>
             )}
