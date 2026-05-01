@@ -50,12 +50,11 @@ const UserMenu = ({ onClose, onToggleTheme, onLogout }) => {
     if (onClose) onClose();
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (onClose) onClose();
-    setTimeout(() => {
-      if (onLogout) onLogout();
-      navigate('/', { replace: true });
-    }, 150);
+    if (onLogout) {
+      await onLogout(); // Espera a que el servidor cierre la sesión
+    }
   };
 
   return (

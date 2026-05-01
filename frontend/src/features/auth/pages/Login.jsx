@@ -3,7 +3,7 @@
    Se encarga de dibujar el HTML/JSX e invoca el Hook para obtener todas las funciones y estados necesarios. */
 
 // src/features/auth/pages/Login.jsx
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaEye, FaEyeSlash } from "react-icons/fa";
 import Swal from "sweetalert2";
@@ -204,14 +204,26 @@ const Login = () => {
       transition: "border-color 0.2s"
     },
     fieldError: {
-      color: "#ff4d4d",
+      position: "absolute",
+      backgroundColor: "#ffffff",
+      color: "#d32f2f",
       fontSize: "11px",
-      marginBottom: "12px",
-      marginLeft: "4px",
-      display: "block",
-      fontWeight: "500"
+      fontWeight: "700",
+      padding: "4px 10px",
+      borderRadius: "6px",
+      bottom: "-22px",
+      left: "0",
+      zIndex: 50,
+      boxShadow: "0 4px 15px rgba(0,0,0,0.3)",
+      border: "1px solid #ff4d4d",
+      whiteSpace: "nowrap",
+      pointerEvents: "none",
+      display: "flex",
+      alignItems: "center",
+      gap: "4px",
+      animation: "slideInTop 0.3s ease"
     },
-    inputWrap: { position: "relative", width: "100%" },
+    inputWrap: { position: "relative", width: "100%", marginBottom: "15px" },
     eyeBtn: {
       position: "absolute",
       right: "14px",
@@ -251,6 +263,27 @@ const Login = () => {
     }
   }), []);
 
+  const loginEmailRef = useRef(null);
+  const loginPassRef = useRef(null);
+
+  // 🧹 LIMPIEZA TOTAL AL ENTRAR (Evitar que el navegador rellene solo)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (loginEmailRef.current) loginEmailRef.current.value = "";
+      if (loginPassRef.current) loginPassRef.current.value = "";
+      setLoginData({ correo: "", clave: "" });
+      setRegisterData({
+        documentType: "Cédula de Ciudadanía",
+        documentNumber: "",
+        fullName: "",
+        correo: "",
+        clave: "",
+        confirmarClave: ""
+      });
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   // ═══════════════════════════════════════════════
   // 🔐 HANDLER: LOGIN
   // ═══════════════════════════════════════════════
@@ -260,14 +293,18 @@ const Login = () => {
     resetMessages();
     setIsSubmitting(true);
 
+    // 🛡️ REFUERZO: Sincronizar con el valor real del DOM (Autofill fix)
+    const currentCorreo = loginEmailRef.current?.value || loginData.correo || "";
+    const currentClave = loginPassRef.current?.value || loginData.clave || "";
+
     const useForce = isForced || loginData.force || false;
 
-    console.log(`🔵 Intentando Login ${useForce ? '[FORZADO]' : ''}:`, loginData.correo);
+    console.log(`🔵 Intentando Login ${useForce ? '[FORZADO]' : ''}:`, currentCorreo);
 
-    if (!loginData.correo?.trim() || !loginData.clave?.trim()) {
+    if (!currentCorreo.trim() || !currentClave.trim()) {
       const fe = {};
-      if (!loginData.correo?.trim()) fe.correo = "Ingresa tu correo";
-      if (!loginData.clave?.trim()) fe.clave = "Ingresa tu contraseña";
+      if (!currentCorreo.trim()) fe.correo = "Ingresa tu correo";
+      if (!currentClave.trim()) fe.clave = "Ingresa tu contraseña";
       setFieldErrors(fe);
       setIsSubmitting(false);
       return;
@@ -278,8 +315,8 @@ const Login = () => {
 
     try {
       const response = await api.post("/api/auth/login", {
-        correo: loginData.correo.trim().toLowerCase(),
-        clave: loginData.clave.trim(),
+        correo: currentCorreo.trim().toLowerCase(),
+        clave: currentClave.trim(),
         force: useForce
       }, { signal: controller.signal });
 
@@ -622,25 +659,29 @@ const Login = () => {
               {activeTab === "login" ? (
                 <form onSubmit={handleLogin} onChange={resetMessages} autoComplete="off">
                   <label style={styles.label}>Correo electrónico</label>
-                  <input
-                    style={{ ...styles.input, borderColor: fieldErrors.correo ? '#ff4d4d' : styles.input.border.split(' ')[2] }}
-                    type="email"
-                    name="correo_login_unique"
-                    autoComplete="off"
-                    placeholder="ejemplo@correo.com"
-                    value={loginData.correo}
-                    onChange={(e) => setLoginData({ ...loginData, correo: e.target.value })}
-                  />
-                  {fieldErrors.correo && <span style={styles.fieldError}>{fieldErrors.correo}</span>}
+                  <div style={styles.inputWrap}>
+                    <input
+                      ref={loginEmailRef}
+                      style={{ ...styles.input, borderColor: fieldErrors.correo ? '#ff4d4d' : styles.input.border.split(' ')[2], marginBottom: 0 }}
+                      type="email"
+                      name="correo_login_unique"
+                      autoComplete="off"
+                      placeholder="Ingresa tu correo..."
+                      value={loginData.correo}
+                      onChange={(e) => setLoginData({ ...loginData, correo: e.target.value })}
+                    />
+                    {fieldErrors.correo && <span style={styles.fieldError}>⚠️ {fieldErrors.correo}</span>}
+                  </div>
 
                   <label style={styles.label}>Contraseña</label>
                   <div style={styles.inputWrap}>
                       <input
-                        style={{ ...styles.input, paddingRight: '40px', borderColor: fieldErrors.clave ? '#ff4d4d' : styles.input.border.split(' ')[2] }}
+                        ref={loginPassRef}
+                        style={{ ...styles.input, paddingRight: '40px', borderColor: fieldErrors.clave ? '#ff4d4d' : styles.input.border.split(' ')[2], marginBottom: 0 }}
                         type={showLoginPass ? "text" : "password"}
                         name="clave_login_unique"
                         autoComplete="new-password"
-                        placeholder="••••••••"
+                        placeholder="Escribe tu contraseña..."
                         value={loginData.clave}
                         onChange={(e) => setLoginData({ ...loginData, clave: e.target.value })}
                       />
@@ -652,8 +693,8 @@ const Login = () => {
                       >
                         {showLoginPass ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
                       </button>
+                      {fieldErrors.clave && <span style={styles.fieldError}>⚠️ {fieldErrors.clave}</span>}
                     </div>
-                    {fieldErrors.clave && <span style={styles.fieldError}>{fieldErrors.clave}</span>}
 
                   {error && <div style={styles.error}>{error}</div>}
                   {infoMsg && <div style={styles.info}>{infoMsg}</div>}
@@ -686,90 +727,103 @@ const Login = () => {
                   <div className="login-input-row">
                     <div style={{ flex: 1.15 }}>
                       <label style={styles.label}>Tipo de documento</label>
-                      <select
-                        style={styles.input}
-                        value={registerData.documentType}
-                        onChange={(e) => setRegisterData({ ...registerData, documentType: e.target.value })}
-                      >
-                        <option>Cédula de Ciudadanía</option>
-                        <option>Cédula de Extranjería</option>
-                        <option>Permiso Especial (PEP)</option>
-                        <option>Permiso Temporal (PPT)</option>
-                        <option>Pasaporte</option>
-                        <option>NIT</option>
-                      </select>
+                      <div style={styles.inputWrap}>
+                        <select
+                          style={styles.input}
+                          value={registerData.documentType}
+                          onChange={(e) => setRegisterData({ ...registerData, documentType: e.target.value })}
+                        >
+                          <option>Cédula de Ciudadanía</option>
+                          <option>Cédula de Extranjería</option>
+                          <option>Permiso Especial (PEP)</option>
+                          <option>Permiso Temporal (PPT)</option>
+                          <option>Pasaporte</option>
+                          <option>NIT</option>
+                        </select>
+                      </div>
                     </div>
                     <div style={{ flex: 0.85 }}>
                       <label style={styles.label}>Número</label>
-                      <input
-                        style={{ ...styles.input, borderColor: fieldErrors.documentNumber ? '#ff4d4d' : styles.input.border.split(' ')[2] }}
-                        type="text"
-                        placeholder="1234567"
-                        value={registerData.documentNumber}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val === "" || /^[0-9]+$/.test(val)) {
-                            setRegisterData({ ...registerData, documentNumber: val });
-                          }
-                        }}
-                      />
-                      {fieldErrors.documentNumber && <span style={styles.fieldError}>{fieldErrors.documentNumber}</span>}
+                      <div style={styles.inputWrap}>
+                        <input
+                          style={{ ...styles.input, borderColor: fieldErrors.documentNumber ? '#ff4d4d' : styles.input.border.split(' ')[2], marginBottom: 0 }}
+                          type="text"
+                          autoComplete="off"
+                          placeholder="Número de doc..."
+                          value={registerData.documentNumber}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === "" || /^[0-9]+$/.test(val)) {
+                              setRegisterData({ ...registerData, documentNumber: val });
+                            }
+                          }}
+                        />
+                        {fieldErrors.documentNumber && <span style={styles.fieldError}>⚠️ {fieldErrors.documentNumber}</span>}
+                      </div>
                     </div>
                   </div>
 
                   <label style={styles.label}>Nombre completo</label>
-                  <input
-                    style={{ ...styles.input, borderColor: fieldErrors.fullName ? '#ff4d4d' : styles.input.border.split(' ')[2] }}
-                    type="text"
-                    placeholder="Tu nombre y apellido completos"
-                    value={registerData.fullName}
-                    onChange={(e) => setRegisterData({ ...registerData, fullName: e.target.value })}
-                  />
-                  {fieldErrors.fullName && <span style={styles.fieldError}>{fieldErrors.fullName}</span>}
+                  <div style={styles.inputWrap}>
+                    <input
+                      style={{ ...styles.input, borderColor: fieldErrors.fullName ? '#ff4d4d' : styles.input.border.split(' ')[2], marginBottom: 0 }}
+                      type="text"
+                      autoComplete="off"
+                      placeholder="Ej: Juan Pérez..."
+                      value={registerData.fullName}
+                      onChange={(e) => setRegisterData({ ...registerData, fullName: e.target.value })}
+                    />
+                    {fieldErrors.fullName && <span style={styles.fieldError}>⚠️ {fieldErrors.fullName}</span>}
+                  </div>
 
                   <label style={styles.label}>Correo electrónico</label>
-                  <input
-                    style={{ ...styles.input, borderColor: fieldErrors.correo ? '#ff4d4d' : styles.input.border.split(' ')[2] }}
-                    type="text"
-                    inputMode="email"
-                    placeholder="tu@email.com"
-                    value={registerData.correo}
-                    onChange={(e) => setRegisterData({ ...registerData, correo: e.target.value })}
-                  />
-                  {fieldErrors.correo && <span style={styles.fieldError}>{fieldErrors.correo}</span>}
+                  <div style={styles.inputWrap}>
+                    <input
+                      style={{ ...styles.input, borderColor: fieldErrors.correo ? '#ff4d4d' : styles.input.border.split(' ')[2], marginBottom: 0 }}
+                      type="text"
+                      inputMode="email"
+                      autoComplete="off"
+                      placeholder="nombre@correo.com"
+                      value={registerData.correo}
+                      onChange={(e) => setRegisterData({ ...registerData, correo: e.target.value })}
+                    />
+                    {fieldErrors.correo && <span style={styles.fieldError}>⚠️ {fieldErrors.correo}</span>}
+                  </div>
 
                   <div className="login-input-row">
                     <div style={{ flex: 1 }}>
                       <label style={styles.label}>Contraseña</label>
                       <div style={styles.inputWrap}>
                         <input
-                          style={{ ...styles.input, paddingRight: '40px', borderColor: fieldErrors.clave ? '#ff4d4d' : styles.input.border.split(' ')[2] }}
+                          style={{ ...styles.input, paddingRight: '40px', borderColor: fieldErrors.clave ? '#ff4d4d' : styles.input.border.split(' ')[2], marginBottom: 0 }}
                           type={showRegPass ? "text" : "password"}
-                          placeholder="••••••••"
+                          autoComplete="new-password"
+                          placeholder="Crea una clave..."
                           value={registerData.clave}
                           onChange={(e) => setRegisterData({ ...registerData, clave: e.target.value })}
                         />
                         <button type="button" style={styles.eyeBtn} onClick={() => setShowRegPass(!showRegPass)}>
                           {showRegPass ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
                         </button>
+                        {fieldErrors.clave && <span style={styles.fieldError}>⚠️ {fieldErrors.clave}</span>}
                       </div>
-                      {fieldErrors.clave && <span style={styles.fieldError}>{fieldErrors.clave}</span>}
                     </div>
                     <div style={{ flex: 1 }}>
                       <label style={styles.label}>Confirmar contraseña</label>
                       <div style={styles.inputWrap}>
                         <input
-                          style={{ ...styles.input, paddingRight: '40px', borderColor: fieldErrors.confirmarClave ? '#ff4d4d' : styles.input.border.split(' ')[2] }}
+                          style={{ ...styles.input, paddingRight: '40px', borderColor: fieldErrors.confirmarClave ? '#ff4d4d' : styles.input.border.split(' ')[2], marginBottom: 0 }}
                           type={showRegConfirmPass ? "text" : "password"}
-                          placeholder="••••••••"
+                          autoComplete="new-password"
+                          placeholder="Repite tu clave..."
                           value={registerData.confirmarClave}
                           onChange={(e) => setRegisterData({ ...registerData, confirmarClave: e.target.value })}
                         />
                         <button type="button" style={styles.eyeBtn} onClick={() => setShowRegConfirmPass(!showRegConfirmPass)}>
                           {showRegConfirmPass ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
                         </button>
+                        {fieldErrors.confirmarClave && <span style={styles.fieldError}>⚠️ {fieldErrors.confirmarClave}</span>}
                       </div>
-                      {fieldErrors.confirmarClave && <span style={styles.fieldError}>{fieldErrors.confirmarClave}</span>}
                     </div>
                   </div>
 
@@ -808,17 +862,19 @@ const Login = () => {
               <p style={styles.formSubtitle}>Te enviaremos un correo de recuperación</p>
 
               <label style={styles.label}>Tu correo</label>
-              <input
-                style={{...styles.input, borderColor: fieldErrors.recoverEmail ? '#ff6b6b' : 'rgba(255,193,7,0.15)'}}
-                type="text"
-                inputMode="email"
-                name="email"
-                autoComplete="email"
-                placeholder="usuario@correo.com"
-                value={recoverEmail}
-                onChange={(e) => { setRecoverEmail(e.target.value); resetMessages(); }}
-              />
-              {fieldErrors.recoverEmail && <div style={{...styles.error, marginTop: '5px', marginBottom: '10px', textAlign: 'left', fontSize: '12px'}}>{fieldErrors.recoverEmail}</div>}
+              <div style={styles.inputWrap}>
+                <input
+                  style={{...styles.input, borderColor: fieldErrors.recoverEmail ? '#ff4d4d' : 'rgba(255,193,7,0.15)', marginBottom: 0}}
+                  type="text"
+                  inputMode="email"
+                  name="email"
+                  autoComplete="email"
+                  placeholder="usuario@correo.com"
+                  value={recoverEmail}
+                  onChange={(e) => { setRecoverEmail(e.target.value); resetMessages(); }}
+                />
+                {fieldErrors.recoverEmail && <div style={styles.fieldError}>⚠️ {fieldErrors.recoverEmail}</div>}
+              </div>
 
               {error && <div style={styles.error}>{error}</div>}
               {infoMsg && <div style={styles.info}>{infoMsg}</div>}
@@ -853,26 +909,26 @@ const Login = () => {
               <label style={styles.label}>Contraseña Nueva</label>
               <div style={styles.inputWrap}>
                 <input
-                  style={{...styles.input, borderColor: fieldErrors.clave ? '#ff6b6b' : 'rgba(255,255,255,0.1)'}}
+                  style={{...styles.input, borderColor: fieldErrors.clave ? '#ff4d4d' : 'rgba(255,255,255,0.1)', marginBottom: 0}}
                   type="password"
                   placeholder="••••••••"
                   value={registerData.clave}
                   onChange={(e) => setRegisterData({...registerData, clave: e.target.value})}
                 />
+                {fieldErrors.clave && <span style={styles.fieldError}>⚠️ {fieldErrors.clave}</span>}
               </div>
-              {fieldErrors.clave && <span style={styles.fieldError}>{fieldErrors.clave}</span>}
 
               <label style={styles.label}>Repetir Contraseña</label>
               <div style={styles.inputWrap}>
                 <input
-                  style={{...styles.input, borderColor: fieldErrors.confirmarClave ? '#ff6b6b' : 'rgba(255,255,255,0.1)'}}
+                  style={{...styles.input, borderColor: fieldErrors.confirmarClave ? '#ff4d4d' : 'rgba(255,255,255,0.1)', marginBottom: 0}}
                   type="password"
                   placeholder="••••••••"
                   value={registerData.confirmarClave}
                   onChange={(e) => setRegisterData({...registerData, confirmarClave: e.target.value})}
                 />
+                {fieldErrors.confirmarClave && <span style={styles.fieldError}>⚠️ {fieldErrors.confirmarClave}</span>}
               </div>
-              {fieldErrors.confirmarClave && <span style={styles.fieldError}>{fieldErrors.confirmarClave}</span>}
 
               {error && <div style={styles.error}>{error}</div>}
 
@@ -888,6 +944,7 @@ const Login = () => {
       <style>{`
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideInRight { from { transform: translateX(50px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideInTop { from { transform: translateY(-5px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
         .login-container-root {
           display: flex;

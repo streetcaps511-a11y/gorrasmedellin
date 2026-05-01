@@ -81,15 +81,21 @@ export const AuthProvider = ({ children }) => {
     });
   }, []);
 
-  const logout = useCallback((reason = 'Manual') => {
+  const logout = useCallback(async (reason = 'Manual') => {
     console.warn(`🚀 Cerrando sesión... Motivo: ${reason}`);
     
-    // 🚪 Notificar al servidor en segundo plano (sin bloquear al usuario)
-    if (sessionStorage.getItem('token')) {
-      api.post('/api/auth/logout').catch(() => {});
+    // 🚪 Notificar al servidor (esperar confirmación para evitar sesiones colgadas)
+    try {
+      const token = sessionStorage.getItem('token');
+      if (token) {
+        // Usamos un timeout corto para no bloquear al usuario si el servidor no responde
+        await api.post('/api/auth/logout', {}, { timeout: 3000 });
+      }
+    } catch (err) {
+      console.warn("⚠️ Error al notificar logout al servidor:", err.message);
     }
 
-    // 🧹 Limpieza inmediata
+    // 🧹 Limpieza inmediata (Pase lo que pase con el servidor)
     NitroCache.clear();
     setUser(null);
     sessionStorage.removeItem("user");
