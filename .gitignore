@@ -1,12 +1,8 @@
-# Dependencias
 node_modules/
-
-# Archivos de build
+.env.local
+.env.*.local
 dist/
 build/
-
-# Archivos de configuración
-.env
-
-# Otros
-4.txt
+.DS_Store
+*.log
+.vscode/
