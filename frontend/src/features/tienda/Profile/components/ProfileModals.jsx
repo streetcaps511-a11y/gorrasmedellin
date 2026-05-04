@@ -3,6 +3,7 @@
    Recibe información a través de 'props' y notifica eventos hacia arriba (a la Página principal). */
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   FaTimes, FaCheckCircle, FaExclamationTriangle, FaExchangeAlt, FaCalendarTimes, FaArrowRight
 } from "react-icons/fa";
@@ -128,24 +129,26 @@ export const ExpiredReturnModal = ({ onClose, periodDays, expiredDate, orderDate
       {/* Glow decorativo de fondo */}
       <div className="gm-expired-glow" />
 
-      {/* Ícono de reloj / calendario vencido */}
-      <div className="gm-expired-icon-ring">
-        <div className="gm-expired-icon-inner">
-          <FaCalendarTimes size={34} color="#ef4444" />
+      {/* Fila: Ícono + Badge lado a lado */}
+      <div className="gm-expired-header-row">
+        <div className="gm-expired-icon-ring">
+          <div className="gm-expired-icon-inner">
+            <FaCalendarTimes size={26} color="#ef4444" />
+          </div>
+        </div>
+        <div className="gm-expired-badge">
+          <span className="gm-expired-badge-dot" />
+          PLAZO VENCIDO
         </div>
       </div>
 
-      {/* Badge de estado */}
-      <div className="gm-expired-badge">
-        <span className="gm-expired-badge-dot" />
-        PLAZO VENCIDO
-      </div>
+      {/* Subtítulo del período — va ANTES del título principal */}
+      <p className="gm-expired-period-label">El período de <strong>{periodDays} días</strong> ha vencido</p>
 
       <h3 className="gm-expired-title">¡Ya no es posible solicitar un cambio!</h3>
 
       <p className="gm-expired-desc">
-        El período de <strong>{periodDays} días</strong> para solicitar cambios o devoluciones
-        en este pedido ha expirado. Lamentablemente no podemos procesar tu solicitud.
+        Lamentablemente el tiempo para solicitar cambios o devoluciones en este pedido ha expirado y no podemos procesar tu solicitud.
       </p>
 
       {/* Tarjeta de fechas */}
@@ -166,9 +169,9 @@ export const ExpiredReturnModal = ({ onClose, periodDays, expiredDate, orderDate
         <button onClick={onClose} className="gm-expired-btn-secondary">
           ENTENDIDO
         </button>
-        <a href="/politica-devoluciones" className="gm-expired-btn-primary">
+        <Link to="/politica-devoluciones" className="gm-expired-btn-primary" onClick={onClose}>
           VER POLÍTICAS <FaArrowRight size={12} />
-        </a>
+        </Link>
       </div>
     </div>
   </div>
