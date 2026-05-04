@@ -4,7 +4,7 @@
 
 import React, { useState } from 'react';
 import { 
-  FaTimes, FaCheckCircle, FaExclamationTriangle, FaExchangeAlt 
+  FaTimes, FaCheckCircle, FaExclamationTriangle, FaExchangeAlt, FaCalendarTimes, FaArrowRight
 } from "react-icons/fa";
 import '../styles/ProfileModals.css';
 
@@ -122,33 +122,53 @@ export const PolicyModal = ({ onClose, onContinue }) => {
 };
 
 export const ExpiredReturnModal = ({ onClose, periodDays, expiredDate, orderDate }) => (
-  <div className="gm-modal-overlay-p">
-    <div className="gm-policy-modal" style={{ textAlign: 'center', padding: '40px 30px' }}>
-      <div style={{ width: "70px", height: "70px", backgroundColor: "rgba(245, 158, 11, 0.1)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", border: "1px solid #f59e0b" }}>
-        <FaExclamationTriangle color="#f59e0b" size={32} />
+  <div className="gm-modal-overlay-p gm-expired-overlay">
+    <div className="gm-expired-modal">
+
+      {/* Glow decorativo de fondo */}
+      <div className="gm-expired-glow" />
+
+      {/* Ícono de reloj / calendario vencido */}
+      <div className="gm-expired-icon-ring">
+        <div className="gm-expired-icon-inner">
+          <FaCalendarTimes size={34} color="#ef4444" />
+        </div>
       </div>
-      
-      <h3 style={{ fontSize: "1.5rem", fontWeight: 800, marginBottom: "12px", color: "#fff" }}>El período de cambio terminó</h3>
-      <p style={{ color: "#94a3b8", fontSize: "0.95rem", lineHeight: "1.6", marginBottom: "25px" }}>
-        ¡Lo sentimos! La ventana de cambios de <strong>{periodDays} días</strong> ha pasado. 
-        <span style={{ display: 'block', color: '#f59e0b', marginTop: '10px', fontWeight: '600' }}>Ya no puedes solicitar un nuevo cambio o devolución.</span>
+
+      {/* Badge de estado */}
+      <div className="gm-expired-badge">
+        <span className="gm-expired-badge-dot" />
+        PLAZO VENCIDO
+      </div>
+
+      <h3 className="gm-expired-title">¡Ya no es posible solicitar un cambio!</h3>
+
+      <p className="gm-expired-desc">
+        El período de <strong>{periodDays} días</strong> para solicitar cambios o devoluciones
+        en este pedido ha expirado. Lamentablemente no podemos procesar tu solicitud.
       </p>
 
-      <div style={{ backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '15px', marginBottom: '30px', border: '1px solid rgba(255,255,255,0.05)' }}>
-        <div style={{ color: '#64748b', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>El período de cambio terminó el</div>
-        <div style={{ color: '#fff', fontSize: '1.1rem', fontWeight: '800', marginBottom: '4px' }}>{expiredDate}</div>
-        <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Pedido el {orderDate}</div>
+      {/* Tarjeta de fechas */}
+      <div className="gm-expired-dates-card">
+        <div className="gm-expired-date-item">
+          <span className="gm-expired-date-label">Fecha del pedido</span>
+          <span className="gm-expired-date-value">{orderDate}</span>
+        </div>
+        <div className="gm-expired-date-divider" />
+        <div className="gm-expired-date-item">
+          <span className="gm-expired-date-label">Plazo venció el</span>
+          <span className="gm-expired-date-value gm-expired-date-red">{expiredDate}</span>
+        </div>
       </div>
 
-      <button 
-        onClick={onClose} 
-        style={{ width: "100%", padding: "14px", borderRadius: "12px", backgroundColor: "#FFC107", color: "#000", border: "none", fontWeight: 800, cursor: "pointer", fontSize: "1rem", boxShadow: '0 4px 15px rgba(255, 193, 7, 0.3)' }}
-      >
-        ENTENDIDO
-      </button>
-      
-      <div style={{ marginTop: '20px' }}>
-        <a href="/politicas-cambios" style={{ color: '#FFC107', fontSize: '0.85rem', textDecoration: 'none', fontWeight: '600' }}>Ver Política de Cambios y Reembolsos ›</a>
+      {/* Botones */}
+      <div className="gm-expired-actions">
+        <button onClick={onClose} className="gm-expired-btn-secondary">
+          ENTENDIDO
+        </button>
+        <a href="/politica-devoluciones" className="gm-expired-btn-primary">
+          VER POLÍTICAS <FaArrowRight size={12} />
+        </a>
       </div>
     </div>
   </div>

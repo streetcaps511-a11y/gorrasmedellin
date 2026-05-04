@@ -215,9 +215,13 @@ export const useProfile = () => {
   };
 
   const checkReturnPeriod = (order) => {
-    if (!order?.date) return true; // Expired by default if no date
-    const [day, month, year] = order.date.split('/').map(Number);
-    const orderDate = new Date(year, month - 1, day);
+    // Usar rawDate (ISO) para el cálculo; si no existe, intentar parsear date
+    const rawDateStr = order?.rawDate || order?.fecha;
+    if (!rawDateStr) return false; // Sin fecha: no permitir
+    
+    const orderDate = new Date(rawDateStr);
+    if (isNaN(orderDate.getTime())) return false; // Fecha inválida: no permitir
+    
     const today = new Date();
     
     // Calcular fecha de expiración (5 días después)
@@ -230,7 +234,7 @@ export const useProfile = () => {
     if (diffDays > 5) {
       setExpiredModalData({
         periodDays: 5,
-        orderDate: order.date,
+        orderDate: order.date, // Fecha formateada para mostrar al usuario
         expiredDate: expirationDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })
       });
       setShowExpiredModal(true);
@@ -531,6 +535,7 @@ export const useProfile = () => {
       const status = normalizeStatus(o);
       return {
         id: `PED-${o.id}`,
+        rawDate: o.fecha, // ISO date para cálculos
         date: new Date(o.fecha).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' }),
         total: `$${Number(o.total || 0).toLocaleString('es-CO')}`,
         status,
